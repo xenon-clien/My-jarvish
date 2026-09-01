@@ -18,11 +18,10 @@ from backend.core.logger import get_logger
 from backend.voice.audio_manager import audio_manager
 from backend.voice.speech_to_text import stt_manager
 from backend.voice.text_to_speech import tts_manager
-from backend.ai.agent import JarvisAgent
+from backend.core.command_processor import command_processor, ExecutionStatus
 from backend.tools.autosubmit_watcher import start_autosubmit_watcher
 
 logger = get_logger("JarvisApp")
-agent = JarvisAgent()
 _webview_window = None
 
 
@@ -35,13 +34,13 @@ class JarvisBridgeAPI:
         try:
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
-            response = loop.run_until_complete(agent.process_user_input(text))
+            ctx = loop.run_until_complete(command_processor.process_command(text, source="ui"))
             loop.close()
 
-            # Speak response via natural Swara voice
-            if response.message:
-                tts_manager.speak(response.message, block=False)
-            return response.message or "Command executed."
+            # Speak response via natural voice
+            if ctx.response_message:
+                tts_manager.speak(ctx.response_message, block=False)
+            return ctx.response_message or "Command executed."
         except Exception as e:
             logger.error(f"Error executing command: {e}")
             return f"Error: {e}"
@@ -62,10 +61,10 @@ def _on_gesture_event(gesture_name: str, cmd: str = ""):
         try:
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
-            response = loop.run_until_complete(agent.process_user_input(cmd))
+            ctx = loop.run_until_complete(command_processor.process_command(cmd, source="gesture"))
             loop.close()
-            if response.message:
-                tts_manager.speak(response.message, block=False)
+            if ctx.response_message:
+                tts_manager.speak(ctx.response_message, block=False)
         except Exception as exc:
             logger.error(f"Gesture command execution error: {exc}")
 
@@ -80,7 +79,7 @@ def _voice_listen_loop():
                 continue
 
             if stt_manager.enabled and stt_manager.is_microphone_available():
-                user_text = stt_manager.listen_once(timeout=2.0, phrase_time_limit=5.0, silence_limit=0.25)
+                user_text = stt_manager.listen_once(timeout=3.0, phrase_time_limit=6.0, silence_limit=0.55)
                 if user_text and len(user_text.strip()) > 1:
                     tts_manager.stop()
                     logger.info(f"Voice speech captured: '{user_text}'")
@@ -92,16 +91,16 @@ def _voice_listen_loop():
 
                     loop = asyncio.new_event_loop()
                     asyncio.set_event_loop(loop)
-                    response = loop.run_until_complete(agent.process_user_input(user_text))
+                    ctx = loop.run_until_complete(command_processor.process_command(user_text, source="voice"))
                     loop.close()
 
-                    if response.message:
+                    if ctx.response_message:
                         if _webview_window:
                             try:
-                                _webview_window.evaluate_js(f"if (typeof setSpeakingState === 'function') setSpeakingState(true, {repr(response.message)});")
+                                _webview_window.evaluate_js(f"if (typeof setSpeakingState === 'function') setSpeakingState(true, {repr(ctx.response_message)});")
                             except Exception:
                                 pass
-                        tts_manager.speak(response.message, block=False)
+                        tts_manager.speak(ctx.response_message, block=False)
             time.sleep(0.05)
         except Exception as exc:
             logger.debug(f"Voice listen loop error: {exc}")
