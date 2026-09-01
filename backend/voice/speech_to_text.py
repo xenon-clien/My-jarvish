@@ -1,5 +1,6 @@
 """High-sensitivity Speech-to-Text Manager with Software AGC, Diagnostic Instrumentation & Dual-Language Scoring."""
 import concurrent.futures
+import os
 import queue
 import re
 import time
