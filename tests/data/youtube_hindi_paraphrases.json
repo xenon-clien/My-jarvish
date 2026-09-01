@@ -305,7 +305,6 @@
     "text": "2 minute 30 second pe le jao",
     "action": "youtube.seek_timestamp",
     "arguments": {
-      "timestamp": "02:30",
       "seconds": 150
     }
   },
@@ -313,7 +312,6 @@
     "text": "1:35 pe chalao",
     "action": "youtube.seek_timestamp",
     "arguments": {
-      "timestamp": "01:35",
       "seconds": 95
     }
   },
@@ -321,7 +319,6 @@
     "text": "teen minute pe jao",
     "action": "youtube.seek_timestamp",
     "arguments": {
-      "timestamp": "03:00",
       "seconds": 180
     }
   },

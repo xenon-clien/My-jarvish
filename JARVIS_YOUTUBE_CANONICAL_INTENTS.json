@@ -3,7 +3,7 @@
   "contract_version": "2.0",
   "domain": "media",
   "application": "youtube",
-  "description": "Hardened semantic contract for YouTube capabilities. Example phrases are lexical hints, NOT exhaustive matching strings.",
+  "description": "Hardened semantic contract for YouTube capabilities. Contradictions resolved (no required=true with default). Numeric seek_timestamp normalized. Idempotent state-aware actions.",
   "canonical_intents": {
     "youtube.open": {
       "description": "Open YouTube homepage or bring existing YouTube browser tab into active foreground focus.",
@@ -37,7 +37,6 @@
         "query": {
           "type": "string",
           "required": false,
-          "default": null,
           "description": "Optional search query"
         },
         "ordinal": {
@@ -115,16 +114,50 @@
       "arguments_schema": {
         "enabled": {
           "type": "boolean",
-          "required": true,
+          "required": false,
           "default": true,
           "description": "True to enter fullscreen, False to exit"
         }
       },
       "state_effect": "FULLSCREEN_STATE_SET",
       "example_phrases": [
-        "fullscreen karo (True)",
-        "fullscreen hatao (False)",
-        "screen badi karo (True)"
+        "fullscreen karo",
+        "fullscreen hatao",
+        "screen badi karo"
+      ]
+    },
+    "youtube.set_theater_mode": {
+      "description": "Set theater/cinema mode state explicitly to ON or OFF.",
+      "arguments_schema": {
+        "enabled": {
+          "type": "boolean",
+          "required": false,
+          "default": true,
+          "description": "True to enter theater mode, False to exit"
+        }
+      },
+      "state_effect": "THEATER_MODE_SET",
+      "example_phrases": [
+        "theater mode chalu karo",
+        "cinema mode laga do",
+        "theater mode band karo"
+      ]
+    },
+    "youtube.set_miniplayer": {
+      "description": "Set miniplayer mode state explicitly to ON or OFF.",
+      "arguments_schema": {
+        "enabled": {
+          "type": "boolean",
+          "required": false,
+          "default": true,
+          "description": "True to enter miniplayer, False to exit"
+        }
+      },
+      "state_effect": "MINIPLAYER_STATE_SET",
+      "example_phrases": [
+        "miniplayer chalu karo",
+        "chhoti screen karo",
+        "miniplayer band karo"
       ]
     },
     "youtube.set_captions": {
@@ -132,15 +165,16 @@
       "arguments_schema": {
         "enabled": {
           "type": "boolean",
-          "required": true,
+          "required": false,
           "default": true,
           "description": "True to enable captions, False to disable"
         }
       },
       "state_effect": "CAPTIONS_STATE_SET",
       "example_phrases": [
-        "subtitle chalu karo (True)",
-        "caption band karo (False)"
+        "subtitle chalu karo",
+        "caption band karo",
+        "captions on"
       ]
     },
     "youtube.set_playback_speed": {
@@ -149,7 +183,6 @@
         "rate": {
           "type": "number",
           "required": true,
-          "default": 1.0,
           "description": "Target speed multiplier (e.g. 0.5, 0.75, 1.0, 1.25, 1.5, 2.0)"
         }
       },
@@ -227,23 +260,40 @@
       ]
     },
     "youtube.seek_timestamp": {
-      "description": "Seek playback directly to a normalized timestamp or second position.",
+      "description": "Seek playback directly to a normalized second position offset.",
       "arguments_schema": {
-        "timestamp": {
-          "type": "string",
-          "required": true,
-          "description": "Formatted timestamp string (e.g. '02:30')"
-        },
         "seconds": {
           "type": "integer",
           "required": true,
-          "description": "Total seconds offset from start"
+          "description": "Total seconds offset from start (e.g. 150 for 2m30s)"
+        },
+        "raw_timestamp": {
+          "type": "string",
+          "required": false,
+          "description": "Optional human-readable timestamp (e.g. '02:30')"
         }
       },
       "state_effect": "SEEKED_TO_TIMESTAMP",
       "example_phrases": [
         "2 minute 30 second pe le jao",
-        "1:35 pe chalao"
+        "1:35 pe chalao",
+        "teen minute pe jao"
+      ]
+    },
+    "youtube.set_volume": {
+      "description": "Set audio playback volume directly to target percentage (0-100).",
+      "arguments_schema": {
+        "level": {
+          "type": "integer",
+          "required": true,
+          "description": "Target volume percentage from 0 to 100"
+        }
+      },
+      "state_effect": "VOLUME_LEVEL_SET",
+      "example_phrases": [
+        "volume 50 kar do",
+        "volume 80 percent karo",
+        "sound 100 kar do"
       ]
     },
     "youtube.volume_up": {
@@ -296,13 +346,21 @@
         "sound on"
       ]
     },
-    "youtube.like": {
-      "description": "Like current video.",
-      "arguments_schema": {},
-      "state_effect": "LIKED",
+    "youtube.set_like": {
+      "description": "Ensure video like state is set idempotently (never unlikes on 'like' command).",
+      "arguments_schema": {
+        "enabled": {
+          "type": "boolean",
+          "required": false,
+          "default": true,
+          "description": "True to like, False to unlike"
+        }
+      },
+      "state_effect": "LIKED_STATE_SET",
       "example_phrases": [
         "video like karo",
-        "like thok"
+        "like thok",
+        "like hatao"
       ]
     },
     "youtube.replay": {

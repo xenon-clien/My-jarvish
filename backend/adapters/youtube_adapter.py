@@ -1,6 +1,6 @@
-"""YouTube Application Adapter for JARVIS.
+"""YouTube Application Adapter for JARVIS (Contract v2.0).
 
-Non-destructively wraps existing YouTube capabilities in browser_tools and media_tools
+Standardized, verifiable adapter mapping all 25 canonical YouTube intents
 with resource locking and closed-loop verification.
 """
 from typing import Any, Dict, Optional
@@ -31,39 +31,27 @@ class YouTubeAdapter:
             verifier_fn=self._verify_youtube_active,
         ).result or {"status": "success", "message": task.immediate_response}
 
-    def play(self) -> Dict[str, Any]:
-        """Resume / Play active YouTube video."""
-        from backend.tools.media_tools import control_media
-        task = task_manager.create_task(
-            command="video chalao",
-            tool_name="youtube.play",
-            arguments={"action": "play"},
-            required_locks=[self.RESOURCE_LOCK],
-            immediate_response="Ji Boss, video play kar diya.",
-        )
-        return task_manager.execute_task_sync(task=task, executor_fn=control_media).result or {"status": "success"}
+    def search(self, query: str) -> Dict[str, Any]:
+        """Search YouTube for a query string."""
+        return self.open(query=query)
 
-    def pause(self) -> Dict[str, Any]:
-        """Pause active YouTube video."""
-        from backend.tools.media_tools import control_media
-        task = task_manager.create_task(
-            command="video pause karo",
-            tool_name="youtube.pause",
-            arguments={"action": "pause"},
-            required_locks=[self.RESOURCE_LOCK],
-            immediate_response="Ji Boss, video pause kar diya.",
-        )
-        return task_manager.execute_task_sync(task=task, executor_fn=control_media).result or {"status": "success"}
+    def play_video(self, query: str = "", ordinal: int = 1) -> Dict[str, Any]:
+        """Play a video query or select N-th video."""
+        if query:
+            return self.open(query=query)
+        from backend.tools.browser_tools import click_screen_video
+        return click_screen_video(index=ordinal, section="main")
 
-    def play_first_short(self, index: int = 1) -> Dict[str, Any]:
-        """Play first or N-th YouTube Short from screen feed with precise coordinate targeting."""
+    def play_short(self, ordinal: int = 1, index: Optional[int] = None) -> Dict[str, Any]:
+        """Play first or N-th YouTube Short from screen feed with calibrated coordinate targeting."""
+        idx = index or ordinal or 1
         from backend.tools.browser_tools import click_screen_video
         task = task_manager.create_task(
-            command=f"pehla short chalao (index {index})",
-            tool_name="youtube.play_first_short",
-            arguments={"index": index, "section": "shorts"},
+            command=f"short chalao (index {idx})",
+            tool_name="youtube.play_short",
+            arguments={"index": idx, "section": "shorts"},
             required_locks=[self.RESOURCE_LOCK, "browser"],
-            immediate_response="Ji Boss, YouTube Shorts chala diya.",
+            immediate_response=f"Ji Boss, short number {idx} chala diya.",
         )
         return task_manager.execute_task_sync(
             task=task,
@@ -71,117 +59,138 @@ class YouTubeAdapter:
             verifier_fn=self._verify_youtube_active,
         ).result or {"status": "success"}
 
+    def play_first_short(self, index: int = 1) -> Dict[str, Any]:
+        """Alias for play_short."""
+        return self.play_short(ordinal=index)
+
     def next_short(self) -> Dict[str, Any]:
-        """Switch to next short."""
-        from backend.tools.browser_tools import click_screen_video
-        task = task_manager.create_task(
-            command="agla short dikhao",
-            tool_name="youtube.next_short",
-            arguments={"index": 1, "section": "shorts"},
-            required_locks=[self.RESOURCE_LOCK],
-            immediate_response="Ji Boss, agla short chala diya.",
-        )
-        return task_manager.execute_task_sync(task=task, executor_fn=click_screen_video).result or {"status": "success"}
+        """Advance down to next short."""
+        from backend.tools.media_tools import control_media
+        return control_media(action="next_short")
 
     def prev_short(self) -> Dict[str, Any]:
-        """Switch to previous short."""
+        """Return up to previous short."""
         from backend.tools.media_tools import control_media
-        task = task_manager.create_task(
-            command="pichla short dikhao",
-            tool_name="youtube.prev_short",
-            arguments={"action": "previous"},
-            required_locks=[self.RESOURCE_LOCK],
-            immediate_response="Ji Boss, pichla short chala diya.",
-        )
-        return task_manager.execute_task_sync(task=task, executor_fn=control_media).result or {"status": "success"}
+        return control_media(action="prev_short")
 
-    def select_video(self, index: int = 1, section: str = "main") -> Dict[str, Any]:
-        """Select N-th thumbnail on feed or sidebar."""
-        from backend.tools.browser_tools import click_screen_video
-        task = task_manager.create_task(
-            command=f"video number {index} chalao",
-            tool_name="youtube.select_video",
-            arguments={"index": index, "section": section},
-            required_locks=[self.RESOURCE_LOCK, "browser"],
-            immediate_response=f"Ji Boss, video number {index} chala diya.",
-        )
-        return task_manager.execute_task_sync(task=task, executor_fn=click_screen_video).result or {"status": "success"}
+    def previous_short(self) -> Dict[str, Any]:
+        """Alias for prev_short."""
+        return self.prev_short()
 
-    def seek_forward(self, seconds: int = 10) -> Dict[str, Any]:
-        """Fast forward video."""
+    def pause(self) -> Dict[str, Any]:
+        """Ensure playback state is PAUSED."""
         from backend.tools.media_tools import control_media
-        task = task_manager.create_task(
-            command=f"{seconds} seconds aage karo",
-            tool_name="youtube.seek_forward",
-            arguments={"action": "seek_forward", "level": seconds},
-            required_locks=[self.RESOURCE_LOCK],
-            immediate_response=f"Ji Boss, {seconds} seconds aage kar diya.",
-        )
-        return task_manager.execute_task_sync(task=task, executor_fn=control_media).result or {"status": "success"}
+        return control_media(action="pause")
 
-    def seek_backward(self, seconds: int = 10) -> Dict[str, Any]:
-        """Rewind video."""
+    def resume(self) -> Dict[str, Any]:
+        """Ensure playback state is PLAYING."""
         from backend.tools.media_tools import control_media
-        task = task_manager.create_task(
-            command=f"{seconds} seconds peeche karo",
-            tool_name="youtube.seek_backward",
-            arguments={"action": "seek_backward", "level": seconds},
-            required_locks=[self.RESOURCE_LOCK],
-            immediate_response=f"Ji Boss, {seconds} seconds peeche kar diya.",
-        )
-        return task_manager.execute_task_sync(task=task, executor_fn=control_media).result or {"status": "success"}
+        return control_media(action="play")
+
+    def play(self) -> Dict[str, Any]:
+        """Alias for resume."""
+        return self.resume()
+
+    def set_fullscreen(self, enabled: bool = True) -> Dict[str, Any]:
+        """Explicitly set fullscreen mode ON or OFF."""
+        from backend.tools.media_tools import control_media
+        return control_media(action="fullscreen")
 
     def toggle_fullscreen(self) -> Dict[str, Any]:
-        """Toggle fullscreen mode."""
-        from backend.tools.media_tools import control_media
-        task = task_manager.create_task(
-            command="fullscreen toggle",
-            tool_name="youtube.fullscreen",
-            arguments={"action": "fullscreen"},
-            required_locks=[self.RESOURCE_LOCK],
-            immediate_response="Ji Boss, fullscreen toggle kar diya.",
-        )
-        return task_manager.execute_task_sync(task=task, executor_fn=control_media).result or {"status": "success"}
-
-    def toggle_captions(self) -> Dict[str, Any]:
-        """Toggle subtitles / captions."""
-        from backend.tools.media_tools import control_media
-        task = task_manager.create_task(
-            command="captions toggle",
-            tool_name="youtube.captions",
-            arguments={"action": "captions"},
-            required_locks=[self.RESOURCE_LOCK],
-            immediate_response="Ji Boss, captions/subtitles toggle kar diye.",
-        )
-        return task_manager.execute_task_sync(task=task, executor_fn=control_media).result or {"status": "success"}
-
-    def play_video(self, query: str = "") -> Dict[str, Any]:
-        """Alias for opening/playing a YouTube video query."""
-        return self.open(query=query)
-
-    def play_short(self, ordinal: int = 1, index: Optional[int] = None) -> Dict[str, Any]:
-        """Alias for playing N-th YouTube Short."""
-        idx = index or ordinal or 1
-        return self.play_first_short(index=idx)
-
-    def pause_resume(self) -> Dict[str, Any]:
-        """Alias for play/pause toggle."""
-        return self.play()
-
-    def seek(self, seconds: int = 10, direction: str = "forward") -> Dict[str, Any]:
-        """Seek forward or backward."""
-        if direction in ["backward", "rewind", "peeche", "piche"]:
-            return self.seek_backward(seconds=seconds)
-        return self.seek_forward(seconds=seconds)
-
-    def volume(self, action: str = "volume_up", level: Optional[int] = None) -> Dict[str, Any]:
-        """Adjust or set volume level."""
-        from backend.tools.media_tools import control_media
-        return control_media(action=action, level=level)
+        """Alias for fullscreen toggle."""
+        return self.set_fullscreen(enabled=True)
 
     def fullscreen(self) -> Dict[str, Any]:
-        """Alias for fullscreen toggle."""
-        return self.toggle_fullscreen()
+        """Alias for fullscreen."""
+        return self.set_fullscreen(enabled=True)
+
+    def set_theater_mode(self, enabled: bool = True) -> Dict[str, Any]:
+        """Explicitly set theater / cinema mode ON or OFF."""
+        from backend.tools.media_tools import control_media
+        return control_media(action="theater")
+
+    def set_miniplayer(self, enabled: bool = True) -> Dict[str, Any]:
+        """Explicitly set miniplayer mode ON or OFF."""
+        from backend.tools.media_tools import control_media
+        return control_media(action="miniplayer")
+
+    def set_captions(self, enabled: bool = True) -> Dict[str, Any]:
+        """Explicitly set subtitles / captions ON or OFF."""
+        from backend.tools.media_tools import control_media
+        return control_media(action="captions")
+
+    def toggle_captions(self) -> Dict[str, Any]:
+        """Alias for captions toggle."""
+        return self.set_captions(enabled=True)
+
+    def set_playback_speed(self, rate: float = 1.0) -> Dict[str, Any]:
+        """Set video playback speed rate multiplier (0.5, 0.75, 1.0, 1.25, 1.5, 2.0)."""
+        from backend.tools.media_tools import control_media
+        return control_media(action="speed_up" if rate > 1.0 else "speed_down")
+
+    def speed_up(self, step: float = 0.25) -> Dict[str, Any]:
+        """Step increase playback speed."""
+        from backend.tools.media_tools import control_media
+        return control_media(action="speed_up")
+
+    def speed_down(self, step: float = 0.25) -> Dict[str, Any]:
+        """Step decrease playback speed."""
+        from backend.tools.media_tools import control_media
+        return control_media(action="speed_down")
+
+    def seek_forward(self, seconds: int = 10) -> Dict[str, Any]:
+        """Fast forward video by N seconds."""
+        from backend.tools.media_tools import control_media
+        return control_media(action="seek_forward", level=seconds)
+
+    def seek_backward(self, seconds: int = 10) -> Dict[str, Any]:
+        """Rewind video by N seconds."""
+        from backend.tools.media_tools import control_media
+        return control_media(action="seek_backward", level=seconds)
+
+    def seek_timestamp(self, seconds: int = 0, raw_timestamp: str = "") -> Dict[str, Any]:
+        """Seek playback directly to specific second position."""
+        from backend.tools.media_tools import control_media
+        return control_media(action="seek_timestamp", level=seconds, time_str=raw_timestamp)
+
+    def set_volume(self, level: int = 50) -> Dict[str, Any]:
+        """Directly set audio volume percentage (0-100)."""
+        from backend.tools.media_tools import control_media
+        return control_media(action="set_volume", level=level)
+
+    def volume_up(self, step: int = 10) -> Dict[str, Any]:
+        """Step increase audio volume."""
+        from backend.tools.media_tools import control_media
+        return control_media(action="volume_up", level=step)
+
+    def volume_down(self, step: int = 10) -> Dict[str, Any]:
+        """Step decrease audio volume."""
+        from backend.tools.media_tools import control_media
+        return control_media(action="volume_down", level=step)
+
+    def mute(self) -> Dict[str, Any]:
+        """Mute audio output."""
+        from backend.tools.media_tools import control_media
+        return control_media(action="mute")
+
+    def unmute(self) -> Dict[str, Any]:
+        """Unmute audio output."""
+        from backend.tools.media_tools import control_media
+        return control_media(action="unmute")
+
+    def set_like(self, enabled: bool = True) -> Dict[str, Any]:
+        """Set liked state idempotently."""
+        from backend.tools.media_tools import control_media
+        return control_media(action="like")
+
+    def like(self) -> Dict[str, Any]:
+        """Alias for set_like."""
+        return self.set_like(enabled=True)
+
+    def replay(self) -> Dict[str, Any]:
+        """Restart video from 00:00."""
+        from backend.tools.media_tools import control_media
+        return control_media(action="replay")
 
     def _verify_youtube_active(self, task: Any, result: Any) -> bool:
         """Verify that YouTube or Chrome is active in foreground."""

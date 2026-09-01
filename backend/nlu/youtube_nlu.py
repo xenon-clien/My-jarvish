@@ -1,7 +1,7 @@
-"""Universal Hindi/Hinglish Semantic Language Engine for YouTube.
+"""Universal Hindi/Hinglish Semantic Language Engine for YouTube (Contract v2.0).
 
 Maps unlimited natural phrasing (Roman Hindi, Devanagari, Hinglish, English)
-into finite canonical YouTube intents with structured slot extraction,
+into canonical YouTube V2 intents with structured semantic slot extraction,
 state-aware desired values, unit parsing, negation, and self-correction.
 """
 import re
@@ -15,15 +15,20 @@ logger = get_logger("YouTubeNLU")
 
 @dataclass
 class YouTubeSemanticResult:
-    """Hardened canonical semantic interpretation result for YouTube."""
+    """Canonical V2 semantic interpretation result for YouTube."""
     canonical_action: str
     arguments: Dict[str, Any] = field(default_factory=dict)
     content_type: str = "auto"
     ordinal: Optional[int] = None
     query: Optional[str] = None
+    direction: Optional[str] = None
+    seconds: Optional[int] = None
+    playback_rate: Optional[float] = None
+    volume_step: Optional[int] = None
+    desired_state: Optional[str] = None
+    reference: Optional[str] = None
     confidence: float = 0.0
     is_negated: bool = False
-    desired_state: Optional[str] = None
     raw_text: str = ""
     normalized_text: str = ""
 
@@ -43,7 +48,8 @@ class YouTubeSemanticEngine:
         "सर्च": "search", "ढूंढो": "dhundo", "बढ़ाओ": "badhao", "कम": "kam",
         "आवाज": "aawaz", "म्यूट": "mute", "फुलस्क्रीन": "fullscreen", "सब्सक्राइब": "subscribe",
         "लाइक": "like", "कमेंट्स": "comments", "वीडियो": "video", "चालू": "chalu", "दोबारा": "phir se",
-        "स्पीड": "speed", "सबटाइटल": "subtitle", "कैप्शन": "caption"
+        "स्पीड": "speed", "सबटाइटल": "subtitle", "कैप्शन": "caption", "थिएटर": "theater",
+        "सिनेमा": "cinema", "मिनीप्लेयर": "miniplayer"
     }
 
     # Hindi spoken numbers to integers
@@ -91,6 +97,7 @@ class YouTubeSemanticEngine:
             r"\b(?:pouse|pows|pos|pass|paws|post)\b": "pause",
             r"\b(?:rijum|rijume|rigum|resum)\b": "resume",
             r"\b(?:sabscraib|subscrive)\b": "subscribe",
+            r"\b(?:theatre|cinema\s+mode)\b": "theater mode",
         }
         for pat, rep in slips.items():
             norm = re.sub(pat, rep, norm, flags=re.IGNORECASE)
@@ -105,7 +112,6 @@ class YouTubeSemanticEngine:
                 if re.search(pat, norm, flags=re.IGNORECASE):
                     return ord_val
         
-        # Generic numeric regex: 'number 7', '7th', '7 wali'
         m = re.search(r"\b(?:number\s*)?(\d+)(?:st|nd|rd|th)?\b", norm)
         if m:
             val = int(m.group(1))
@@ -138,9 +144,9 @@ class YouTubeSemanticEngine:
         """Check if action is negated ('mat karo', 'nahi karna', 'dont', 'mat rokna')."""
         norm = cls.normalize_text(text)
         neg_patterns = [
-            r"\b(?:mat|nahi|na|not|dont|don't|never)\s+(?:karo|kar|karna|chalao|chala|rok|roko|rokna|pause|khol|play|badhao|kam|lagana|lagao)\b",
-            r"\b(?:pause|play|next|mute|volume|video|short|subtitle|caption)\s+mat\b",
-            r"\bmat\s+(?:karna|karo|chala|rokna|kholna|lagana|badhana)\b",
+            r"\b(?:mat|nahi|na|not|dont|don't|never)\s+(?:karo|kar|karna|chalao|chala|rok|roko|rokna|pause|khol|play|badhao|kam|lagana|lagao|like)\b",
+            r"\b(?:pause|play|next|mute|volume|video|short|subtitle|caption|like)\s+mat\b",
+            r"\bmat\s+(?:karna|karo|chala|rokna|kholna|lagana|badhana|karna)\b",
             r"\bmat\b"
         ]
         return any(re.search(p, norm, flags=re.IGNORECASE) for p in neg_patterns)
@@ -158,15 +164,12 @@ class YouTubeSemanticEngine:
     def extract_time_seconds(cls, text: str) -> int:
         """Parse spoken time durations like '10 second', 'ek minute', '2 minute', 'bees second' into seconds."""
         norm = cls.normalize_text(text)
-        
-        # Check minute patterns
         m_min = re.search(r"\b(?:(\d+)|([a-z]+))\s*(?:minute|min)\b", norm)
         if m_min:
             val_str = m_min.group(1) or m_min.group(2)
             mins = int(val_str) if val_str.isdigit() else cls.HINDI_NUMBERS.get(val_str, 1)
             return int(mins * 60)
 
-        # Check second patterns
         m_sec = re.search(r"\b(?:(\d+)|([a-z]+))\s*(?:second|sec)\b", norm)
         if m_sec:
             val_str = m_sec.group(1) or m_sec.group(2)
@@ -177,24 +180,21 @@ class YouTubeSemanticEngine:
 
     @classmethod
     def extract_timestamp(cls, text: str) -> Optional[Tuple[str, int]]:
-        """Parse timestamp utterances like '2 minute 30 second', '1:35', 'teen minute'."""
+        """Parse timestamp utterances like '2 minute 30 second', '1:35', 'teen minute' into (raw_str, total_sec)."""
         norm = cls.normalize_text(text)
         
-        # Pattern 1: '02:30' or '1:35'
         m_code = re.search(r"\b(\d+):(\d+)\b", norm)
         if m_code:
             mins, secs = int(m_code.group(1)), int(m_code.group(2))
             total_sec = mins * 60 + secs
             return (f"{mins:02d}:{secs:02d}", total_sec)
 
-        # Pattern 2: '2 minute 30 second'
         m_ms = re.search(r"\b(\d+)\s*(?:minute|min)\s*(?:aur\s*)?(\d+)\s*(?:second|sec)?\b", norm)
         if m_ms:
             mins, secs = int(m_ms.group(1)), int(m_ms.group(2) or 0)
             total_sec = mins * 60 + secs
             return (f"{mins:02d}:{secs:02d}", total_sec)
 
-        # Pattern 3: 'teen minute' / '3 min'
         m_single = re.search(r"\b(?:(\d+)|([a-z]+))\s*(?:minute|min)\s*(?:pe|par|jump|seek|jao)\b", norm)
         if m_single:
             val_str = m_single.group(1) or m_single.group(2)
@@ -206,7 +206,7 @@ class YouTubeSemanticEngine:
 
     @classmethod
     def parse(cls, raw_text: str, current_page: str = "", active_app: str = "") -> YouTubeSemanticResult:
-        """Parse natural utterance into canonical hardened YouTube intent and arguments."""
+        """Parse natural utterance into canonical hardened YouTube V2 intent and arguments."""
         norm_raw = cls.normalize_text(raw_text)
         
         # 1. Handle Self-Correction first
@@ -231,6 +231,8 @@ class YouTubeSemanticEngine:
             return YouTubeSemanticResult(
                 canonical_action="youtube.next_short",
                 content_type="short",
+                direction="down",
+                desired_state="NAVIGATED_NEXT_SHORT",
                 confidence=0.98,
                 raw_text=raw_text,
                 normalized_text=corrected_text
@@ -240,6 +242,8 @@ class YouTubeSemanticEngine:
                 return YouTubeSemanticResult(
                     canonical_action="youtube.next_short",
                     content_type="short",
+                    direction="down",
+                    desired_state="NAVIGATED_NEXT_SHORT",
                     confidence=0.96,
                     raw_text=raw_text,
                     normalized_text=corrected_text
@@ -259,6 +263,8 @@ class YouTubeSemanticEngine:
             return YouTubeSemanticResult(
                 canonical_action="youtube.previous_short",
                 content_type="short",
+                direction="up",
+                desired_state="NAVIGATED_PREV_SHORT",
                 confidence=0.98,
                 raw_text=raw_text,
                 normalized_text=corrected_text
@@ -268,6 +274,8 @@ class YouTubeSemanticEngine:
                 return YouTubeSemanticResult(
                     canonical_action="youtube.previous_short",
                     content_type="short",
+                    direction="up",
+                    desired_state="NAVIGATED_PREV_SHORT",
                     confidence=0.96,
                     raw_text=raw_text,
                     normalized_text=corrected_text
@@ -277,9 +285,10 @@ class YouTubeSemanticEngine:
         if content_type == "short" and ordinal is not None:
             return YouTubeSemanticResult(
                 canonical_action="youtube.play_short",
-                arguments={"ordinal": ordinal, "index": ordinal},
+                arguments={"ordinal": ordinal},
                 content_type="short",
                 ordinal=ordinal,
+                desired_state="SHORT_PLAYING",
                 confidence=0.98,
                 raw_text=raw_text,
                 normalized_text=corrected_text
@@ -288,9 +297,10 @@ class YouTubeSemanticEngine:
             ord_target = ordinal or 1
             return YouTubeSemanticResult(
                 canonical_action="youtube.play_short",
-                arguments={"ordinal": ord_target, "index": ord_target},
+                arguments={"ordinal": ord_target},
                 content_type="short",
                 ordinal=ord_target,
+                desired_state="SHORT_PLAYING",
                 confidence=0.95,
                 raw_text=raw_text,
                 normalized_text=corrected_text
@@ -301,7 +311,7 @@ class YouTubeSemanticEngine:
             return YouTubeSemanticResult(
                 canonical_action="youtube.set_fullscreen",
                 arguments={"enabled": False},
-                desired_state="OFF",
+                desired_state="FULLSCREEN_OFF",
                 confidence=0.98,
                 raw_text=raw_text,
                 normalized_text=corrected_text
@@ -310,18 +320,58 @@ class YouTubeSemanticEngine:
             return YouTubeSemanticResult(
                 canonical_action="youtube.set_fullscreen",
                 arguments={"enabled": True},
-                desired_state="ON",
+                desired_state="FULLSCREEN_ON",
                 confidence=0.98,
                 raw_text=raw_text,
                 normalized_text=corrected_text
             )
 
-        # ── 5. Captions State-Aware (Desired State: ON vs OFF) ───────────────
+        # ── 5. Theater Mode (Restored V1 Capability) ────────────────────────
+        if re.search(r"\b(?:theater\s+(?:mode\s+)?(?:band|hatao|close)|cinema\s+mode\s+band)\b", corrected_text):
+            return YouTubeSemanticResult(
+                canonical_action="youtube.set_theater_mode",
+                arguments={"enabled": False},
+                desired_state="THEATER_OFF",
+                confidence=0.98,
+                raw_text=raw_text,
+                normalized_text=corrected_text
+            )
+        if re.search(r"\b(?:theater\s+mode|cinema\s+mode|theatre\s+mode)\b", corrected_text):
+            return YouTubeSemanticResult(
+                canonical_action="youtube.set_theater_mode",
+                arguments={"enabled": True},
+                desired_state="THEATER_ON",
+                confidence=0.98,
+                raw_text=raw_text,
+                normalized_text=corrected_text
+            )
+
+        # ── 6. Miniplayer Mode ──────────────────────────────────────────────
+        if re.search(r"\b(?:miniplayer\s+(?:band|hatao|close))\b", corrected_text):
+            return YouTubeSemanticResult(
+                canonical_action="youtube.set_miniplayer",
+                arguments={"enabled": False},
+                desired_state="MINIPLAYER_OFF",
+                confidence=0.98,
+                raw_text=raw_text,
+                normalized_text=corrected_text
+            )
+        if re.search(r"\b(?:miniplayer|chhoti\s+screen|mini\s+player)\b", corrected_text):
+            return YouTubeSemanticResult(
+                canonical_action="youtube.set_miniplayer",
+                arguments={"enabled": True},
+                desired_state="MINIPLAYER_ON",
+                confidence=0.98,
+                raw_text=raw_text,
+                normalized_text=corrected_text
+            )
+
+        # ── 7. Captions State-Aware (Desired State: ON vs OFF) ───────────────
         if re.search(r"\b(?:captions?\s+(?:off|band|hatao)|subtitles?\s+(?:off|band|hatao)|caption\s+band)\b", corrected_text):
             return YouTubeSemanticResult(
                 canonical_action="youtube.set_captions",
                 arguments={"enabled": False},
-                desired_state="OFF",
+                desired_state="CAPTIONS_OFF",
                 confidence=0.98,
                 raw_text=raw_text,
                 normalized_text=corrected_text
@@ -330,13 +380,13 @@ class YouTubeSemanticEngine:
             return YouTubeSemanticResult(
                 canonical_action="youtube.set_captions",
                 arguments={"enabled": True},
-                desired_state="ON",
+                desired_state="CAPTIONS_ON",
                 confidence=0.98,
                 raw_text=raw_text,
                 normalized_text=corrected_text
             )
 
-        # ── 6. Playback Speed Target Value (e.g. 1.5x, 2x, normal) ──────────
+        # ── 8. Playback Speed Target Value (e.g. 1.5x, 2x, normal) ──────────
         m_speed = re.search(r"\b(?:(\d+(?:\.\d+)?)\s*x|dedh\s*(?:guna|x)|dhai\s*(?:guna|x)|normal\s+speed)\b", corrected_text)
         if m_speed:
             if "dedh" in corrected_text:
@@ -350,6 +400,8 @@ class YouTubeSemanticEngine:
             return YouTubeSemanticResult(
                 canonical_action="youtube.set_playback_speed",
                 arguments={"rate": target_rate},
+                playback_rate=target_rate,
+                desired_state="SPEED_SET",
                 confidence=0.97,
                 raw_text=raw_text,
                 normalized_text=corrected_text
@@ -371,24 +423,29 @@ class YouTubeSemanticEngine:
                 normalized_text=corrected_text
             )
 
-        # ── 7. Timestamp Seeking (e.g. '2 minute 30 second pe le jao') ───────
+        # ── 9. Timestamp Seeking (Normalized seconds) ────────────────────────
         ts_data = cls.extract_timestamp(corrected_text)
         if ts_data:
             ts_str, total_sec = ts_data
             return YouTubeSemanticResult(
                 canonical_action="youtube.seek_timestamp",
-                arguments={"timestamp": ts_str, "seconds": total_sec},
+                arguments={"seconds": total_sec, "raw_timestamp": ts_str},
+                seconds=total_sec,
+                desired_state="SEEKED_TO_TIMESTAMP",
                 confidence=0.97,
                 raw_text=raw_text,
                 normalized_text=corrected_text
             )
 
-        # ── 8. Relative Seek Forward / Backward (e.g. '10 second aage') ──────
+        # ── 10. Relative Seek Forward / Backward ────────────────────────────
         if re.search(r"\b(?:aage|forward|skip)\b", corrected_text) and not re.search(r"\b(?:short|video)\b", corrected_text):
             secs = cls.extract_time_seconds(corrected_text)
             return YouTubeSemanticResult(
                 canonical_action="youtube.seek_forward",
                 arguments={"seconds": secs},
+                seconds=secs,
+                direction="forward",
+                desired_state="SEEKED_FORWARD",
                 confidence=0.96,
                 raw_text=raw_text,
                 normalized_text=corrected_text
@@ -398,12 +455,15 @@ class YouTubeSemanticEngine:
             return YouTubeSemanticResult(
                 canonical_action="youtube.seek_backward",
                 arguments={"seconds": secs},
+                seconds=secs,
+                direction="backward",
+                desired_state="SEEKED_BACKWARD",
                 confidence=0.96,
                 raw_text=raw_text,
                 normalized_text=corrected_text
             )
 
-        # ── 9. Pause & Resume ───────────────────────────────────────────────
+        # ── 11. Pause & Resume ──────────────────────────────────────────────
         if re.search(r"\b(?:pause|rok\s+do|roko|rok|thoda\s+rok|hold|stop\s+video|video\s+rok|video\s+roko|abhi\s+rok)\b", corrected_text):
             return YouTubeSemanticResult(
                 canonical_action="youtube.pause",
@@ -421,7 +481,37 @@ class YouTubeSemanticEngine:
                 normalized_text=corrected_text
             )
 
-        # ── 10. Volume & Mute ───────────────────────────────────────────────
+        # ── 12. Volume Direct Set vs Step ───────────────────────────────────
+        m_vset = re.search(r"\b(?:volume|sound|aawaz)\s*(\d+)(?:\s*percent|%)?\b|\bset\s+volume\s+(\d+)\b", corrected_text)
+        if m_vset:
+            v_val = int(m_vset.group(1) or m_vset.group(2))
+            return YouTubeSemanticResult(
+                canonical_action="youtube.set_volume",
+                arguments={"level": v_val},
+                desired_state="VOLUME_LEVEL_SET",
+                confidence=0.97,
+                raw_text=raw_text,
+                normalized_text=corrected_text
+            )
+
+        if re.search(r"\b(?:volume\s+(?:up|badhao|badha)|aawaz\s+badhao|sound\s+up)\b", corrected_text):
+            return YouTubeSemanticResult(
+                canonical_action="youtube.volume_up",
+                arguments={"step": 10},
+                volume_step=10,
+                confidence=0.95,
+                raw_text=raw_text,
+                normalized_text=corrected_text
+            )
+        if re.search(r"\b(?:volume\s+(?:down|kam)|aawaz\s+kam|sound\s+down)\b", corrected_text):
+            return YouTubeSemanticResult(
+                canonical_action="youtube.volume_down",
+                arguments={"step": 10},
+                volume_step=-10,
+                confidence=0.95,
+                raw_text=raw_text,
+                normalized_text=corrected_text
+            )
         if re.search(r"\b(?:mute|aawaz\s+band|sound\s+off)\b", corrected_text):
             return YouTubeSemanticResult(
                 canonical_action="youtube.mute",
@@ -438,40 +528,38 @@ class YouTubeSemanticEngine:
                 raw_text=raw_text,
                 normalized_text=corrected_text
             )
-        if re.search(r"\b(?:volume\s+(?:up|badhao|badha)|aawaz\s+badhao|sound\s+up)\b", corrected_text):
-            return YouTubeSemanticResult(
-                canonical_action="youtube.volume_up",
-                arguments={"step": 10},
-                confidence=0.95,
-                raw_text=raw_text,
-                normalized_text=corrected_text
-            )
-        if re.search(r"\b(?:volume\s+(?:down|kam)|aawaz\s+kam|sound\s+down)\b", corrected_text):
-            return YouTubeSemanticResult(
-                canonical_action="youtube.volume_down",
-                arguments={"step": 10},
-                confidence=0.95,
-                raw_text=raw_text,
-                normalized_text=corrected_text
-            )
 
-        # ── 11. Social / Replay ─────────────────────────────────────────────
-        if re.search(r"\b(?:like\s+karo|like\s+thok|like\s+this|video\s+like)\b", corrected_text):
+        # ── 13. Idempotent Like / Unlike ────────────────────────────────────
+        if re.search(r"\b(?:like\s+(?:hatao|remove|unlike))\b", corrected_text):
             return YouTubeSemanticResult(
-                canonical_action="youtube.like",
+                canonical_action="youtube.set_like",
+                arguments={"enabled": False},
+                desired_state="UNLIKED",
                 confidence=0.96,
                 raw_text=raw_text,
                 normalized_text=corrected_text
             )
+        if re.search(r"\b(?:like\s+karo|like\s+thok|like\s+this|video\s+like|like)\b", corrected_text):
+            return YouTubeSemanticResult(
+                canonical_action="youtube.set_like",
+                arguments={"enabled": True},
+                desired_state="LIKED",
+                confidence=0.96,
+                raw_text=raw_text,
+                normalized_text=corrected_text
+            )
+
+        # ── 14. Replay ──────────────────────────────────────────────────────
         if re.search(r"\b(?:replay|shuru\s+se\s+chalao|start\s+again)\b", corrected_text):
             return YouTubeSemanticResult(
                 canonical_action="youtube.replay",
+                desired_state="REPLAYED",
                 confidence=0.96,
                 raw_text=raw_text,
                 normalized_text=corrected_text
             )
 
-        # ── 12. Search & Play Video Entity ──────────────────────────────────
+        # ── 15. Search & Play Video Entity ──────────────────────────────────
         cleaned_query = corrected_text
         for filler_pat in cls.FILLERS:
             cleaned_query = re.sub(filler_pat, " ", cleaned_query, flags=re.IGNORECASE)
@@ -483,6 +571,7 @@ class YouTubeSemanticEngine:
                 canonical_action="youtube.search",
                 arguments={"query": cleaned_query},
                 query=cleaned_query,
+                desired_state="SEARCH_RESULTS_DISPLAYED",
                 confidence=0.94,
                 raw_text=raw_text,
                 normalized_text=corrected_text
@@ -495,16 +584,18 @@ class YouTubeSemanticEngine:
                 query=cleaned_query,
                 ordinal=ordinal or 1,
                 content_type="video",
+                desired_state="VIDEO_PLAYING",
                 confidence=0.93,
                 raw_text=raw_text,
                 normalized_text=corrected_text
             )
 
-        # ── 13. Plain YouTube Open ──────────────────────────────────────────
+        # ── 16. Plain YouTube Open ──────────────────────────────────────────
         if re.search(r"\b(?:youtube|kholo|open)\b", corrected_text):
             return YouTubeSemanticResult(
                 canonical_action="youtube.open",
                 arguments={},
+                desired_state="NAVIGATED_HOME",
                 confidence=0.95,
                 raw_text=raw_text,
                 normalized_text=corrected_text

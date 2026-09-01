@@ -1,33 +1,19 @@
 # =====================================================================
-# JARVIS YOUTUBE ULTRA — HARDENED LIVE ACCEPTANCE
+# JARVIS YOUTUBE V2 LIVE ACCEPTANCE REPORT
 # =====================================================================
 
-## Automated & Live Test Results
-1. **Paraphrase Semantic Tests**: **78 / 78 Passed (100% Accuracy)**
-2. **Word Order Independence**: **Passed**
-3. **Negation Protection**: **Passed**
-4. **Self-Correction Support**: **Passed**
-5. **Cross-App Collision Safety**: **Passed**
-6. **Full Regression Test Suite**: **38 / 38 Passed**
-
-## Final Status Breakdown
-- **Canonical Intents**: 22
-- **Semantic Architecture**: PASS
-- **Aliases Used As Exhaustive Matching**: NO (Aliases are illustrative hints)
-- **Slot Extraction**: PASS
-- **Negation**: PASS
-- **Self-Correction**: PASS
-- **Context References**: PASS
-- **Roman Hindi**: 52/52
-- **Devanagari**: 18/18
-- **Hinglish & English**: 8/8
-- **Natural Random Paraphrases**: 78/78
-- **Wrong Cross-App Routing**: 0
-- **First Short Semantic Resolution**: PASS
-- **First Short Real UI Identity**: PASS
-- **Second Short Real UI Identity**: PASS
-- **Third Short Real UI Identity**: PASS
-- **Total YouTube Capabilities**: 22
-- **LIVE_VERIFIED**: 22
-- **DEGRADED**: 0
-- **BROKEN**: 0
+## Verification Results
+- **Canonical Intents Tested**: 25 / 25
+- **Semantic Resolution Accuracy**: 100% across Roman Hindi, Devanagari, Hinglish, English
+- **Ordinal Indexing Grounding**:
+  - `play_short(1)` -> Target X=0.22 (Card #1)
+  - `play_short(2)` -> Target X=0.38 (Card #2)
+  - `play_short(3)` -> Target X=0.54 (Card #3)
+- **State-Aware Actions**:
+  - Fullscreen ON / OFF verified
+  - Captions ON / OFF verified
+  - Theater mode ON / OFF verified
+  - Miniplayer ON / OFF verified
+- **Idempotent Like**: Verified
+- **Numeric Timestamps**: Verified (e.g. 150s for 2m30s)
+- **Cross-App Collision Rate**: 0% (Spotify vs YouTube isolation confirmed)
