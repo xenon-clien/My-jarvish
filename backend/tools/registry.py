@@ -193,8 +193,10 @@ class ToolRegistry:
         """Return list of JSON schemas for all registered tools."""
         return [t.get_schema() for t in self._tools.values()]
 
-    def get_openai_tool_schemas(self) -> List[Dict[str, Any]]:
-        """Return list of OpenAI / OpenRouter function calling schemas."""
+    def get_openai_tool_schemas(self, tool_names: Optional[List[str]] = None) -> List[Dict[str, Any]]:
+        """Return list of OpenAI / OpenRouter function calling schemas, optionally scoped."""
+        if tool_names:
+            return [t.get_openai_tool_schema() for name, t in self._tools.items() if name in tool_names]
         return [t.get_openai_tool_schema() for t in self._tools.values()]
 
     async def execute(self, tool_name: str, **kwargs) -> ToolResult:

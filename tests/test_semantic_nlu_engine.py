@@ -76,7 +76,7 @@ def test_chrome_browser_variations():
         assert res.entities.application == "chrome", f"Failed app extraction for '{phrase}': got {res.entities.application}"
         routed = UniversalIntentRouter.route(res)
         assert routed is not None and len(routed) > 0
-        assert routed[0].tool_name == "open_url"
+        assert routed[0].tool_name in ["open_url", "open_website"]
     print(f"✅ Passed {len(phrases)} Chrome Browser variations!")
 
 

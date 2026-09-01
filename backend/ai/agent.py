@@ -241,8 +241,13 @@ class JarvisAgent:
             {"role": "user", "content": user_text},
         ]
 
-        # Call AI provider
-        tools_schemas = self.registry.get_openai_tool_schemas()
+        # Call AI provider with scoped tools
+        from backend.core.command_processor import command_processor
+        domain, app = command_processor.resolve_application_context(user_text, user_text)
+        scoped_tool_names = command_processor.get_scoped_tools(domain, app)
+        tools_schemas = self.registry.get_openai_tool_schemas(scoped_tool_names)
+        logger.info(f"Scoped Gemini tool schemas provided: {len(tools_schemas)} tools for app '{app}'")
+
         try:
             ai_response: BaseAIResponse = await self.provider.generate_response(
                 messages=messages,
@@ -551,3 +556,8 @@ class JarvisAgent:
             execution_time_ms=t_res.execution_time_ms,
         )
         return self._format_tool_results_response([t_res], [pending.tool_name])
+
+
+# Global Singleton Jarvis Agent
+jarvis_agent = JarvisAgent()
+

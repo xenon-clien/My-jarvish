@@ -240,7 +240,7 @@ def control_media(action: str, level: Optional[int] = None, time_str: Optional[s
             win32api.keybd_event(0x4E, 0, win32con.KEYEVENTF_KEYUP, 0)
             win32api.keybd_event(0x10, 0, win32con.KEYEVENTF_KEYUP, 0)
         _send_key_event(VK_MEDIA_NEXT_TRACK)
-        msg = "Agla video chala diya."
+        msg = "next track / Agla video chala diya."
     elif action_clean in ["prev", "previous", "previous_track", "pichla_song"]:
         # YouTube native prev video 'Shift + P' (0x50) and Global Prev Track
         if WIN32_AVAILABLE:
@@ -250,7 +250,7 @@ def control_media(action: str, level: Optional[int] = None, time_str: Optional[s
             win32api.keybd_event(0x50, 0, win32con.KEYEVENTF_KEYUP, 0)
             win32api.keybd_event(0x10, 0, win32con.KEYEVENTF_KEYUP, 0)
         _send_key_event(VK_MEDIA_PREV_TRACK)
-        msg = "Pichla video chala diya."
+        msg = "Previous track / Pichla video chala diya."
     elif action_clean in ["volume_up", "louder", "awaj_badhao", "awaz_badhao", "volume_badhao", "sound_badhao", "tez"]:
         # YouTube player Up Arrow (0x26) + Master Volume (+16% step)
         _send_key_event(0x26)

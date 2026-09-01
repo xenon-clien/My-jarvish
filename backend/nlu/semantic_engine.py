@@ -50,7 +50,7 @@ class SemanticIntentEngine:
 
         # ── App Lifecycle ────────────────────────────────────────────────────
         UniversalIntent.OPEN_APP: [
-            r"\b(?:open|kholo|start|launch|on\s+kar|le\s+chalo|khol)\b",
+            r"\b(?:open|kholo|start|launch|on\s+kar|le\s+chalo|khol|khol\s+de|khol\s+do|laga\s+de|laga\s+do|lagao|laga|chala\s+de|chalao)\b",
         ],
         UniversalIntent.CLOSE_APP: [
             r"\b(?:close|band\s+karo|hatao|exit|quit|band\s+kar)\b",
@@ -118,10 +118,10 @@ class SemanticIntentEngine:
             r"\b(?:pichla\s+short|prev\s+short|upar\s+short|pichla\s+short\s+dikhao|pichla\s+short\s+chalao)\b",
         ],
         UniversalIntent.VOLUME_UP: [
-            r"\b(?:volume\s+up|aawaz\s+badhao|volume\s+badhao|sound\s+badhao|sound\s+up)\b",
+            r"\b(?:volume\s+(?:thoda\s+)?(?:up|badhao|badha)|aawaz\s+(?:thodi\s+)?badhao|sound\s+(?:thoda\s+)?badhao|sound\s+up|volume\s+up|aawaz\s+badhao|volume\s+badhao)\b",
         ],
         UniversalIntent.VOLUME_DOWN: [
-            r"\b(?:volume\s+down|aawaz\s+kam|volume\s+kam|sound\s+kam|sound\s+down)\b",
+            r"\b(?:volume\s+(?:thoda\s+)?(?:down|kam)|aawaz\s+(?:thodi\s+)?kam|sound\s+(?:thoda\s+)?kam|sound\s+down|volume\s+down|aawaz\s+kam|volume\s+kam)\b",
         ],
         UniversalIntent.MUTE_AUDIO: [
             r"\b(?:mute\s+audio|mute|mute\s+karo|aawaz\s+band)\b",

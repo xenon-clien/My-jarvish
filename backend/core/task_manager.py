@@ -255,3 +255,4 @@ class TaskManager:
 
 # Global Singleton Task Manager
 task_manager = TaskManager()
+resource_lock_manager = task_manager.lock_manager

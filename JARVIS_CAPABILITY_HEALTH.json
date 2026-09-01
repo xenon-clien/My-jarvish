@@ -1,0 +1,165 @@
+{
+  "timestamp": 1788278472.629572,
+  "total_declared_apps": 152,
+  "curated_registry_apps": 53,
+  "os_scanned_apps": 97,
+  "tier_1_deep_adapters": {
+    "youtube": {
+      "tier": 1,
+      "health": "LIVE_VERIFIED",
+      "capabilities": {
+        "open": {
+          "implemented": true,
+          "tested": true,
+          "live_verified": true
+        },
+        "play_video": {
+          "implemented": true,
+          "tested": true,
+          "live_verified": true
+        },
+        "play_short_1_to_5": {
+          "implemented": true,
+          "tested": true,
+          "live_verified": true
+        },
+        "next_short": {
+          "implemented": true,
+          "tested": true,
+          "live_verified": true
+        },
+        "prev_short": {
+          "implemented": true,
+          "tested": true,
+          "live_verified": true
+        },
+        "pause_resume": {
+          "implemented": true,
+          "tested": true,
+          "live_verified": true
+        },
+        "volume_control": {
+          "implemented": true,
+          "tested": true,
+          "live_verified": true
+        },
+        "fullscreen": {
+          "implemented": true,
+          "tested": true,
+          "live_verified": true
+        }
+      }
+    },
+    "whatsapp": {
+      "tier": 1,
+      "health": "LIVE_VERIFIED",
+      "capabilities": {
+        "open": {
+          "implemented": true,
+          "tested": true,
+          "live_verified": true
+        },
+        "send_message": {
+          "implemented": true,
+          "tested": true,
+          "live_verified": true
+        },
+        "voice_call": {
+          "implemented": true,
+          "tested": true,
+          "live_verified": true
+        },
+        "video_call": {
+          "implemented": true,
+          "tested": true,
+          "live_verified": true
+        },
+        "end_call": {
+          "implemented": true,
+          "tested": true,
+          "live_verified": true
+        },
+        "mute_call": {
+          "implemented": true,
+          "tested": true,
+          "live_verified": true
+        },
+        "view_status": {
+          "implemented": true,
+          "tested": true,
+          "live_verified": true
+        },
+        "delete_message": {
+          "implemented": true,
+          "tested": true,
+          "live_verified": true
+        }
+      }
+    },
+    "system": {
+      "tier": 1,
+      "health": "LIVE_VERIFIED",
+      "capabilities": {
+        "time_and_date": {
+          "implemented": true,
+          "tested": true,
+          "live_verified": true
+        },
+        "battery_status": {
+          "implemented": true,
+          "tested": true,
+          "live_verified": true
+        },
+        "storage_status": {
+          "implemented": true,
+          "tested": true,
+          "live_verified": true
+        },
+        "network_status": {
+          "implemented": true,
+          "tested": true,
+          "live_verified": true
+        },
+        "shutdown_restart_sleep_lock": {
+          "implemented": true,
+          "tested": true,
+          "live_verified": true
+        },
+        "junk_cleanup": {
+          "implemented": true,
+          "tested": true,
+          "live_verified": true
+        }
+      }
+    }
+  },
+  "tier_2_common_tools": {
+    "chrome": {
+      "tier": 2,
+      "health": "HEALTHY",
+      "open_close_tabs_scroll": true
+    },
+    "edge": {
+      "tier": 2,
+      "health": "HEALTHY",
+      "open_close_tabs_scroll": true
+    },
+    "spotify": {
+      "tier": 2,
+      "health": "HEALTHY",
+      "search_play_pause_next": true
+    },
+    "explorer": {
+      "tier": 2,
+      "health": "HEALTHY",
+      "find_list_read_create_delete": true
+    },
+    "vscode": {
+      "tier": 2,
+      "health": "HEALTHY",
+      "launch_focus_cli": true
+    }
+  },
+  "tier_3_os_process_apps_count": 144,
+  "tier_4_unsupported_deep_actions_count": 0
+}
