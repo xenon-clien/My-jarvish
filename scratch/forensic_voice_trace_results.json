@@ -1,0 +1,66 @@
+{
+  "layer1_process": {
+    "python_version": "3.14.3 (tags/v3.14.3:323c59a, Feb  3 2026, 16:04:56) [MSC v.1944 64 bit (AMD64)]",
+    "executable": "C:\\Python314\\python.exe",
+    "cwd": "C:\\Users\\shivam\\Downloads\\chatbot",
+    "status": "PASS"
+  },
+  "layer2_mic_device": {
+    "default_in_index": 1,
+    "device_name": "Microphone (Realtek High Defini",
+    "max_inputs": 2,
+    "sample_rate": 44100.0,
+    "status": "PASS"
+  },
+  "layer3_audio_stream": {
+    "duration_sec": 1.64,
+    "rms_level": 176.75,
+    "peak_level": 690,
+    "has_signal": true,
+    "status": "PASS"
+  },
+  "layer4_vad": {
+    "stt_enabled": true,
+    "sample_rate": 16000,
+    "channels": 1,
+    "chunk_size": 1024,
+    "gain_factor": 4.0,
+    "status": "PASS"
+  },
+  "layer5_tts_guard": {
+    "tts_enabled": true,
+    "is_speaking": false,
+    "last_spoken_time": 0.0,
+    "time_since_last_spoken": 1788281160.97,
+    "guard_blocking": false,
+    "status": "PASS"
+  },
+  "layer6_stt_api": {
+    "api_status": "PASS_CONNECTED_SILENCE",
+    "status": "PASS"
+  },
+  "layer7_normalizer": {
+    "input": "YouTube kholo",
+    "translated": "youtube kholo",
+    "normalized": "youtube kholo",
+    "detected_language": "hinglish",
+    "status": "PASS"
+  },
+  "layer8_command_processor": {
+    "resolved_domain": "media",
+    "resolved_app": "youtube",
+    "scoped_tool_count": 7,
+    "status": "PASS"
+  },
+  "layer9_adapters": {
+    "youtube_open": true,
+    "youtube_play_short": true,
+    "youtube_next_short": true,
+    "status": "PASS"
+  },
+  "layer10_resource_locks": {
+    "active_locks": {},
+    "lock_count": 0,
+    "status": "PASS"
+  }
+}
