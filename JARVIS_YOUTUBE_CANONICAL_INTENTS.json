@@ -1,269 +1,315 @@
 {
-  "version": "1.0",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "contract_version": "2.0",
   "domain": "media",
   "application": "youtube",
+  "description": "Hardened semantic contract for YouTube capabilities. Example phrases are lexical hints, NOT exhaustive matching strings.",
   "canonical_intents": {
     "youtube.open": {
-      "description": "Open YouTube homepage or bring existing tab to focus",
-      "arguments": {},
-      "aliases": [
+      "description": "Open YouTube homepage or bring existing YouTube browser tab into active foreground focus.",
+      "arguments_schema": {},
+      "state_effect": "NAVIGATED_HOME",
+      "example_phrases": [
         "kholo",
-        "open",
-        "launch",
-        "chalu karo"
+        "open youtube",
+        "launch"
       ]
     },
     "youtube.search": {
-      "description": "Search YouTube for a query, song, creator, or topic",
-      "arguments": {
+      "description": "Search YouTube catalog for a query, creator, or topic.",
+      "arguments_schema": {
         "query": {
           "type": "string",
-          "required": true
+          "required": true,
+          "description": "Search query text or creator name"
         }
       },
-      "aliases": [
-        "search",
+      "state_effect": "SEARCH_RESULTS_DISPLAYED",
+      "example_phrases": [
+        "MrBeast search karo",
         "dhundo",
-        "dhoondo",
-        "khojo",
-        "find"
+        "khojo"
       ]
     },
     "youtube.play_video": {
-      "description": "Search and play a specific video query, or play N-th video",
-      "arguments": {
+      "description": "Play a specific video result or search query.",
+      "arguments_schema": {
         "query": {
           "type": "string",
-          "required": false
+          "required": false,
+          "default": null,
+          "description": "Optional search query"
         },
         "ordinal": {
           "type": "integer",
           "required": false,
-          "default": 1
+          "default": 1,
+          "description": "1-based index of video result"
         }
       },
-      "aliases": [
-        "chalao",
-        "play",
-        "laga do",
-        "video chalao",
-        "baja"
+      "state_effect": "VIDEO_PLAYING",
+      "example_phrases": [
+        "pehli video chalao",
+        "CarryMinati video play karo"
       ]
     },
     "youtube.play_short": {
-      "description": "Play first or N-th YouTube Short from screen feed/shelf",
-      "arguments": {
+      "description": "Play the first or N-th YouTube Short from the visible shelf/feed.",
+      "arguments_schema": {
         "ordinal": {
           "type": "integer",
-          "required": true,
-          "default": 1
+          "required": false,
+          "default": 1,
+          "description": "1-based index of Short card"
         }
       },
-      "aliases": [
-        "pehla short",
-        "first short",
-        "short chalao",
-        "reel play karo"
+      "state_effect": "SHORT_PLAYING",
+      "example_phrases": [
+        "pehli short chalao",
+        "first short laga do",
+        "3rd short"
       ]
     },
     "youtube.next_short": {
-      "description": "Navigate down to the next YouTube Short",
-      "arguments": {},
-      "aliases": [
+      "description": "Relative navigation: advance down to the next YouTube Short in player.",
+      "arguments_schema": {},
+      "state_effect": "NAVIGATED_NEXT_SHORT",
+      "example_phrases": [
         "agla short",
-        "next short",
         "next",
-        "scroll down short",
         "agli wali"
       ]
     },
     "youtube.previous_short": {
-      "description": "Navigate up to the previous YouTube Short",
-      "arguments": {},
-      "aliases": [
+      "description": "Relative navigation: return up to the previous YouTube Short in player.",
+      "arguments_schema": {},
+      "state_effect": "NAVIGATED_PREV_SHORT",
+      "example_phrases": [
         "pichla short",
-        "prev short",
         "previous",
-        "scroll up short",
         "pichli wali"
       ]
     },
     "youtube.pause": {
-      "description": "Pause active YouTube video or Short",
-      "arguments": {},
-      "aliases": [
+      "description": "Ensure media playback state is PAUSED.",
+      "arguments_schema": {},
+      "state_effect": "PAUSED",
+      "example_phrases": [
         "pause",
         "rok do",
-        "thoda rok",
-        "hold karo",
-        "stop video"
+        "video roko"
       ]
     },
     "youtube.resume": {
-      "description": "Resume / Unpause active YouTube video or Short",
-      "arguments": {},
-      "aliases": [
+      "description": "Ensure media playback state is PLAYING.",
+      "arguments_schema": {},
+      "state_effect": "PLAYING",
+      "example_phrases": [
         "resume",
         "chala do",
-        "unpause",
-        "continue",
-        "wapas chalao"
+        "unpause"
       ]
     },
-    "youtube.seek_forward": {
-      "description": "Fast-forward playback by N seconds (default 10s)",
-      "arguments": {
-        "seconds": {
-          "type": "integer",
-          "required": false,
-          "default": 10
+    "youtube.set_fullscreen": {
+      "description": "Set fullscreen state explicitly to ON or OFF.",
+      "arguments_schema": {
+        "enabled": {
+          "type": "boolean",
+          "required": true,
+          "default": true,
+          "description": "True to enter fullscreen, False to exit"
         }
       },
-      "aliases": [
-        "aage karo",
-        "forward",
-        "skip",
-        "fast forward",
-        "10 sec aage"
+      "state_effect": "FULLSCREEN_STATE_SET",
+      "example_phrases": [
+        "fullscreen karo (True)",
+        "fullscreen hatao (False)",
+        "screen badi karo (True)"
       ]
     },
-    "youtube.seek_backward": {
-      "description": "Rewind playback by N seconds (default 10s)",
-      "arguments": {
-        "seconds": {
-          "type": "integer",
-          "required": false,
-          "default": 10
+    "youtube.set_captions": {
+      "description": "Set closed captions / subtitles state explicitly to ON or OFF.",
+      "arguments_schema": {
+        "enabled": {
+          "type": "boolean",
+          "required": true,
+          "default": true,
+          "description": "True to enable captions, False to disable"
         }
       },
-      "aliases": [
-        "peeche karo",
-        "rewind",
-        "backward",
-        "10 sec peeche"
+      "state_effect": "CAPTIONS_STATE_SET",
+      "example_phrases": [
+        "subtitle chalu karo (True)",
+        "caption band karo (False)"
       ]
     },
-    "youtube.seek_timestamp": {
-      "description": "Jump directly to specific timecode or minute",
-      "arguments": {
-        "timestamp": {
-          "type": "string",
-          "required": true
+    "youtube.set_playback_speed": {
+      "description": "Set video playback speed rate to target multiplier.",
+      "arguments_schema": {
+        "rate": {
+          "type": "number",
+          "required": true,
+          "default": 1.0,
+          "description": "Target speed multiplier (e.g. 0.5, 0.75, 1.0, 1.25, 1.5, 2.0)"
         }
       },
-      "aliases": [
-        "iss time pe",
-        "exact time",
-        "jump to time"
-      ]
-    },
-    "youtube.volume_up": {
-      "description": "Increase audio volume level",
-      "arguments": {
-        "step": {
-          "type": "integer",
-          "required": false,
-          "default": 10
-        }
-      },
-      "aliases": [
-        "volume badhao",
-        "aawaz badhao",
-        "sound up"
-      ]
-    },
-    "youtube.volume_down": {
-      "description": "Decrease audio volume level",
-      "arguments": {
-        "step": {
-          "type": "integer",
-          "required": false,
-          "default": 10
-        }
-      },
-      "aliases": [
-        "volume kam karo",
-        "aawaz kam karo",
-        "sound down"
-      ]
-    },
-    "youtube.mute": {
-      "description": "Mute video audio",
-      "arguments": {},
-      "aliases": [
-        "mute",
-        "aawaz band",
-        "sound off"
-      ]
-    },
-    "youtube.unmute": {
-      "description": "Unmute video audio",
-      "arguments": {},
-      "aliases": [
-        "unmute",
-        "aawaz kholo",
-        "sound on"
-      ]
-    },
-    "youtube.fullscreen": {
-      "description": "Toggle fullscreen mode",
-      "arguments": {},
-      "aliases": [
-        "fullscreen",
-        "bada karo",
-        "large screen",
-        "screen badi karo"
-      ]
-    },
-    "youtube.theater_mode": {
-      "description": "Toggle cinema/theater mode",
-      "arguments": {},
-      "aliases": [
-        "theater mode",
-        "cinema mode"
-      ]
-    },
-    "youtube.captions": {
-      "description": "Toggle subtitles/captions on or off",
-      "arguments": {},
-      "aliases": [
-        "captions",
-        "subtitles",
-        "subtitle on",
-        "subtitle off"
-      ]
-    },
-    "youtube.like": {
-      "description": "Like current video",
-      "arguments": {},
-      "aliases": [
-        "like",
-        "video like karo",
-        "like thok"
+      "state_effect": "SPEED_SET",
+      "example_phrases": [
+        "1.5x speed kar do",
+        "normal speed karo",
+        "2x pe chalao"
       ]
     },
     "youtube.speed_up": {
-      "description": "Increase playback speed (1.25x, 1.5x, 2x)",
-      "arguments": {},
-      "aliases": [
+      "description": "Relative step increase in video playback speed.",
+      "arguments_schema": {
+        "step": {
+          "type": "number",
+          "required": false,
+          "default": 0.25
+        }
+      },
+      "state_effect": "SPEED_INCREASED",
+      "example_phrases": [
         "speed badhao",
         "fast karo",
         "tez chalao"
       ]
     },
     "youtube.speed_down": {
-      "description": "Decrease playback speed (0.75x, 0.5x)",
-      "arguments": {},
-      "aliases": [
+      "description": "Relative step decrease in video playback speed.",
+      "arguments_schema": {
+        "step": {
+          "type": "number",
+          "required": false,
+          "default": 0.25
+        }
+      },
+      "state_effect": "SPEED_DECREASED",
+      "example_phrases": [
         "speed kam karo",
         "slow karo",
         "dheere chalao"
       ]
     },
+    "youtube.seek_forward": {
+      "description": "Fast-forward video by N seconds.",
+      "arguments_schema": {
+        "seconds": {
+          "type": "integer",
+          "required": false,
+          "default": 10,
+          "description": "Number of seconds to skip forward"
+        }
+      },
+      "state_effect": "SEEKED_FORWARD",
+      "example_phrases": [
+        "10 second aage",
+        "fast forward",
+        "thoda aage kar"
+      ]
+    },
+    "youtube.seek_backward": {
+      "description": "Rewind video by N seconds.",
+      "arguments_schema": {
+        "seconds": {
+          "type": "integer",
+          "required": false,
+          "default": 10,
+          "description": "Number of seconds to rewind"
+        }
+      },
+      "state_effect": "SEEKED_BACKWARD",
+      "example_phrases": [
+        "10 sec peeche",
+        "rewind",
+        "thoda peeche"
+      ]
+    },
+    "youtube.seek_timestamp": {
+      "description": "Seek playback directly to a normalized timestamp or second position.",
+      "arguments_schema": {
+        "timestamp": {
+          "type": "string",
+          "required": true,
+          "description": "Formatted timestamp string (e.g. '02:30')"
+        },
+        "seconds": {
+          "type": "integer",
+          "required": true,
+          "description": "Total seconds offset from start"
+        }
+      },
+      "state_effect": "SEEKED_TO_TIMESTAMP",
+      "example_phrases": [
+        "2 minute 30 second pe le jao",
+        "1:35 pe chalao"
+      ]
+    },
+    "youtube.volume_up": {
+      "description": "Increase playback audio volume.",
+      "arguments_schema": {
+        "step": {
+          "type": "integer",
+          "required": false,
+          "default": 10
+        }
+      },
+      "state_effect": "VOLUME_INCREASED",
+      "example_phrases": [
+        "volume badhao",
+        "aawaz badhao"
+      ]
+    },
+    "youtube.volume_down": {
+      "description": "Decrease playback audio volume.",
+      "arguments_schema": {
+        "step": {
+          "type": "integer",
+          "required": false,
+          "default": 10
+        }
+      },
+      "state_effect": "VOLUME_DECREASED",
+      "example_phrases": [
+        "volume kam karo",
+        "aawaz kam karo"
+      ]
+    },
+    "youtube.mute": {
+      "description": "Ensure audio volume is MUTED.",
+      "arguments_schema": {},
+      "state_effect": "MUTED",
+      "example_phrases": [
+        "mute",
+        "aawaz band",
+        "sound off"
+      ]
+    },
+    "youtube.unmute": {
+      "description": "Ensure audio volume is UNMUTED.",
+      "arguments_schema": {},
+      "state_effect": "UNMUTED",
+      "example_phrases": [
+        "unmute",
+        "aawaz kholo",
+        "sound on"
+      ]
+    },
+    "youtube.like": {
+      "description": "Like current video.",
+      "arguments_schema": {},
+      "state_effect": "LIKED",
+      "example_phrases": [
+        "video like karo",
+        "like thok"
+      ]
+    },
     "youtube.replay": {
-      "description": "Restart video from beginning",
-      "arguments": {},
-      "aliases": [
+      "description": "Restart video from beginning (00:00).",
+      "arguments_schema": {},
+      "state_effect": "REPLAYED",
+      "example_phrases": [
         "replay",
         "shuru se chalao",
         "start again"

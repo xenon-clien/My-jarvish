@@ -1,4 +1,4 @@
-"""Comprehensive unit and semantic equivalence tests for YouTube Hindi/Hinglish NLU Engine."""
+"""Comprehensive unit and semantic contract tests for YouTube Hindi/Hinglish NLU Engine."""
 import json
 import os
 import pytest
@@ -15,7 +15,7 @@ def paraphrase_data():
 
 
 def test_youtube_nlu_paraphrase_corpus(paraphrase_data):
-    """Assert all 119 natural Hindi/Hinglish paraphrases resolve to exact canonical action and arguments."""
+    """Assert all natural Hindi/Hinglish paraphrases resolve to exact canonical action and arguments."""
     total = len(paraphrase_data)
     passed = 0
     failures = []
@@ -25,6 +25,7 @@ def test_youtube_nlu_paraphrase_corpus(paraphrase_data):
         expected_action = item["action"]
         expected_ordinal = item.get("ordinal")
         expected_query = item.get("query")
+        expected_args = item.get("arguments")
 
         res = youtube_nlu.parse(raw_text)
         
@@ -36,6 +37,17 @@ def test_youtube_nlu_paraphrase_corpus(paraphrase_data):
         # Ordinal check
         if expected_ordinal is not None and res.ordinal != expected_ordinal:
             failures.append(f"FAILED ordinal for '{raw_text}': expected {expected_ordinal}, got {res.ordinal}")
+            continue
+
+        # Arguments check (e.g. enabled, rate, timestamp, seconds)
+        if expected_args:
+            for k, v in expected_args.items():
+                if res.arguments.get(k) != v:
+                    failures.append(f"FAILED argument '{k}' for '{raw_text}': expected {v}, got {res.arguments.get(k)}")
+                    break
+            else:
+                passed += 1
+                continue
             continue
 
         passed += 1
@@ -63,7 +75,8 @@ def test_negation_protection():
         "pause mat karna",
         "video mat rokna",
         "next short mat chala",
-        "volume kam mat karo"
+        "volume kam mat karo",
+        "subtitle mat lagana"
     ]
     for p in neg_phrases:
         res = youtube_nlu.parse(p)
@@ -77,9 +90,9 @@ def test_self_corrections():
     assert res1.canonical_action == "youtube.play_short"
     assert res1.ordinal == 1
 
-    res2 = youtube_nlu.parse("third nahi first wali short laga")
+    res2 = youtube_nlu.parse("third... nahi second wali chalao")
     assert res2.canonical_action == "youtube.play_short"
-    assert res2.ordinal == 1
+    assert res2.ordinal == 2
 
     res3 = youtube_nlu.parse("pause nahi mute karo")
     assert res3.canonical_action == "youtube.mute"

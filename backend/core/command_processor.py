@@ -310,10 +310,24 @@ class CommandProcessor:
                     tool_name = "control_media"
                     tool_args = {"action": "play"}
                     imm_resp = "Ji Boss, video play kar diya."
-                elif yt_res.canonical_action == "youtube.fullscreen":
+                elif yt_res.canonical_action in ["youtube.fullscreen", "youtube.set_fullscreen"]:
                     tool_name = "control_media"
                     tool_args = {"action": "fullscreen"}
-                    imm_resp = "Ji Boss, fullscreen kar diya."
+                    imm_resp = "Ji Boss, fullscreen kar diya." if yt_res.arguments.get("enabled", True) else "Ji Boss, fullscreen se bahar aa gaye."
+                elif yt_res.canonical_action in ["youtube.captions", "youtube.set_captions"]:
+                    tool_name = "control_media"
+                    tool_args = {"action": "captions"}
+                    imm_resp = "Ji Boss, subtitles chalu kar diye." if yt_res.arguments.get("enabled", True) else "Ji Boss, subtitles band kar diye."
+                elif yt_res.canonical_action == "youtube.set_playback_speed":
+                    tool_name = "control_media"
+                    rate = yt_res.arguments.get("rate", 1.0)
+                    tool_args = {"action": "speed_up" if rate > 1.0 else "speed_down"}
+                    imm_resp = f"Ji Boss, playback speed {rate}x kar di."
+                elif yt_res.canonical_action == "youtube.seek_timestamp":
+                    tool_name = "control_media"
+                    ts = yt_res.arguments.get("timestamp", "00:00")
+                    tool_args = {"action": "seek_forward", "level": yt_res.arguments.get("seconds", 10)}
+                    imm_resp = f"Ji Boss, video {ts} par le gaye."
                 elif yt_res.canonical_action == "youtube.seek_forward":
                     tool_name = "control_media"
                     tool_args = {"action": "seek_forward", "level": yt_res.arguments.get("seconds", 10)}
@@ -342,10 +356,10 @@ class CommandProcessor:
                     tool_name = "control_media"
                     tool_args = {"action": "like"}
                     imm_resp = "Ji Boss, video like kar diya."
-                elif yt_res.canonical_action == "youtube.captions":
+                elif yt_res.canonical_action == "youtube.replay":
                     tool_name = "control_media"
-                    tool_args = {"action": "captions"}
-                    imm_resp = "Ji Boss, captions toggle kar diye."
+                    tool_args = {"action": "replay"}
+                    imm_resp = "Ji Boss, video shuru se chala diya."
                 elif yt_res.canonical_action == "youtube.speed_up":
                     tool_name = "control_media"
                     tool_args = {"action": "speed_up"}

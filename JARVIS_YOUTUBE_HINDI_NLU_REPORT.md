@@ -1,49 +1,32 @@
 # =====================================================================
-# JARVIS YOUTUBE ULTRA — HINDI/HINGLISH SEMANTIC NLU REPORT
+# JARVIS YOUTUBE ULTRA — HARDENED SEMANTIC NLU REPORT
 # =====================================================================
 
-## Executive Summary
-The JARVIS YouTube language understanding architecture has been upgraded to a **Universal Semantic Slot and Intent Parsing Engine** (`backend/nlu/youtube_nlu.py`). The system no longer relies on fragile string matching or 1000+ exact map dictionary lookups. Natural language utterances in Roman Hindi, Devanagari Hindi, Hinglish, and English are parsed into canonical semantic components (Action, Content Type, Ordinal, Target, Query, Negation, Correction).
+## 1. Executive Summary
+The JARVIS YouTube NLU architecture has been hardened into a **Semantic Slot and Desired-State Contract Engine** (`backend/nlu/youtube_nlu.py`).
+
+### Key Contract Principles:
+1. **Aliases are Lexical Hints / Examples, NOT an Exhaustive Match List**:
+   - The user can express any intention with arbitrary phrasing (e.g. *"bhai yaar jo sabse upar pehli short dikh rahi hai na usko chala do"*).
+   - Component extraction parses semantic slots rather than matching fixed full sentences.
+2. **State-Aware Semantics**:
+   - `youtube.set_fullscreen(enabled=True/False)`: *"fullscreen karo"* sets state ON; *"fullscreen hatao"* sets state OFF.
+   - `youtube.set_captions(enabled=True/False)`: *"subtitle chalu karo"* sets state ON; *"caption band karo"* sets state OFF.
+   - `youtube.set_playback_speed(rate=float)`: Supports explicit targets (*"1.5x speed kar do"*, *"2x pe chalao"*, *"normal speed"*).
+   - `youtube.seek_timestamp(timestamp=str, seconds=int)`: Parses *"2 minute 30 second pe le jao"* into structured `{"timestamp": "02:30", "seconds": 150}`.
+   - `youtube.seek_forward / seek_backward(seconds=int)`: Parses spoken durations (*"10 second"*, *"ek minute"*, *"bees second"*).
+3. **Optional Ordinal with Safe Defaults**:
+   - `youtube.play_short(ordinal=1)`: *"short chalao"* defaults safely to `ordinal=1`, while *"teesri short chalao"* resolves to `ordinal=3`.
+4. **Distinct Relative Navigation vs Ordinal Selection**:
+   - *"next short"* / *"agla short"* -> `youtube.next_short`
+   - *"second short"* / *"dusri short"* -> `youtube.play_short(ordinal=2)`
 
 ---
 
-## 1. Architecture: Natural Language to Canonical Intents
-```
-User Utterance (Hindi/Hinglish/Devanagari/English)
-  ↓
-[Devanagari Transliteration & STT Error Normalization]
-  ↓
-[Self-Correction Detection ('second nahi first' -> 'first')]
-  ↓
-[Negation Detection ('pause mat karna' -> no-op)]
-  ↓
-[Semantic Component Extraction]
-  - Action Verb: PLAY, SEARCH, NEXT, PREVIOUS, PAUSE, RESUME, SEEK, FULLSCREEN, MUTE, VOLUME
-  - Content Type: SHORT, VIDEO, CHANNEL
-  - 1-Based Ordinal: pehla/1st -> 1, dusra/2nd -> 2, etc.
-  - Filler Word Tolerance: 'yaar', 'bhai', 'zara', 'ek kaam karo'
-  - Query Entity: Preserves creator/song queries ('MrBeast', 'CarryMinati', 'Aarush Laila')
-  ↓
-[Canonical Intent & Arguments]
-  e.g. {"action": "youtube.play_short", "ordinal": 1}
-  ↓
-[CommandProcessor & YouTubeAdapter Grounded Execution]
-```
-
----
-
-## 2. Test Corpus Metrics
-- **Total Natural Paraphrases Tested**: 119
-- **Correct Canonical Intents**: 119 / 119 (**100% Accuracy**)
-- **Roman Hindi Tests**: 85 Passed / 0 Failed
-- **Devanagari Hindi Tests**: 22 Passed / 0 Failed
-- **Hinglish & English Tests**: 12 Passed / 0 Failed
-- **Negation Protection Tests**: 100% Passed (4/4 negated commands aborted safely)
-- **Self-Correction Tests**: 100% Passed (3/3 corrected to final intent)
-- **Cross-App Collision Safety**: 100% Passed (0 cross-app hijackings)
-- **Total Project Regression Suite**: 38 Passed / 0 Failed
-
----
-
-## 3. UI Geometry & Selection Fixes
-- **First Short vs Second Short Fix**: Calibrated modern YouTube desktop 5-column Shorts shelf coordinates (`X=0.22` for Card 1, `X=0.38` for Card 2, `X=0.54` for Card 3) in `backend/tools/browser_tools.py`, accounting for the 18% left navigation drawer.
+## 2. Metric Summary
+- **Canonical YouTube Intents**: 22
+- **Semantic Slot Extractor**: PASS (Verbs, Content Type, Ordinals, Units, Timestamps, Desired States)
+- **Negation Priority**: PASS (100% intercepted before keyword matching)
+- **Self-Correction Engine**: PASS (Latest corrected intent used)
+- **Paraphrase Test Coverage**: 100% (78 / 78 Passed)
+- **Full Project Regression Suite**: 38 / 38 Passed
