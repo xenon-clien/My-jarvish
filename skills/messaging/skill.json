@@ -1,0 +1,31 @@
+{
+  "application": "messaging",
+  "display_name": "WhatsApp Communication Suite",
+  "version": "Latest",
+  "process_names": [],
+  "window_classes": [],
+  "url_patterns": [],
+  "category": "messaging",
+  "capabilities": [
+    "open",
+    "close",
+    "search_contact",
+    "open_chat",
+    "send_message",
+    "start_voice_call",
+    "start_video_call",
+    "save_contact",
+    "list_contacts"
+  ],
+  "actions": {},
+  "navigation": [],
+  "mediaControls": [],
+  "inputControls": [],
+  "stateInformation": [],
+  "accessibilityCapabilities": [],
+  "browserCapabilities": [],
+  "permissions": [],
+  "verificationMethods": [],
+  "feature_matrix": {},
+  "last_updated": null
+}

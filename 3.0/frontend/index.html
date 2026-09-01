@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JARVIS - Universal AI Operating System</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Canvas Background for Holographic Particle Sphere -->
+  <canvas id="arc-reactor-canvas"></canvas>
+
+  <div class="hologram-overlay">
+    <!-- Top Minimal HUD Navigation -->
+    <header class="hud-header">
+      <div class="hud-brand">
+        <div class="hud-core-indicator"></div>
+        <div class="hud-title-group">
+          <span class="hud-title">J.A.R.V.I.S.</span>
+          <span class="hud-version">MARK VII // CORE 3.0</span>
+        </div>
+      </div>
+
+      <nav class="hud-tabs">
+        <button class="hud-tab active" data-tab="home-tab">🏠 Home</button>
+        <button class="hud-tab" data-tab="chat-tab">💬 Chat</button>
+        <button class="hud-tab" data-tab="dashboard-tab">📊 Dashboard</button>
+        <button class="hud-tab" data-tab="diagnostics-tab">🩺 Diagnostics</button>
+      </nav>
+
+      <div class="hud-controls">
+        <button class="voice-mode-toggle-btn active" id="auto-listen-toggle" title="Toggle Always Listening Mode">
+          🎙️ AUTO-LISTEN: <span id="auto-listen-status">ON</span>
+        </button>
+        <div class="status-pill online">
+          <span class="pulse-ring"></span>
+          <span id="system-status-pill">ONLINE</span>
+        </div>
+        <button class="hud-emergency-btn" id="emergency-stop-btn" title="Emergency Stop">
+          🛑 CANCEL TASK
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Dynamic Viewport -->
+    <main class="hud-viewport">
+      <!-- ── TAB 1: HOME (Cinematic Holographic Arc Reactor View) ────────── -->
+      <section class="hud-pane active" id="home-tab">
+        <!-- Floating Left Telemetry Card -->
+        <div class="hud-card floating-left">
+          <div class="card-glow-edge"></div>
+          <div class="card-header-bar">SYSTEM TELEMETRY</div>
+          <div class="telemetry-item">
+            <span class="t-label">AI BRAIN</span>
+            <span class="t-value highlight" id="ai-brain-val">GEMINI 2.5 FLASH</span>
+          </div>
+          <div class="telemetry-item">
+            <span class="t-label">INSTALLED APPS</span>
+            <span class="t-value" id="apps-count-val">150 DISCOVERED</span>
+          </div>
+          <div class="telemetry-item">
+            <span class="t-label">ACTIVE TOOLS</span>
+            <span class="t-value" id="tools-count-val">75 CANONICAL</span>
+          </div>
+          <div class="telemetry-item">
+            <span class="t-label">SYSTEM RECOVERY</span>
+            <span class="t-value green">VERIFIED CLOSED-LOOP</span>
+          </div>
+        </div>
+
+        <!-- Floating Right Quick Commands Card -->
+        <div class="hud-card floating-right">
+          <div class="card-glow-edge"></div>
+          <div class="card-header-bar">DIRECT PROTOCOLS</div>
+          <div class="quick-protocol-list">
+            <button class="protocol-btn" data-cmd="open youtube">▶ Open YouTube</button>
+            <button class="protocol-btn" data-cmd="YouTube pe pehla Short chalao">⚡ Play First Short</button>
+            <button class="protocol-btn" data-cmd="Chrome mein new tab kholo">🌐 Chrome New Tab</button>
+            <button class="protocol-btn" data-cmd="Hidden files dikhao">👁 Show Hidden Files</button>
+            <button class="protocol-btn" data-cmd="Kaun kaun se apps installed hain?">📱 Discovered Apps</button>
+            <button class="protocol-btn" data-cmd="Health check karo">🩺 Run Health Check</button>
+          </div>
+        </div>
+
+        <!-- Central Holographic Reactor Interface -->
+        <div class="central-core-wrapper">
+          <div class="core-interaction-zone" id="mic-orb-trigger">
+            <div class="outer-energy-ring"></div>
+            <div class="inner-reactor-glow"></div>
+            <div class="core-icon-label" id="core-state-label">CLICK OR SPEAK</div>
+          </div>
+          <div class="voice-transcript-banner" id="live-transcript-banner">
+            "Say 'Open YouTube', 'Play first Short', or 'Health check'..."
+          </div>
+        </div>
+      </section>
+
+      <!-- ── TAB 2: CHAT CONVERSATION VIEW ───────────────────────────────── -->
+      <section class="hud-pane" id="chat-tab">
+        <div class="chat-terminal-box">
+          <div class="terminal-header">
+            <span>JARVIS INTERACTIVE NEURAL STREAM</span>
+            <span class="timestamp" id="hud-clock">00:00:00</span>
+          </div>
+          <div class="chat-terminal-body" id="chat-messages">
+            <div class="terminal-msg assistant">
+              <span class="msg-tag">[JARVIS]</span>
+              <span class="msg-txt">Namaste Shivam! All subsystems online. Ready for command execution.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── TAB 3: APPS & CAPABILITY DASHBOARD ───────────────────────────── -->
+      <section class="hud-pane" id="dashboard-tab">
+        <div class="dashboard-container">
+          <div class="dash-top-bar">
+            <div class="dash-title">
+              <h3>DISCOVERED LAPTOP APPLICATIONS</h3>
+              <span class="app-count-tag" id="dash-total-apps">150 APPS</span>
+            </div>
+            <div class="category-pills" id="category-pills">
+              <!-- Dynamically populated categories -->
+            </div>
+          </div>
+          <div class="apps-hud-grid" id="apps-hud-grid">
+            <!-- App cards dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ── TAB 4: DIAGNOSTICS & SYSTEM HEALTH ───────────────────────────── -->
+      <section class="hud-pane" id="diagnostics-tab">
+        <div class="diag-container">
+          <div class="diag-header">
+            <h3>HEALTH SCORECARD & ERROR BOUNDARIES</h3>
+            <button class="hud-mini-btn" id="rescan-health-btn">RUN HEALTH CHECK</button>
+          </div>
+          <div class="diag-grid" id="diag-grid">
+            <!-- Health cards dynamically populated -->
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom Holographic Command Input Strip -->
+    <footer class="hud-footer">
+      <div class="command-bar-wrapper">
+        <div class="command-prefix">JARVIS &gt;</div>
+        <input type="text" id="command-input" placeholder="Type or speak a command in Hindi, Hinglish, or English..." autocomplete="off">
+        <button class="command-mic-btn" id="footer-mic-btn" title="Toggle Listening Mode">
+          <span class="mic-dot"></span> LISTEN
+        </button>
+        <button class="command-send-btn" id="footer-send-btn">
+          EXECUTE ➔
+        </button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Capabilities Modal -->
+  <div class="hud-modal-overlay" id="capability-modal" style="display: none;">
+    <div class="hud-modal-card">
+      <div class="hud-modal-header">
+        <h4 id="modal-app-name">Application Capabilities</h4>
+        <button class="modal-close" id="modal-close-btn">&times;</button>
+      </div>
+      <div class="hud-modal-body" id="modal-app-body">
+        <!-- Capabilities -->
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

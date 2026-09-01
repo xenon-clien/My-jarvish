@@ -1,0 +1,2354 @@
+{
+  "total_files": 334,
+  "total_loc": 38545,
+  "python_loc": 36846,
+  "registered_apps_count": 53,
+  "registered_apps": [
+    {
+      "name": "Google Chrome",
+      "executables": [
+        "chrome.exe",
+        "chrome"
+      ],
+      "aliases": [
+        "chrome",
+        "google chrome",
+        "browser",
+        "web browser",
+        "internet",
+        "\u0915\u094d\u0930\u094b\u092e",
+        "\u0917\u0942\u0917\u0932 \u0915\u094d\u0930\u094b\u092e"
+      ],
+      "command": "start chrome"
+    },
+    {
+      "name": "Visual Studio Code",
+      "executables": [
+        "code.exe",
+        "code.cmd",
+        "code"
+      ],
+      "aliases": [
+        "vscode",
+        "vs code",
+        "code",
+        "visual studio code",
+        "code editor",
+        "editor",
+        "\u0935\u0940\u090f\u0938 \u0915\u094b\u0921"
+      ],
+      "command": "code"
+    },
+    {
+      "name": "Notepad",
+      "executables": [
+        "notepad.exe",
+        "notepad"
+      ],
+      "aliases": [
+        "notepad",
+        "text editor",
+        "notes editor",
+        "\u0928\u094b\u091f\u092a\u0948\u0921"
+      ],
+      "command": "notepad"
+    },
+    {
+      "name": "Windows Calculator",
+      "executables": [
+        "calc.exe",
+        "calculatorapp.exe",
+        "calc"
+      ],
+      "aliases": [
+        "calculator",
+        "calc",
+        "\u0915\u0948\u0932\u0915\u0941\u0932\u0947\u091f\u0930"
+      ],
+      "command": "calc"
+    },
+    {
+      "name": "Spotify",
+      "executables": [
+        "spotify.exe",
+        "spotify"
+      ],
+      "aliases": [
+        "spotify",
+        "spotifi",
+        "spoti",
+        "\u0938\u094d\u092a\u0949\u091f\u093f\u092b\u093e\u0908",
+        "\u0938\u094d\u092a\u0949\u091f\u093f\u092b\u093c\u093e\u0908",
+        "\u0938\u094d\u092a\u0949\u091f\u0940\u092b\u093e\u0908"
+      ],
+      "command": "start spotify:"
+    },
+    {
+      "name": "Microsoft Edge",
+      "executables": [
+        "msedge.exe",
+        "msedge"
+      ],
+      "aliases": [
+        "edge",
+        "ms edge",
+        "microsoft edge",
+        "\u090f\u091c"
+      ],
+      "command": "start msedge"
+    },
+    {
+      "name": "Command Prompt",
+      "executables": [
+        "cmd.exe"
+      ],
+      "aliases": [
+        "cmd",
+        "command prompt",
+        "cmd window",
+        "cmd tab",
+        "command line",
+        "\u0915\u092e\u093e\u0902\u0921 \u092a\u094d\u0930\u0949\u092e\u094d\u092a\u094d\u091f"
+      ],
+      "command": "start cmd"
+    },
+    {
+      "name": "PowerShell",
+      "executables": [
+        "powershell.exe",
+        "pwsh.exe"
+      ],
+      "aliases": [
+        "powershell",
+        "ps",
+        "powershell window",
+        "powershell tab",
+        "\u092a\u093e\u0935\u0930\u0936\u0947\u0932"
+      ],
+      "command": "start powershell"
+    },
+    {
+      "name": "Windows Terminal",
+      "executables": [
+        "wt.exe"
+      ],
+      "aliases": [
+        "terminal",
+        "windows terminal",
+        "wt",
+        "\u091f\u0930\u094d\u092e\u093f\u0928\u0932"
+      ],
+      "command": "start wt"
+    },
+    {
+      "name": "File Explorer",
+      "executables": [
+        "explorer.exe",
+        "explorer"
+      ],
+      "aliases": [
+        "explorer",
+        "file explorer",
+        "file manager",
+        "folder",
+        "folders",
+        "files",
+        "my computer",
+        "my files",
+        "\u090f\u0915\u094d\u0938\u092a\u094d\u0932\u094b\u0930\u0930",
+        "\u092b\u093e\u0907\u0932 \u090f\u0915\u094d\u0938\u092a\u094d\u0932\u094b\u0930\u0930",
+        "\u092b\u093e\u0907\u0932 \u092e\u0948\u0928\u0947\u091c\u0930",
+        "\u092e\u093e\u092f \u0915\u0902\u092a\u094d\u092f\u0942\u091f\u0930",
+        "\u092b\u094b\u0932\u094d\u0921\u0930"
+      ],
+      "command": "explorer"
+    },
+    {
+      "name": "Paint",
+      "executables": [
+        "mspaint.exe",
+        "mspaint",
+        "paint.exe"
+      ],
+      "aliases": [
+        "paint",
+        "mspaint",
+        "drawing",
+        "\u092a\u0947\u0902\u091f"
+      ],
+      "command": "mspaint"
+    },
+    {
+      "name": "Task Manager",
+      "executables": [
+        "taskmgr.exe",
+        "taskmgr"
+      ],
+      "aliases": [
+        "task manager",
+        "taskmgr",
+        "task manager kholo",
+        "activity monitor",
+        "\u091f\u093e\u0938\u094d\u0915 \u092e\u0948\u0928\u0947\u091c\u0930",
+        "\u091f\u093e\u0938\u094d\u0915 \u092e\u0947\u0928\u0947\u091c\u0930",
+        "\u091f\u093e\u0938\u094d\u0915"
+      ],
+      "command": "taskmgr"
+    },
+    {
+      "name": "Control Panel",
+      "executables": [
+        "control.exe",
+        "control"
+      ],
+      "aliases": [
+        "control panel",
+        "control",
+        "\u0915\u0902\u091f\u094d\u0930\u094b\u0932 \u092a\u0948\u0928\u0932"
+      ],
+      "command": "control"
+    },
+    {
+      "name": "Device Manager",
+      "executables": [
+        "devmgmt.msc"
+      ],
+      "aliases": [
+        "device manager",
+        "devmgmt",
+        "\u0921\u093f\u0935\u093e\u0907\u0938 \u092e\u0948\u0928\u0947\u091c\u0930"
+      ],
+      "command": "start devmgmt.msc"
+    },
+    {
+      "name": "Resource Monitor",
+      "executables": [
+        "resmon.exe",
+        "resmon"
+      ],
+      "aliases": [
+        "resource monitor",
+        "resmon",
+        "\u0930\u093f\u0938\u094b\u0930\u094d\u0938 \u092e\u0949\u0928\u093f\u091f\u0930"
+      ],
+      "command": "resmon"
+    },
+    {
+      "name": "Event Viewer",
+      "executables": [
+        "eventvwr.exe",
+        "eventvwr.msc"
+      ],
+      "aliases": [
+        "event viewer",
+        "eventvwr",
+        "\u0907\u0935\u0947\u0902\u091f \u0935\u094d\u092f\u0942\u0905\u0930"
+      ],
+      "command": "start eventvwr.msc"
+    },
+    {
+      "name": "Services",
+      "executables": [
+        "services.msc"
+      ],
+      "aliases": [
+        "services",
+        "services management",
+        "\u0938\u0930\u094d\u0935\u093f\u0938\u0947\u091c"
+      ],
+      "command": "start services.msc"
+    },
+    {
+      "name": "Registry Editor",
+      "executables": [
+        "regedit.exe",
+        "regedit"
+      ],
+      "aliases": [
+        "registry editor",
+        "regedit",
+        "\u0930\u091c\u093f\u0938\u094d\u091f\u094d\u0930\u0940 \u090f\u0921\u093f\u091f\u0930"
+      ],
+      "command": "regedit"
+    },
+    {
+      "name": "System Information",
+      "executables": [
+        "msinfo32.exe",
+        "msinfo32"
+      ],
+      "aliases": [
+        "system information",
+        "system info",
+        "msinfo32",
+        "msinfo",
+        "\u0938\u093f\u0938\u094d\u091f\u092e \u0907\u0928\u092b\u093e\u0930\u094d\u092e\u0947\u0936\u0928"
+      ],
+      "command": "msinfo32"
+    },
+    {
+      "name": "WhatsApp",
+      "executables": [
+        "whatsapp.exe",
+        "whatsapp.root.exe",
+        "whatsapp"
+      ],
+      "aliases": [
+        "whatsapp",
+        "whatapp",
+        "whatsap",
+        "watsapp",
+        "watsap",
+        "\u0935\u094d\u0939\u093e\u091f\u094d\u0938\u090f\u092a",
+        "\u0935\u094d\u0939\u093e\u091f\u094d\u0938\u0910\u092a",
+        "\u0935\u093e\u091f\u094d\u0938\u090f\u092a",
+        "\u0935\u093e\u091f\u0938\u092a",
+        "whatsapp desktop",
+        "chat",
+        "messages"
+      ],
+      "command": "start whatsapp:"
+    },
+    {
+      "name": "Telegram",
+      "executables": [
+        "telegram.exe",
+        "telegram"
+      ],
+      "aliases": [
+        "telegram",
+        "telegram desktop",
+        "\u091f\u0947\u0932\u0940\u0917\u094d\u0930\u093e\u092e"
+      ],
+      "command": "start telegram:"
+    },
+    {
+      "name": "Discord",
+      "executables": [
+        "Discord.exe",
+        "Update.exe"
+      ],
+      "aliases": [
+        "discord",
+        "discord app",
+        "disc",
+        "\u0921\u093f\u0938\u094d\u0915\u0949\u0930\u094d\u0921"
+      ],
+      "command": "discord"
+    },
+    {
+      "name": "Windows Settings",
+      "executables": [
+        "systemsettings.exe"
+      ],
+      "aliases": [
+        "settings",
+        "windows settings",
+        "setting",
+        "\u0938\u0947\u091f\u093f\u0902\u0917\u094d\u0938",
+        "\u0938\u0947\u091f\u093f\u0902\u0917"
+      ],
+      "command": "start ms-settings:"
+    },
+    {
+      "name": "Camera",
+      "executables": [
+        "windowscamera.exe"
+      ],
+      "aliases": [
+        "camera",
+        "webcam",
+        "\u0915\u0948\u092e\u0930\u093e"
+      ],
+      "command": "start microsoft.windows.camera:"
+    },
+    {
+      "name": "Antigravity",
+      "executables": [
+        "Antigravity.exe",
+        "antigravity.exe"
+      ],
+      "aliases": [
+        "antigravity",
+        "anti gravity",
+        "anti-gravity",
+        "antigravity app",
+        "anti gravity app",
+        "agy",
+        "antigravity ide",
+        "anti gravity ide",
+        "\u090f\u0902\u091f\u0940\u0917\u094d\u0930\u0947\u0935\u093f\u091f\u0940",
+        "\u090f\u0902\u091f\u0940 \u0917\u094d\u0930\u0947\u0935\u093f\u091f\u0940"
+      ],
+      "command": "\"C:\\Users\\shivam\\AppData\\Local\\Programs\\Antigravity\\Antigravity.exe\""
+    },
+    {
+      "name": "VLC Media Player",
+      "executables": [
+        "vlc.exe",
+        "vlc"
+      ],
+      "aliases": [
+        "vlc",
+        "vlc player",
+        "vlc media player",
+        "media player",
+        "video player",
+        "vl c",
+        "\u0935\u0940\u090f\u0932\u0938\u0940",
+        "\u0935\u0940\u090f\u0932\u0938\u0940 \u092a\u094d\u0932\u0947\u092f\u0930",
+        "\u0935\u0940\u0921\u093f\u092f\u094b \u092a\u094d\u0932\u0947\u092f\u0930",
+        "\u092e\u0940\u0921\u093f\u092f\u093e \u092a\u094d\u0932\u0947\u092f\u0930"
+      ],
+      "command": "\"C:\\Program Files\\VideoLAN\\VLC\\vlc.exe\""
+    },
+    {
+      "name": "Recycle Bin",
+      "executables": [
+        "explorer.exe"
+      ],
+      "aliases": [
+        "recycle bin",
+        "recyclebin",
+        "trash",
+        "trash bin",
+        "bin",
+        "dustbin",
+        "\u0930\u0940\u0938\u093e\u092f\u0915\u0932 \u092c\u093f\u0928",
+        "\u0915\u091a\u0930\u093e",
+        "\u0915\u091a\u0930\u093e \u092a\u0947\u091f\u0940",
+        "delete files"
+      ],
+      "command": "explorer.exe ::{645FF040-5081-101B-9F08-00AA002F954E}"
+    },
+    {
+      "name": "This PC",
+      "executables": [
+        "explorer.exe"
+      ],
+      "aliases": [
+        "this pc",
+        "thispc",
+        "my computer",
+        "this pc shortcut",
+        "computer",
+        "\u0915\u0902\u092a\u094d\u092f\u0942\u091f\u0930",
+        "\u092e\u093e\u092f \u0915\u0902\u092a\u094d\u092f\u0942\u091f\u0930",
+        "\u0926\u093f\u0938 \u092a\u0940\u0938\u0940"
+      ],
+      "command": "explorer.exe ::{20D04FE0-3AEA-1069-A2D8-08002B30309D}"
+    },
+    {
+      "name": "Downloads",
+      "executables": [
+        "explorer.exe"
+      ],
+      "aliases": [
+        "downloads",
+        "download",
+        "downloads folder",
+        "\u0921\u093e\u0909\u0928\u0932\u094b\u0921\u094d\u0938"
+      ],
+      "command": "start shell:Downloads"
+    },
+    {
+      "name": "Documents",
+      "executables": [
+        "explorer.exe"
+      ],
+      "aliases": [
+        "documents",
+        "my documents",
+        "documents folder",
+        "\u0921\u0949\u0915\u094d\u092f\u0942\u092e\u0947\u0902\u091f\u094d\u0938"
+      ],
+      "command": "start shell:Personal"
+    },
+    {
+      "name": "Desktop Folder",
+      "executables": [
+        "explorer.exe"
+      ],
+      "aliases": [
+        "desktop folder",
+        "desktop",
+        "\u0921\u0947\u0938\u094d\u0915\u091f\u0949\u092a"
+      ],
+      "command": "start shell:Desktop"
+    },
+    {
+      "name": "MongoDB Compass",
+      "executables": [
+        "MongoDBCompass.exe",
+        "mongodb.exe"
+      ],
+      "aliases": [
+        "mongodb",
+        "mongo db",
+        "mongodb compass",
+        "mongo compass",
+        "compass",
+        "\u092e\u094b\u0902\u0917\u094b \u0921\u0940\u092c\u0940",
+        "\u092e\u094b\u0902\u0917\u094b\u0921\u0940\u092c\u0940",
+        "\u092e\u094b\u0902\u0917\u094b"
+      ],
+      "command": "mongodb"
+    },
+    {
+      "name": "Roblox Player",
+      "executables": [
+        "RobloxPlayerBeta.exe",
+        "roblox.exe"
+      ],
+      "aliases": [
+        "roblox",
+        "roblox player",
+        "\u0930\u0949\u092c\u094d\u0932\u0949\u0915\u094d\u0938",
+        "\u0930\u094b\u092c\u094d\u0932\u0949\u0915\u094d\u0938"
+      ],
+      "command": "roblox"
+    },
+    {
+      "name": "Roblox Studio",
+      "executables": [
+        "RobloxStudioBeta.exe",
+        "RobloxStudioLauncherBeta.exe"
+      ],
+      "aliases": [
+        "roblox studio",
+        "studio roblox",
+        "\u0930\u0949\u092c\u094d\u0932\u0949\u0915\u094d\u0938 \u0938\u094d\u091f\u0942\u0921\u093f\u092f\u094b"
+      ],
+      "command": "roblox studio"
+    },
+    {
+      "name": "Comet",
+      "executables": [
+        "comet.exe"
+      ],
+      "aliases": [
+        "comet",
+        "comet browser",
+        "perplexity comet",
+        "\u0915\u0949\u092e\u0947\u091f"
+      ],
+      "command": "comet"
+    },
+    {
+      "name": "ProChat",
+      "executables": [
+        "prochat.exe"
+      ],
+      "aliases": [
+        "prochat",
+        "pro chat",
+        "\u092a\u094d\u0930\u094b \u091a\u0948\u091f"
+      ],
+      "command": "prochat"
+    },
+    {
+      "name": "MinGW Installer",
+      "executables": [
+        "mingw.exe",
+        "mingw-get.exe"
+      ],
+      "aliases": [
+        "mingw",
+        "mingw installer",
+        "min gw"
+      ],
+      "command": "mingw"
+    },
+    {
+      "name": "ONLYOFFICE",
+      "executables": [
+        "DesktopEditors.exe",
+        "onlyoffice.exe"
+      ],
+      "aliases": [
+        "onlyoffice",
+        "only office",
+        "\u0913\u0928\u0932\u0940 \u0911\u092b\u093f\u0938"
+      ],
+      "command": "\"C:\\Program Files\\ONLYOFFICE\\DesktopEditors\\DesktopEditors.exe\""
+    },
+    {
+      "name": "Brave",
+      "executables": [
+        "brave.exe"
+      ],
+      "aliases": [
+        "brave",
+        "brave browser",
+        "brawe",
+        "breav",
+        "breave",
+        "brav",
+        "\u092c\u094d\u0930\u0947\u0935",
+        "\u092c\u094d\u0930\u0947\u0935 \u092c\u094d\u0930\u093e\u0909\u091c\u093c\u0930"
+      ],
+      "command": "\"C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe\""
+    },
+    {
+      "name": "Typing Master 11",
+      "executables": [
+        "TypingMaster.exe"
+      ],
+      "aliases": [
+        "typing master",
+        "typing master 11",
+        "typingmaster",
+        "\u091f\u093e\u0907\u092a\u093f\u0902\u0917 \u092e\u093e\u0938\u094d\u091f\u0930"
+      ],
+      "command": "\"C:\\Program Files (x86)\\TypingMaster11\\TypingMaster.exe\""
+    },
+    {
+      "name": "TallyPrime",
+      "executables": [
+        "tally.exe"
+      ],
+      "aliases": [
+        "tally",
+        "tally prime",
+        "tallyprime",
+        "\u091f\u0948\u0932\u0940",
+        "\u091f\u0948\u0932\u0940 \u092a\u094d\u0930\u093e\u0907\u092e"
+      ],
+      "command": "\"C:\\Program Files\\TallyPrime\\tally.exe\""
+    },
+    {
+      "name": "Snipping Tool",
+      "executables": [
+        "SnippingTool.exe",
+        "ScreenClippingHost.exe"
+      ],
+      "aliases": [
+        "snipping tool",
+        "snip",
+        "screenshot",
+        "screen capture",
+        "\u0938\u094d\u0928\u093f\u092a\u093f\u0902\u0917 \u091f\u0942\u0932",
+        "\u0938\u094d\u0915\u094d\u0930\u0940\u0928\u0936\u0949\u091f"
+      ],
+      "command": "start ms-screenclip:"
+    },
+    {
+      "name": "Clock & Alarms",
+      "executables": [
+        "Time.exe"
+      ],
+      "aliases": [
+        "clock",
+        "alarm",
+        "alarms",
+        "stopwatch",
+        "timer",
+        "\u0918\u095c\u0940",
+        "\u0905\u0932\u093e\u0930\u094d\u092e"
+      ],
+      "command": "start ms-clock:"
+    },
+    {
+      "name": "Photos",
+      "executables": [
+        "Microsoft.Photos.exe"
+      ],
+      "aliases": [
+        "photos",
+        "pictures",
+        "photo viewer",
+        "gallery",
+        "\u0924\u0938\u094d\u0935\u0940\u0930\u0947\u0902",
+        "\u092b\u094b\u091f\u094b"
+      ],
+      "command": "start ms-photos:"
+    },
+    {
+      "name": "Microsoft Store",
+      "executables": [
+        "WinStore.App.exe"
+      ],
+      "aliases": [
+        "microsoft store",
+        "store",
+        "app store",
+        "windows store",
+        "\u0938\u094d\u091f\u094b\u0930"
+      ],
+      "command": "start ms-windows-store:"
+    },
+    {
+      "name": "Disk Management",
+      "executables": [
+        "diskmgmt.msc"
+      ],
+      "aliases": [
+        "disk management",
+        "diskmgmt",
+        "\u0921\u093f\u0938\u094d\u0915 \u092e\u0948\u0928\u0947\u091c\u092e\u0947\u0902\u091f",
+        "hard disk"
+      ],
+      "command": "start diskmgmt.msc"
+    },
+    {
+      "name": "Performance Monitor",
+      "executables": [
+        "perfmon.exe"
+      ],
+      "aliases": [
+        "performance monitor",
+        "perfmon",
+        "\u092a\u0930\u092b\u0949\u0930\u092e\u0947\u0902\u0938 \u092e\u0949\u0928\u093f\u091f\u0930"
+      ],
+      "command": "perfmon"
+    },
+    {
+      "name": "Voice Recorder",
+      "executables": [
+        "SoundRec.exe"
+      ],
+      "aliases": [
+        "voice recorder",
+        "sound recorder",
+        "audio recorder",
+        "\u0935\u0949\u092f\u0938 \u0930\u093f\u0915\u0949\u0930\u094d\u0921\u0930"
+      ],
+      "command": "start ms-soundrecorder:"
+    },
+    {
+      "name": "Bluetooth Settings",
+      "executables": [
+        "systemsettings.exe"
+      ],
+      "aliases": [
+        "bluetooth settings",
+        "bluetooth setting",
+        "open bluetooth settings",
+        "\u092c\u094d\u0932\u0942\u091f\u0942\u0925 \u0938\u0947\u091f\u093f\u0902\u0917\u094d\u0938"
+      ],
+      "command": "start ms-settings:bluetooth"
+    },
+    {
+      "name": "Wi-Fi Settings",
+      "executables": [
+        "systemsettings.exe"
+      ],
+      "aliases": [
+        "wifi settings",
+        "wi-fi settings",
+        "wifi setting",
+        "open wifi settings",
+        "\u0935\u093e\u0908\u092b\u093e\u0908 \u0938\u0947\u091f\u093f\u0902\u0917\u094d\u0938"
+      ],
+      "command": "start ms-settings:network-wifi"
+    },
+    {
+      "name": "Display Settings",
+      "executables": [
+        "systemsettings.exe"
+      ],
+      "aliases": [
+        "display settings",
+        "screen resolution",
+        "brightness settings",
+        "\u0921\u093f\u0938\u094d\u092a\u094d\u0932\u0947 \u0938\u0947\u091f\u093f\u0902\u0917\u094d\u0938"
+      ],
+      "command": "start ms-settings:display"
+    },
+    {
+      "name": "Sound Settings",
+      "executables": [
+        "systemsettings.exe"
+      ],
+      "aliases": [
+        "sound settings",
+        "audio settings",
+        "\u0938\u093e\u0909\u0902\u0921 \u0938\u0947\u091f\u093f\u0902\u0917\u094d\u0938"
+      ],
+      "command": "start ms-settings:sound"
+    },
+    {
+      "name": "Windows Update",
+      "executables": [
+        "systemsettings.exe"
+      ],
+      "aliases": [
+        "windows update",
+        "update settings",
+        "\u0935\u093f\u0902\u0921\u094b\u091c \u0905\u092a\u0921\u0947\u091f"
+      ],
+      "command": "start ms-settings:windowsupdate"
+    }
+  ],
+  "tools_count": 62,
+  "tools": [
+    {
+      "name": "get_current_time",
+      "category": "SYSTEM",
+      "permission": 0,
+      "description": "Get the current local system time, date, and timezone.",
+      "has_schema": false
+    },
+    {
+      "name": "get_system_status",
+      "category": "SYSTEM",
+      "permission": 0,
+      "description": "Get overall system health metrics including CPU usage, RAM utilization, and OS platform.",
+      "has_schema": false
+    },
+    {
+      "name": "get_battery_status",
+      "category": "SYSTEM",
+      "permission": 0,
+      "description": "Get laptop battery percentage, power plug status, and remaining time.",
+      "has_schema": false
+    },
+    {
+      "name": "get_storage_status",
+      "category": "SYSTEM",
+      "permission": 0,
+      "description": "Get disk storage usage, total capacity, and available free space for system drives.",
+      "has_schema": false
+    },
+    {
+      "name": "get_network_status",
+      "category": "SYSTEM",
+      "permission": 0,
+      "description": "Get network status, hostname, local IP addresses, and internet connectivity test.",
+      "has_schema": false
+    },
+    {
+      "name": "echo_message",
+      "category": "SYSTEM",
+      "permission": 0,
+      "description": "Echo a message back to the caller for connectivity and argument testing.",
+      "has_schema": true
+    },
+    {
+      "name": "diagnose_system_problem",
+      "category": "SYSTEM",
+      "permission": 1,
+      "description": "Diagnose, troubleshoot, isolate root causes, and safely self-repair PC issues (Bluetooth, Wi-Fi, Internet, Audio, USB, Slow PC, Storage, Windows Update, NPM/Dev tools).",
+      "has_schema": true
+    },
+    {
+      "name": "get_comprehensive_system_health",
+      "category": "SYSTEM",
+      "permission": 0,
+      "description": "Run a full-system universal hardware, OS, storage, battery, CPU, RAM, Bluetooth, Wi-Fi, and audio health scan.",
+      "has_schema": false
+    },
+    {
+      "name": "find_files",
+      "category": "FILE",
+      "permission": 0,
+      "description": "Search for files by name pattern or extension (e.g. '*.py', 'DBMS PDF', 'project') across allowed directories. Set include_hidden=True if user explicitly requests hidden files.",
+      "has_schema": true
+    },
+    {
+      "name": "list_directory",
+      "category": "FILE",
+      "permission": 0,
+      "description": "List all files and subdirectories inside an allowed folder. If directory_path is omitted or None, lists the current workspace directory.",
+      "has_schema": true
+    },
+    {
+      "name": "read_file_content",
+      "category": "FILE",
+      "permission": 0,
+      "description": "Read and return text or code contents from a file in an allowed directory.",
+      "has_schema": true
+    },
+    {
+      "name": "get_file_info",
+      "category": "FILE",
+      "permission": 0,
+      "description": "Get metadata, size, timestamps, and permissions for a file or folder.",
+      "has_schema": true
+    },
+    {
+      "name": "create_folder",
+      "category": "FILE",
+      "permission": 1,
+      "description": "Create a new folder inside an allowed directory.",
+      "has_schema": true
+    },
+    {
+      "name": "rename_file",
+      "category": "FILE",
+      "permission": 1,
+      "description": "Rename a file or folder in place within allowed directories.",
+      "has_schema": true
+    },
+    {
+      "name": "copy_file",
+      "category": "FILE",
+      "permission": 1,
+      "description": "Copy a file or directory from one allowed location to another.",
+      "has_schema": true
+    },
+    {
+      "name": "move_file",
+      "category": "FILE",
+      "permission": 1,
+      "description": "Move a file or directory from one allowed location to another.",
+      "has_schema": true
+    },
+    {
+      "name": "delete_file",
+      "category": "FILE",
+      "permission": 3,
+      "description": "Delete a file or folder permanently. (LEVEL 3: Requires explicit user confirmation).",
+      "has_schema": true
+    },
+    {
+      "name": "open_application",
+      "category": "SYSTEM",
+      "permission": 1,
+      "description": "Launch an authorized Windows application (e.g. Chrome, VS Code, Notepad, Calculator, Spotify, Edge, File Explorer).",
+      "has_schema": true
+    },
+    {
+      "name": "launch_app",
+      "category": "SYSTEM",
+      "permission": 1,
+      "description": "Launch an authorized Windows application (alias for open_application).",
+      "has_schema": true
+    },
+    {
+      "name": "close_application",
+      "category": "SYSTEM",
+      "permission": 1,
+      "description": "Safely close or terminate running instances of an authorized application (e.g. Calculator, Notepad, Chrome).",
+      "has_schema": true
+    },
+    {
+      "name": "list_running_applications",
+      "category": "SYSTEM",
+      "permission": 0,
+      "description": "List active desktop applications and background user processes with CPU and memory usage.",
+      "has_schema": true
+    },
+    {
+      "name": "register_application",
+      "category": "SYSTEM",
+      "permission": 1,
+      "description": "Register a new application in the JARVIS allowlist so it can be launched safely.",
+      "has_schema": true
+    },
+    {
+      "name": "clean_unused_apps",
+      "category": "SYSTEM",
+      "permission": 1,
+      "description": "Close idle, unused, or background taskbar applications to clean up memory and desktop clutter. (e.g. 'faltu tabs band karo', 'clean taskbar', 'close background apps', 'close idle apps', 'cleanup desktop').",
+      "has_schema": true
+    },
+    {
+      "name": "click_screen_video",
+      "category": "MEDIA",
+      "permission": 0,
+      "description": "Click a video on the active screen/YouTube page by index (1st, 2nd, 3rd) or click the right-side recommended sidebar next video. (e.g. 'Play second video', 'Right side video lagao', 'Next video chalao', 'Right side 2nd video').",
+      "has_schema": true
+    },
+    {
+      "name": "play_youtube_video",
+      "category": "MEDIA",
+      "permission": 0,
+      "description": "Search and automatically play a song, music video, or video on YouTube directly in Google Chrome / browser. (e.g. 'Play YouTube', 'Aarush Laila pe click karo', 'Play Boyfriend song', 'YouTube open karo', 'Samay Raina lagao', 'Expensive gift for laila video play karo').",
+      "has_schema": true
+    },
+    {
+      "name": "close_browser_tab",
+      "category": "BROWSER",
+      "permission": 0,
+      "description": "Close the active browser tab or YouTube tab using Windows shortcuts (Ctrl+W). (e.g. 'tab band karo', 'close tab', 'YouTube band karo', 'close YouTube tab', 'tab close karo').",
+      "has_schema": true
+    },
+    {
+      "name": "search_web",
+      "category": "SEARCH",
+      "permission": 0,
+      "description": "Search the web using Google, DuckDuckGo, or Bing and open results in the browser.",
+      "has_schema": true
+    },
+    {
+      "name": "open_website",
+      "category": "BROWSER",
+      "permission": 0,
+      "description": "Open any website or web application in the default browser (e.g. GitHub, Instagram, Reddit, ChatGPT, Twitter).",
+      "has_schema": true
+    },
+    {
+      "name": "open_url",
+      "category": "BROWSER",
+      "permission": 0,
+      "description": "Alias for open_website to open URLs or browser.",
+      "has_schema": true
+    },
+    {
+      "name": "search_spotify",
+      "category": "MEDIA",
+      "permission": 0,
+      "description": "Search for songs, artists, or playlists on Spotify.",
+      "has_schema": true
+    },
+    {
+      "name": "get_quick_answer",
+      "category": "SEARCH",
+      "permission": 0,
+      "description": "Fetch a direct factual summary from Wikipedia without opening the browser.",
+      "has_schema": true
+    },
+    {
+      "name": "get_weather_info",
+      "category": "SEARCH",
+      "permission": 0,
+      "description": "Get real-time live weather conditions, temperature, humidity, and forecast for any city or state. (e.g. 'Punjab mein mausam kaisa hai', 'Delhi ka weather', 'Aaj ka mausam').",
+      "has_schema": true
+    },
+    {
+      "name": "scroll_page",
+      "category": "BROWSER",
+      "permission": 0,
+      "description": "Scroll the active browser window or YouTube page up or down (e.g. 'scroll karo', 'niche scroll', 'upar scroll', 'scroll down', 'scroll up').",
+      "has_schema": true
+    },
+    {
+      "name": "control_media",
+      "category": "MEDIA",
+      "permission": 0,
+      "description": "Control active media playback (YouTube, Spotify, music): play/pause, next song, previous song, volume up/down, set volume to exact percentage (0-100), mute, seek forward/backward, seek to exact timestamp (e.g. 53 minutes).",
+      "has_schema": true
+    },
+    {
+      "name": "send_whatsapp_message",
+      "category": "MEDIA",
+      "permission": 0,
+      "description": "Send or draft a WhatsApp message to a contact or phone number. (e.g. 'Harsh ko message karo: hello', 'Send message to Shivam').",
+      "has_schema": true
+    },
+    {
+      "name": "call_whatsapp_contact",
+      "category": "MEDIA",
+      "permission": 0,
+      "description": "Initiate a WhatsApp voice or video call to a contact. (e.g. 'Harsh ko voice call lagao', 'Video call lagao', 'WhatsApp call').",
+      "has_schema": true
+    },
+    {
+      "name": "control_whatsapp_call",
+      "category": "MEDIA",
+      "permission": 0,
+      "description": "Control active WhatsApp call: end call/hang up, mute microphone, or answer incoming. (e.g. 'Call cut karo', 'Call end karo', 'Mute call', 'Hang up').",
+      "has_schema": true
+    },
+    {
+      "name": "manage_whatsapp_chat",
+      "category": "MEDIA",
+      "permission": 0,
+      "description": "Manage WhatsApp chats: search chat, next/previous chat, mute chat, archive chat, pin chat, mark as unread, new chat dialog. (e.g. 'Next chat', 'Pichla chat', 'Mute this chat', 'Archive chat', 'Search chat Karan', 'New chat kholo').",
+      "has_schema": true
+    },
+    {
+      "name": "control_whatsapp_status",
+      "category": "MEDIA",
+      "permission": 0,
+      "description": "WhatsApp Status / Story controls: open status tab, next status, previous status, pause status. (e.g. 'Status dekho', 'WhatsApp status', 'Next status', 'Previous status', 'Pause status').",
+      "has_schema": true
+    },
+    {
+      "name": "delete_whatsapp_message",
+      "category": "MEDIA",
+      "permission": 0,
+      "description": "Delete or unsend the last sent WhatsApp message, or clear current draft box. (e.g. 'Message delete karo', 'Unsend message', 'Draft clear karo').",
+      "has_schema": true
+    },
+    {
+      "name": "send_active_message",
+      "category": "SYSTEM",
+      "permission": 0,
+      "description": "Press Send / Enter on active messaging window. (e.g. 'Send karo', 'Bhejo').",
+      "has_schema": false
+    },
+    {
+      "name": "save_contact",
+      "category": "MEDIA",
+      "permission": 0,
+      "description": "Save a new contact in JARVIS persistent address book. (e.g. 'Save Harsh's number as 8054840494').",
+      "has_schema": true
+    },
+    {
+      "name": "get_contact",
+      "category": "MEDIA",
+      "permission": 0,
+      "description": "Search and view details of a contact from address book. (e.g. 'Harsh ka number kya hai', 'Get contact Shivam').",
+      "has_schema": true
+    },
+    {
+      "name": "list_contacts",
+      "category": "MEDIA",
+      "permission": 0,
+      "description": "List all saved contacts in the address book. (e.g. 'Saare contacts dikhao', 'List contacts').",
+      "has_schema": false
+    },
+    {
+      "name": "delete_contact",
+      "category": "MEDIA",
+      "permission": 0,
+      "description": "Delete a contact from the address book. (e.g. 'Delete contact Harsh').",
+      "has_schema": true
+    },
+    {
+      "name": "shutdown_pc",
+      "category": "SYSTEM",
+      "permission": 1,
+      "description": "Safely close all open tabs/apps and shut down the Windows laptop/PC. (e.g. 'Laptop shutdown karo', 'Shutdown PC', 'Turn off computer').",
+      "has_schema": true
+    },
+    {
+      "name": "restart_pc",
+      "category": "SYSTEM",
+      "permission": 1,
+      "description": "Safely close all open tabs/apps and restart the Windows laptop/PC. (e.g. 'Laptop restart karo', 'Restart computer').",
+      "has_schema": true
+    },
+    {
+      "name": "sleep_pc",
+      "category": "SYSTEM",
+      "permission": 0,
+      "description": "Put the Windows laptop/PC into Sleep Mode. (e.g. 'Sleep mode mein daalo', 'Sleep computer', 'Go to sleep').",
+      "has_schema": false
+    },
+    {
+      "name": "lock_pc",
+      "category": "SYSTEM",
+      "permission": 0,
+      "description": "Lock the Windows desktop session immediately. (e.g. 'Laptop lock karo', 'Lock PC', 'Lock screen').",
+      "has_schema": false
+    },
+    {
+      "name": "cancel_shutdown",
+      "category": "SYSTEM",
+      "permission": 0,
+      "description": "Cancel or abort any scheduled/pending Windows shutdown or restart. (e.g. 'Shutdown cancel karo', 'Abort shutdown').",
+      "has_schema": false
+    },
+    {
+      "name": "clean_junk_files",
+      "category": "SYSTEM",
+      "permission": 1,
+      "description": "Clean temporary cache files, Windows Temp folder, and junk data to free up storage space. (e.g. 'Junk files clean karo', 'Clean cache', 'Free up space', 'Clean temporary files').",
+      "has_schema": false
+    },
+    {
+      "name": "empty_recycle_bin",
+      "category": "SYSTEM",
+      "permission": 1,
+      "description": "Empty the Windows Recycle Bin permanently. (e.g. 'Recycle bin empty karo', 'Empty recycle bin', 'Trash clean karo').",
+      "has_schema": false
+    },
+    {
+      "name": "get_system_health",
+      "category": "SYSTEM",
+      "permission": 0,
+      "description": "Scan overall PC health, RAM consumption, storage levels, and CPU load. (e.g. 'System health check karo', 'Check PC status').",
+      "has_schema": false
+    },
+    {
+      "name": "switch_window",
+      "category": "SYSTEM",
+      "permission": 0,
+      "description": "Bring any running application or browser window to the absolute front of the screen. (e.g. 'Chrome par switch karo', 'VS Code kholo', 'Notepad aage lao', 'Explorer focus karo').",
+      "has_schema": true
+    },
+    {
+      "name": "click_element",
+      "category": "SYSTEM",
+      "permission": 0,
+      "description": "Click a UI element or spatial target on the current active window (e.g. 'upar wala', 'neeche wala', 'left side wala', 'first video', 'channel link', 'submit button').",
+      "has_schema": true
+    },
+    {
+      "name": "scroll_screen",
+      "category": "SYSTEM",
+      "permission": 0,
+      "description": "Scroll up or down on the active window or webpage (e.g. 'neeche scroll karo', 'upar scroll karo', 'scroll down', 'scroll up').",
+      "has_schema": true
+    },
+    {
+      "name": "type_into_element",
+      "category": "SYSTEM",
+      "permission": 0,
+      "description": "Type text into the active focused input box or document (e.g. 'search bar mein type karo', 'Hello world type karo').",
+      "has_schema": true
+    },
+    {
+      "name": "navigate_back_forward",
+      "category": "BROWSER",
+      "permission": 0,
+      "description": "Navigate Back or Forward in Chrome, Edge, Firefox, or File Explorer (e.g. 'back jao', 'peeche jao', 'forward jao', 'go back').",
+      "has_schema": true
+    },
+    {
+      "name": "manage_window",
+      "category": "SYSTEM",
+      "permission": 0,
+      "description": "Minimize, maximize, restore, or close any application or browser window by name or target app (e.g. 'minimize antigravity', 'antigravity minimize karo', 'maximize chrome', 'close window').",
+      "has_schema": true
+    },
+    {
+      "name": "analyze_app",
+      "category": "SYSTEM",
+      "permission": 0,
+      "description": "Inspect and discover the complete capabilities, controls, and features of an application (e.g. 'Jarvis, analyze this app', 'Analyze YouTube', 'Analyze Chrome', 'Analyze VS Code').",
+      "has_schema": true
+    },
+    {
+      "name": "test_app_health",
+      "category": "SYSTEM",
+      "permission": 0,
+      "description": "Run safe, non-destructive health checks across all features of an application and generate a Feature Matrix report (e.g. 'Jarvis, test all features of this app', 'Test YouTube features', 'Check app health').",
+      "has_schema": true
+    },
+    {
+      "name": "auto_heal_all_apps",
+      "category": "SYSTEM",
+      "permission": 0,
+      "description": "Automatically analyze, verify, and auto-heal features across all desktop applications (YouTube, Chrome, WhatsApp, Spotify, VS Code, File Explorer, System Power) without requiring manual commands.",
+      "has_schema": true
+    }
+  ],
+  "exact_phrases_count": 147,
+  "hardcoded_coords_count": 518,
+  "hardcoded_coords_sample": [
+    {
+      "file": "app.py",
+      "line": 79,
+      "code": "time.sleep(0.15)"
+    },
+    {
+      "file": "app.py",
+      "line": 83,
+      "code": "user_text = stt_manager.listen_once(timeout=2.0, phrase_time_limit=5.0, silence_limit=0.25)"
+    },
+    {
+      "file": "app.py",
+      "line": 105,
+      "code": "time.sleep(0.05)"
+    },
+    {
+      "file": "run_full_system_test.py",
+      "line": 69,
+      "code": "v1_y = int(screen_h * 0.30)"
+    },
+    {
+      "file": "run_full_system_test.py",
+      "line": 70,
+      "code": "v2_y = int(screen_h * 0.48)"
+    },
+    {
+      "file": "run_full_system_test.py",
+      "line": 71,
+      "code": "v3_y = int(screen_h * 0.65)"
+    },
+    {
+      "file": "run_full_system_test.py",
+      "line": 72,
+      "code": "v4_y = int(screen_h * 0.82)"
+    },
+    {
+      "file": "run_full_system_test.py",
+      "line": 73,
+      "code": "click_x = int(screen_w * 0.78)"
+    },
+    {
+      "file": "test_live_gestures.py",
+      "line": 23,
+      "code": "time.sleep(0.03)"
+    },
+    {
+      "file": "test_live_gestures.py",
+      "line": 29,
+      "code": "frame[0:int(h * 0.40), int(w * 0.25):int(w * 0.75)] = 0"
+    },
+    {
+      "file": "test_sendinput.py",
+      "line": 26,
+      "code": "user32.SetCursorPos(x, y)"
+    },
+    {
+      "file": "test_sendinput.py",
+      "line": 27,
+      "code": "time.sleep(0.05)"
+    },
+    {
+      "file": "test_sendinput.py",
+      "line": 34,
+      "code": "time.sleep(0.04)"
+    },
+    {
+      "file": "test_sendinput.py",
+      "line": 36,
+      "code": "time.sleep(0.05)"
+    },
+    {
+      "file": "test_sendinput.py",
+      "line": 38,
+      "code": "time.sleep(0.04)"
+    },
+    {
+      "file": "3.0\\adapters\\browser_adapter.py",
+      "line": 152,
+      "code": "time.sleep(0.06)"
+    },
+    {
+      "file": "3.0\\adapters\\browser_adapter.py",
+      "line": 165,
+      "code": "time.sleep(0.08)"
+    },
+    {
+      "file": "3.0\\adapters\\browser_adapter.py",
+      "line": 180,
+      "code": "time.sleep(0.03)"
+    },
+    {
+      "file": "3.0\\adapters\\browser_adapter.py",
+      "line": 183,
+      "code": "time.sleep(0.06)"
+    },
+    {
+      "file": "3.0\\adapters\\browser_adapter.py",
+      "line": 190,
+      "code": "time.sleep(0.03)"
+    },
+    {
+      "file": "3.0\\adapters\\browser_adapter.py",
+      "line": 195,
+      "code": "time.sleep(0.03)"
+    },
+    {
+      "file": "3.0\\adapters\\browser_adapter.py",
+      "line": 198,
+      "code": "time.sleep(0.04)"
+    },
+    {
+      "file": "3.0\\adapters\\browser_adapter.py",
+      "line": 202,
+      "code": "time.sleep(0.03)"
+    },
+    {
+      "file": "3.0\\adapters\\browser_adapter.py",
+      "line": 256,
+      "code": "time.sleep(0.08)"
+    },
+    {
+      "file": "3.0\\adapters\\browser_adapter.py",
+      "line": 264,
+      "code": "time.sleep(0.04)"
+    },
+    {
+      "file": "3.0\\adapters\\chrome_adapter.py",
+      "line": 149,
+      "code": "time.sleep(0.04)"
+    },
+    {
+      "file": "3.0\\adapters\\chrome_adapter.py",
+      "line": 219,
+      "code": "time.sleep(0.08)"
+    },
+    {
+      "file": "3.0\\adapters\\generic_desktop_adapter.py",
+      "line": 294,
+      "code": "user32.mouse_event(0x0800, 0, 0, amount, 0)  # MOUSEEVENTF_WHEEL"
+    },
+    {
+      "file": "3.0\\adapters\\system_adapter.py",
+      "line": 181,
+      "code": "time.sleep(0.03)"
+    },
+    {
+      "file": "3.0\\adapters\\system_adapter.py",
+      "line": 187,
+      "code": "time.sleep(0.02)"
+    },
+    {
+      "file": "3.0\\adapters\\system_adapter.py",
+      "line": 193,
+      "code": "time.sleep(0.02)"
+    },
+    {
+      "file": "3.0\\adapters\\whatsapp_adapter.py",
+      "line": 207,
+      "code": "time.sleep(0.04)"
+    },
+    {
+      "file": "3.0\\adapters\\whatsapp_adapter.py",
+      "line": 238,
+      "code": "time.sleep(0.05)"
+    },
+    {
+      "file": "3.0\\adapters\\whatsapp_adapter.py",
+      "line": 269,
+      "code": "time.sleep(0.05)"
+    },
+    {
+      "file": "3.0\\adapters\\whatsapp_adapter.py",
+      "line": 286,
+      "code": "time.sleep(0.04)"
+    },
+    {
+      "file": "3.0\\adapters\\youtube_adapter.py",
+      "line": 266,
+      "code": "time.sleep(0.08)"
+    },
+    {
+      "file": "3.0\\adapters\\youtube_adapter.py",
+      "line": 277,
+      "code": "time.sleep(0.04)"
+    },
+    {
+      "file": "3.0\\adapters\\youtube_adapter.py",
+      "line": 342,
+      "code": "time.sleep(0.04)"
+    },
+    {
+      "file": "3.0\\adapters\\youtube_adapter.py",
+      "line": 344,
+      "code": "time.sleep(0.08)"
+    },
+    {
+      "file": "3.0\\adapters\\youtube_adapter.py",
+      "line": 404,
+      "code": "time.sleep(0.04)"
+    }
+  ],
+  "ai_calls_count": 255,
+  "ai_calls_sample": [
+    {
+      "file": "3.0\\ai\\context_manager.py",
+      "line": 4,
+      "code": "what Gemini needs for the current turn, minimizing latency and token costs."
+    },
+    {
+      "file": "3.0\\ai\\gemini_planner.py",
+      "line": 1,
+      "code": "\"\"\"JARVIS 3.0 - Gemini Structured Planner."
+    },
+    {
+      "file": "3.0\\ai\\gemini_planner.py",
+      "line": 9,
+      "code": "from ai.provider import AIStructuredResponse, GeminiProvider, MockProvider"
+    },
+    {
+      "file": "3.0\\ai\\gemini_planner.py",
+      "line": 14,
+      "code": "logger = get_logger(\"GeminiPlanner\")"
+    },
+    {
+      "file": "3.0\\ai\\gemini_planner.py",
+      "line": 23,
+      "code": "class GeminiPlanner:"
+    },
+    {
+      "file": "3.0\\ai\\gemini_planner.py",
+      "line": 24,
+      "code": "\"\"\"Uses Gemini API as reasoning engine to plan tasks and tool parameters.\"\"\""
+    },
+    {
+      "file": "3.0\\ai\\gemini_planner.py",
+      "line": 27,
+      "code": "self.provider = GeminiProvider()"
+    },
+    {
+      "file": "3.0\\ai\\gemini_planner.py",
+      "line": 46,
+      "code": "logger.warning(f\"Gemini planner failed: {exc}. Using fallback provider.\")"
+    },
+    {
+      "file": "3.0\\ai\\gemini_planner.py",
+      "line": 97,
+      "code": "gemini_planner = GeminiPlanner()"
+    },
+    {
+      "file": "3.0\\ai\\provider.py",
+      "line": 4,
+      "code": "- Google Gemini 2.5 / Flash (Official Google AI Studio REST API)"
+    },
+    {
+      "file": "3.0\\ai\\provider.py",
+      "line": 5,
+      "code": "- OpenRouter (Unified multi-model API)"
+    },
+    {
+      "file": "3.0\\ai\\provider.py",
+      "line": 45,
+      "code": "class GeminiProvider(BaseAIProvider):"
+    },
+    {
+      "file": "3.0\\ai\\provider.py",
+      "line": 46,
+      "code": "\"\"\"Direct Google AI Studio Gemini API Provider.\"\"\""
+    },
+    {
+      "file": "3.0\\ai\\provider.py",
+      "line": 50,
+      "code": "self.api_key = self.settings.AI_API_KEY or self.settings.OPENROUTER_API_KEY"
+    },
+    {
+      "file": "3.0\\ai\\provider.py",
+      "line": 51,
+      "code": "self.model = self.settings.AI_MODEL or \"gemini-2.5-flash\""
+    },
+    {
+      "file": "3.0\\ai\\provider.py",
+      "line": 60,
+      "code": "logger.warning(\"No Gemini API Key configured. Using MockProvider.\")"
+    },
+    {
+      "file": "3.0\\ai\\provider.py",
+      "line": 64,
+      "code": "logger.warning(\"Gemini rate limit cooldown active. Using local fallback.\")"
+    },
+    {
+      "file": "3.0\\ai\\provider.py",
+      "line": 86,
+      "code": "# Format function declarations for Gemini"
+    },
+    {
+      "file": "3.0\\ai\\provider.py",
+      "line": 87,
+      "code": "gemini_tools = []"
+    },
+    {
+      "file": "3.0\\ai\\provider.py",
+      "line": 101,
+      "code": "gemini_tools = [{\"function_declarations\": func_decls}]"
+    },
+    {
+      "file": "3.0\\ai\\provider.py",
+      "line": 112,
+      "code": "if gemini_tools:"
+    },
+    {
+      "file": "3.0\\ai\\provider.py",
+      "line": 113,
+      "code": "payload[\"tools\"] = gemini_tools"
+    },
+    {
+      "file": "3.0\\ai\\provider.py",
+      "line": 120,
+      "code": "logger.warning(\"Gemini 429 Rate Limit hit. Temporarily cooling down.\")"
+    },
+    {
+      "file": "3.0\\ai\\provider.py",
+      "line": 124,
+      "code": "logger.error(f\"Gemini API error (HTTP {resp.status_code}): {resp.text}\")"
+    },
+    {
+      "file": "3.0\\ai\\provider.py",
+      "line": 130,
+      "code": "return AIStructuredResponse(response_type=\"conversation\", message=\"Boss, Gemini se response nahi aaya.\")"
+    },
+    {
+      "file": "3.0\\ai\\provider.py",
+      "line": 157,
+      "code": "logger.error(f\"Gemini provider exception: {exc}\")"
+    },
+    {
+      "file": "3.0\\ai\\__init__.py",
+      "line": 2,
+      "code": "from ai.provider import AIStructuredResponse, BaseAIProvider, GeminiProvider, MockProvider"
+    },
+    {
+      "file": "3.0\\ai\\__init__.py",
+      "line": 4,
+      "code": "from ai.gemini_planner import GeminiPlanner, PlannerOutput, gemini_planner"
+    },
+    {
+      "file": "3.0\\ai\\__init__.py",
+      "line": 9,
+      "code": "\"GeminiProvider\","
+    },
+    {
+      "file": "3.0\\ai\\__init__.py",
+      "line": 12,
+      "code": "\"GeminiPlanner\","
+    },
+    {
+      "file": "3.0\\ai\\__init__.py",
+      "line": 14,
+      "code": "\"gemini_planner\","
+    },
+    {
+      "file": "3.0\\core\\config.py",
+      "line": 39,
+      "code": "AI_PROVIDER: str = \"gemini\"  # gemini, openrouter, mock"
+    },
+    {
+      "file": "3.0\\core\\config.py",
+      "line": 40,
+      "code": "AI_API_KEY: str = Field(default=\"\", description=\"Google AI Studio Gemini API Key\")"
+    },
+    {
+      "file": "3.0\\core\\config.py",
+      "line": 41,
+      "code": "AI_MODEL: str = \"gemini-3.6-flash\"  # standard fast reasoning model"
+    },
+    {
+      "file": "3.0\\core\\config.py",
+      "line": 46,
+      "code": "# Secondary / OpenRouter & NVIDIA Nemotron Debugger Settings"
+    },
+    {
+      "file": "3.0\\core\\config.py",
+      "line": 47,
+      "code": "OPENROUTER_API_KEY: str = \"\""
+    },
+    {
+      "file": "3.0\\core\\config.py",
+      "line": 48,
+      "code": "OPENROUTER_MODEL: str = \"nvidia/nemotron-3.5-lightning:free\""
+    },
+    {
+      "file": "3.0\\core\\config.py",
+      "line": 49,
+      "code": "OPENROUTER_BASE_URL: str = \"https://openrouter.ai/api/v1\""
+    },
+    {
+      "file": "3.0\\core\\config.py",
+      "line": 50,
+      "code": "NEMOTRON_MODEL: str = \"nvidia/nemotron-3.5-lightning:free\""
+    },
+    {
+      "file": "3.0\\core\\health_manager.py",
+      "line": 45,
+      "code": "\"Gemini\","
+    }
+  ],
+  "skills_count": 9,
+  "skills": [
+    {
+      "application": "chrome",
+      "display_name": "Google Chrome Browser",
+      "version": "128.0",
+      "process_names": [],
+      "window_classes": [],
+      "url_patterns": [],
+      "category": "browser",
+      "capabilities": [
+        "open",
+        "close",
+        "new_tab",
+        "close_tab",
+        "switch_tab",
+        "open_url",
+        "search_web",
+        "navigate_back",
+        "navigate_forward",
+        "refresh_page",
+        "zoom_in",
+        "zoom_out",
+        "find_on_page",
+        "scroll_up",
+        "scroll_down",
+        "scroll_to_top",
+        "scroll_to_bottom",
+        "open_bookmarks",
+        "open_history",
+        "open_downloads",
+        "open_dev_tools",
+        "fullscreen"
+      ],
+      "actions": {},
+      "navigation": [],
+      "mediaControls": [],
+      "inputControls": [],
+      "stateInformation": [],
+      "accessibilityCapabilities": [],
+      "browserCapabilities": [],
+      "permissions": [],
+      "verificationMethods": [],
+      "feature_matrix": {},
+      "last_updated": null
+    },
+    {
+      "application": "edge",
+      "display_name": "Edge Browser",
+      "version": "Latest",
+      "process_names": [],
+      "window_classes": [],
+      "url_patterns": [],
+      "category": "general",
+      "capabilities": [
+        "New Tab",
+        "Close Tab",
+        "Switch Tab",
+        "Open URL",
+        "Search Web",
+        "Navigate Back",
+        "Navigate Forward",
+        "Refresh Page",
+        "Zoom In/Out",
+        "Page Scroll Up/Down",
+        "Scroll to Top/Bottom",
+        "Bookmarks",
+        "History",
+        "Downloads",
+        "Address Bar Focus",
+        "Form Typing",
+        "Link Clicking"
+      ],
+      "actions": {},
+      "navigation": [
+        "New Tab",
+        "Close Tab",
+        "Back",
+        "Forward",
+        "Refresh",
+        "Address Bar"
+      ],
+      "mediaControls": [],
+      "inputControls": [
+        "Address Bar",
+        "Search Field",
+        "Web Form Inputs"
+      ],
+      "stateInformation": [],
+      "accessibilityCapabilities": [],
+      "browserCapabilities": [],
+      "permissions": [],
+      "verificationMethods": [],
+      "feature_matrix": {
+        "New Tab": {
+          "capability": "New Tab",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        },
+        "Close Tab": {
+          "capability": "Close Tab",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        },
+        "Switch Tab": {
+          "capability": "Switch Tab",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        },
+        "Open URL": {
+          "capability": "Open URL",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        },
+        "Search Web": {
+          "capability": "Search Web",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        },
+        "Navigate Back": {
+          "capability": "Navigate Back",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        },
+        "Navigate Forward": {
+          "capability": "Navigate Forward",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        },
+        "Refresh Page": {
+          "capability": "Refresh Page",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        },
+        "Zoom In/Out": {
+          "capability": "Zoom In/Out",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        },
+        "Page Scroll Up/Down": {
+          "capability": "Page Scroll Up/Down",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        },
+        "Scroll to Top/Bottom": {
+          "capability": "Scroll to Top/Bottom",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        },
+        "Bookmarks": {
+          "capability": "Bookmarks",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        },
+        "History": {
+          "capability": "History",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        },
+        "Downloads": {
+          "capability": "Downloads",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        },
+        "Address Bar Focus": {
+          "capability": "Address Bar Focus",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        },
+        "Form Typing": {
+          "capability": "Form Typing",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        },
+        "Link Clicking": {
+          "capability": "Link Clicking",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        }
+      },
+      "last_updated": "2026-08-21 18:04:34"
+    },
+    {
+      "application": "file-explorer",
+      "display_name": "Windows File Explorer",
+      "version": "Windows 11 / 10",
+      "category": "files",
+      "capabilities": [
+        "open",
+        "close",
+        "open_folder",
+        "open_this_pc",
+        "open_downloads",
+        "open_documents",
+        "open_desktop",
+        "navigate_path",
+        "search_files",
+        "create_folder",
+        "create_file",
+        "select_all",
+        "copy_item",
+        "paste_item",
+        "rename_item",
+        "delete_safe_recycle_bin",
+        "sort_by_name",
+        "sort_by_date",
+        "sort_by_size",
+        "view_properties"
+      ]
+    },
+    {
+      "application": "file_explorer",
+      "display_name": "Windows File Explorer",
+      "version": "Windows 11 / 10",
+      "process_names": [],
+      "window_classes": [],
+      "url_patterns": [],
+      "category": "general",
+      "capabilities": [
+        "Open Folder",
+        "Navigate Path",
+        "Search Files",
+        "Create Folder",
+        "Create File",
+        "Copy File",
+        "Move File",
+        "Rename File",
+        "Delete File (Safe)",
+        "Sort Files",
+        "Storage Health",
+        "Recycle Bin Empty",
+        "Junk Files Clean"
+      ],
+      "actions": {},
+      "navigation": [
+        "This PC",
+        "Desktop",
+        "Downloads",
+        "Documents",
+        "Drives"
+      ],
+      "mediaControls": [],
+      "inputControls": [
+        "Address Bar",
+        "Search Bar"
+      ],
+      "stateInformation": [],
+      "accessibilityCapabilities": [],
+      "browserCapabilities": [],
+      "permissions": [],
+      "verificationMethods": [],
+      "feature_matrix": {
+        "Open Folder": {
+          "capability": "Open Folder",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        },
+        "Navigate Path": {
+          "capability": "Navigate Path",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        },
+        "Search Files": {
+          "capability": "Search Files",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        },
+        "Create Folder": {
+          "capability": "Create Folder",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        },
+        "Create File": {
+          "capability": "Create File",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        },
+        "Copy File": {
+          "capability": "Copy File",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        },
+        "Move File": {
+          "capability": "Move File",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        },
+        "Rename File": {
+          "capability": "Rename File",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        },
+        "Delete File (Safe)": {
+          "capability": "Delete File (Safe)",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        },
+        "Sort Files": {
+          "capability": "Sort Files",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        },
+        "Storage Health": {
+          "capability": "Storage Health",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        },
+        "Recycle Bin Empty": {
+          "capability": "Recycle Bin Empty",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        },
+        "Junk Files Clean": {
+          "capability": "Junk Files Clean",
+          "available": true,
+          "implemented": true,
+          "tested": true,
+          "verified": true,
+          "fallback_method": "KEYBOARD_SHORTCUT",
+          "status": "WORKING",
+          "last_checked": "2026-09-01 19:32:28",
+          "error_message": null
+        }
+      },
+      "last_updated": "2026-08-21 18:04:34"
+    },
+    {
+      "application": "messaging",
+      "display_name": "WhatsApp Communication Suite",
+      "version": "Latest",
+      "process_names": [],
+      "window_classes": [],
+      "url_patterns": [],
+      "category": "messaging",
+      "capabilities": [
+        "open",
+        "close",
+        "search_contact",
+        "open_chat",
+        "send_message",
+        "start_voice_call",
+        "start_video_call",
+        "save_contact",
+        "list_contacts"
+      ],
+      "actions": {},
+      "navigation": [],
+      "mediaControls": [],
+      "inputControls": [],
+      "stateInformation": [],
+      "accessibilityCapabilities": [],
+      "browserCapabilities": [],
+      "permissions": [],
+      "verificationMethods": [],
+      "feature_matrix": {},
+      "last_updated": null
+    },
+    {
+      "application": "spotify",
+      "display_name": "Spotify Music Player",
+      "version": "Latest",
+      "process_names": [],
+      "window_classes": [],
+      "url_patterns": [],
+      "category": "media",
+      "capabilities": [
+        "open",
+        "close",
+        "play",
+        "pause",
+        "resume",
+        "next_track",
+        "previous_track",
+        "volume_up",
+        "volume_down",
+        "mute",
+        "like_song",
+        "search_music",
+        "open_playlist"
+      ],
+      "actions": {},
+      "navigation": [],
+      "mediaControls": [],
+      "inputControls": [],
+      "stateInformation": [],
+      "accessibilityCapabilities": [],
+      "browserCapabilities": [],
+      "permissions": [],
+      "verificationMethods": [],
+      "feature_matrix": {},
+      "last_updated": null
+    },
+    {
+      "application": "system",
+      "display_name": "Operating System Power & Diagnostics",
+      "version": "Windows OS",
+      "process_names": [],
+      "window_classes": [],
+      "url_patterns": [],
+      "category": "system",
+      "capabilities": [
+        "battery_status",
+        "storage_status",
+        "ram_cpu_usage",
+        "shutdown_pc",
+        "cancel_shutdown",
+        "restart_pc",
+        "sleep_pc",
+        "lock_pc",
+        "volume_set",
+        "bluetooth_toggle",
+        "wifi_diagnostics",
+        "clean_junk_files",
+        "empty_recycle_bin",
+        "task_manager_launch",
+        "clean_unused_apps"
+      ],
+      "actions": {},
+      "navigation": [],
+      "mediaControls": [],
+      "inputControls": [],
+      "stateInformation": [],
+      "accessibilityCapabilities": [],
+      "browserCapabilities": [],
+      "permissions": [],
+      "verificationMethods": [],
+      "feature_matrix": {},
+      "last_updated": null
+    },
+    {
+      "application": "vscode",
+      "display_name": "Visual Studio Code",
+      "version": "1.92.0",
+      "process_names": [],
+      "window_classes": [],
+      "url_patterns": [],
+      "category": "development",
+      "capabilities": [
+        "open",
+        "close",
+        "open_project",
+        "open_file",
+        "search_files_quick_open",
+        "command_palette",
+        "open_integrated_terminal",
+        "save_file",
+        "close_editor_tab",
+        "switch_editor_tab",
+        "format_document",
+        "find_in_files",
+        "git_source_control"
+      ],
+      "actions": {},
+      "navigation": [],
+      "mediaControls": [],
+      "inputControls": [],
+      "stateInformation": [],
+      "accessibilityCapabilities": [],
+      "browserCapabilities": [],
+      "permissions": [],
+      "verificationMethods": [],
+      "feature_matrix": {},
+      "last_updated": null
+    },
+    {
+      "application": "youtube",
+      "display_name": "YouTube (Desktop / Web)",
+      "version": "2026.2",
+      "process_names": [],
+      "window_classes": [],
+      "url_patterns": [],
+      "category": "media",
+      "capabilities": [
+        "open",
+        "close",
+        "search",
+        "search_suggestions",
+        "select_result",
+        "play",
+        "pause",
+        "resume",
+        "next",
+        "previous",
+        "seek_timestamp",
+        "relative_seek",
+        "volume_up",
+        "volume_down",
+        "mute",
+        "unmute",
+        "fullscreen",
+        "exit_fullscreen",
+        "theater_mode",
+        "captions",
+        "playback_speed",
+        "like",
+        "unlike",
+        "share",
+        "open_comments",
+        "scroll_comments",
+        "write_comment",
+        "open_channel",
+        "subscribe",
+        "unsubscribe",
+        "open_description",
+        "expand_description",
+        "open_playlist",
+        "save_to_playlist",
+        "navigate_back",
+        "navigate_forward",
+        "home",
+        "recommendations",
+        "history",
+        "subscriptions",
+        "notifications",
+        "shorts_feed",
+        "next_short",
+        "previous_short",
+        "like_short",
+        "right_sidebar_video_1",
+        "right_sidebar_video_2",
+        "right_sidebar_video_3",
+        "right_sidebar_video_4",
+        "right_sidebar_video_5",
+        "right_sidebar_video_6"
+      ],
+      "actions": {},
+      "navigation": [],
+      "mediaControls": [],
+      "inputControls": [],
+      "stateInformation": [],
+      "accessibilityCapabilities": [],
+      "browserCapabilities": [],
+      "permissions": [],
+      "verificationMethods": [],
+      "feature_matrix": {},
+      "last_updated": null
+    }
+  ],
+  "requirements": [
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.28.0",
+    "pydantic>=2.6.0",
+    "pydantic-settings>=2.2.0",
+    "python-dotenv>=1.0.0",
+    "rich>=13.7.0",
+    "psutil>=5.9.8",
+    "requests>=2.31.0",
+    "pyttsx3>=2.90",
+    "SpeechRecognition>=3.10.0",
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "httpx>=0.27.0"
+  ]
+}

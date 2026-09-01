@@ -1,0 +1,15 @@
+{
+  "user_name": "Shivam",
+  "default_browser": "chrome",
+  "default_search_engine": "google",
+  "default_volume": 40,
+  "language": "hinglish",
+  "favorite_apps": [
+    "chrome",
+    "youtube",
+    "whatsapp",
+    "vscode",
+    "spotify"
+  ],
+  "theme": "glassmorphic_cyan"
+}

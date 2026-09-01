@@ -1,0 +1,5518 @@
+{
+  "files": [
+    {
+      "path": ".env",
+      "size": 995,
+      "lines": 0,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": ".env.example",
+      "size": 1164,
+      "lines": 40,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": true,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": ".gitignore",
+      "size": 714,
+      "lines": 0,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "app.py",
+      "size": 5943,
+      "lines": 155,
+      "imports": [
+        "backend.voice.text_to_speech",
+        "backend.ai.agent",
+        "webview",
+        "os",
+        "time",
+        "backend.voice.speech_to_text",
+        "backend.tools.autosubmit_watcher",
+        "sys",
+        "pathlib",
+        "backend.core.logger",
+        "backend.plugins.gesture.gesture_loop",
+        "backend.voice.audio_manager",
+        "threading",
+        "asyncio"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "check_audio_libs.py",
+      "size": 236,
+      "lines": 8,
+      "imports": [
+        "sys"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "check_browser_geometry.py",
+      "size": 743,
+      "lines": 17,
+      "imports": [
+        "win32gui"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "diagnose_entire_system.py",
+      "size": 4523,
+      "lines": 110,
+      "imports": [
+        "backend.skills.actions",
+        "backend.nlu.semantic_engine",
+        "backend.tools.browser_tools",
+        "backend.tools.registry",
+        "sys",
+        "backend.tools.app_tools",
+        "backend.nlu",
+        "backend.nlu.debug",
+        "backend.core.config",
+        "backend.tools.skill_tools",
+        "backend.tools.media_tools",
+        "backend.core.permissions",
+        "os",
+        "backend.skills.models",
+        "backend.skills.context",
+        "backend.nlu.entities",
+        "pathlib",
+        "backend.skills.registry",
+        "backend.nlu.models",
+        "backend.nlu.normalizer",
+        "backend.ai.intent_engine",
+        "backend.database.database",
+        "backend.database.repositories",
+        "backend.nlu.router",
+        "backend.tools.whatsapp_tools",
+        "py_compile",
+        "backend.core.logger",
+        "backend.ai.agent"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "FIX_BLUETOOTH.bat",
+      "size": 1963,
+      "lines": 55,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "generate_all_skills.py",
+      "size": 697,
+      "lines": 16,
+      "imports": [
+        "backend.skills.registry",
+        "backend.skills.generator",
+        "backend.skills.scanner",
+        "sys"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "generate_full_15_skills.py",
+      "size": 17198,
+      "lines": 320,
+      "imports": [
+        "os",
+        "datetime",
+        "json",
+        "sys"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "get_metrics.py",
+      "size": 144,
+      "lines": 5,
+      "imports": [
+        "ctypes"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "insert_harsh.py",
+      "size": 1350,
+      "lines": 48,
+      "imports": [
+        "sqlite3"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "inspect_live_whatsapp.py",
+      "size": 668,
+      "lines": 21,
+      "imports": [
+        "win32gui",
+        "psutil"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "JARVIS.bat",
+      "size": 173,
+      "lines": 10,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "jarvis.db",
+      "size": 606208,
+      "lines": 0,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "JARVIS.vbs",
+      "size": 153,
+      "lines": 3,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "list_all_visible_windows.py",
+      "size": 626,
+      "lines": 17,
+      "imports": [
+        "win32gui"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "OPEN_INTERFACE.bat",
+      "size": 99,
+      "lines": 5,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "README.md",
+      "size": 2929,
+      "lines": 74,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": true,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "requirements.txt",
+      "size": 381,
+      "lines": 24,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "run_audit.py",
+      "size": 2338,
+      "lines": 52,
+      "imports": [
+        "os",
+        "pathlib",
+        "backend.nlu",
+        "sys"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "run_full_system_test.py",
+      "size": 4296,
+      "lines": 84,
+      "imports": [
+        "backend.tools.browser_tools",
+        "os",
+        "time",
+        "backend.voice.speech_to_text",
+        "sys",
+        "backend.tools.app_tools",
+        "backend.ai.intent_engine"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "run_jarvis.bat",
+      "size": 198,
+      "lines": 6,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "save_harsh_contact.py",
+      "size": 621,
+      "lines": 19,
+      "imports": [
+        "backend.database.repositories",
+        "sys"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "START_JARVIS_APP.bat",
+      "size": 57,
+      "lines": 4,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "test_all_imports.py",
+      "size": 500,
+      "lines": 17,
+      "imports": [
+        "backend.tools",
+        "backend.ai",
+        "backend.tools.browser_tools",
+        "backend.skills",
+        "sys",
+        "backend.tools.app_tools",
+        "backend.tools.whatsapp_tools",
+        "backend.tools.power_tools",
+        "backend.ai.intent_engine",
+        "backend.ai.agent",
+        "backend.tools.skill_tools",
+        "backend.tools.media_tools"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "test_call_sync.py",
+      "size": 1293,
+      "lines": 31,
+      "imports": [
+        "os",
+        "win32gui",
+        "sys",
+        "time"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "test_fast_sync.py",
+      "size": 813,
+      "lines": 29,
+      "imports": [
+        "backend.ai.intent_engine",
+        "sys",
+        "backend.tools.app_tools"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "test_live_call_trigger.py",
+      "size": 1722,
+      "lines": 47,
+      "imports": [
+        "backend.tools.browser_tools",
+        "os",
+        "win32process",
+        "ctypes",
+        "time",
+        "win32gui",
+        "comtypes.client"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "test_live_gestures.py",
+      "size": 3275,
+      "lines": 82,
+      "imports": [
+        "numpy",
+        "time",
+        "math",
+        "sys",
+        "cv2"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "test_mic_engine.py",
+      "size": 286,
+      "lines": 9,
+      "imports": [
+        "speech_recognition",
+        "sys"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "test_sendinput.py",
+      "size": 1346,
+      "lines": 42,
+      "imports": [
+        "ctypes",
+        "time"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "test_whatsapp_ui.py",
+      "size": 1655,
+      "lines": 42,
+      "imports": [
+        "time",
+        "win32process",
+        "ctypes",
+        "comtypes.client",
+        "win32gui"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "verify_saved_files.py",
+      "size": 1666,
+      "lines": 47,
+      "imports": [
+        "os",
+        "datetime",
+        "py_compile",
+        "sys"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\.env",
+      "size": 659,
+      "lines": 0,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\.env.example",
+      "size": 460,
+      "lines": 20,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\main.py",
+      "size": 2751,
+      "lines": 95,
+      "imports": [
+        "core.logger",
+        "core.health_manager",
+        "api.routes",
+        "os",
+        "contextlib",
+        "fastapi.staticfiles",
+        "uvicorn",
+        "pathlib",
+        "core.config",
+        "fastapi.middleware.cors",
+        "fastapi",
+        "fastapi.responses",
+        "engine.jarvis_engine"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\requirements.txt",
+      "size": 235,
+      "lines": 13,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\run_tests.py",
+      "size": 500,
+      "lines": 19,
+      "imports": [
+        "pytest",
+        "sys"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\user_preferences.json",
+      "size": 290,
+      "lines": 15,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\adapters\\base_adapter.py",
+      "size": 1007,
+      "lines": 31,
+      "imports": [
+        "core.logger",
+        "typing",
+        "abc",
+        "core.tool_registry",
+        "core.models"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "3.0\\adapters\\browser_adapter.py",
+      "size": 10602,
+      "lines": 291,
+      "imports": [
+        "webbrowser",
+        "win32con",
+        "core.logger",
+        "urllib.parse",
+        "typing",
+        "ctypes",
+        "os",
+        "time",
+        "core.models",
+        "subprocess",
+        "core.tool_registry",
+        "win32gui",
+        "win32process",
+        "adapters.base_adapter",
+        "core.tool_contract",
+        "pydantic",
+        "win32api",
+        "win32clipboard"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "3.0\\adapters\\chrome_adapter.py",
+      "size": 12776,
+      "lines": 284,
+      "imports": [
+        "win32con",
+        "adapters.download_manager",
+        "core.logger",
+        "urllib.parse",
+        "typing",
+        "ctypes",
+        "os",
+        "time",
+        "core.models",
+        "subprocess",
+        "core.tool_registry",
+        "win32gui",
+        "adapters.base_adapter",
+        "adapters.browser_adapter",
+        "pydantic",
+        "core.tool_contract",
+        "win32api",
+        "win32clipboard"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\adapters\\download_manager.py",
+      "size": 3435,
+      "lines": 96,
+      "imports": [
+        "core.logger",
+        "typing",
+        "os",
+        "time",
+        "core.models",
+        "subprocess",
+        "pathlib",
+        "pydantic"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\adapters\\filesystem_adapter.py",
+      "size": 5083,
+      "lines": 130,
+      "imports": [
+        "core.logger",
+        "typing",
+        "os",
+        "core.models",
+        "core.tool_registry",
+        "pathlib",
+        "core.config",
+        "adapters.base_adapter",
+        "core.tool_contract",
+        "pydantic"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\adapters\\file_manager_adapter.py",
+      "size": 14520,
+      "lines": 327,
+      "imports": [
+        "core.logger",
+        "typing",
+        "datetime",
+        "os",
+        "time",
+        "core.models",
+        "subprocess",
+        "shutil",
+        "core.tool_registry",
+        "pathlib",
+        "core.config",
+        "adapters.base_adapter",
+        "core.tool_contract",
+        "pydantic",
+        "winreg"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "3.0\\adapters\\generic_desktop_adapter.py",
+      "size": 11959,
+      "lines": 299,
+      "imports": [
+        "apps.application_registry",
+        "core.logger",
+        "subprocess",
+        "adapters.browser_adapter",
+        "apps.capability_discovery",
+        "ctypes",
+        "core.tool_registry",
+        "win32gui",
+        "win32con",
+        "os",
+        "time",
+        "core.models",
+        "typing",
+        "win32process",
+        "adapters.base_adapter",
+        "core.tool_contract",
+        "pydantic",
+        "win32api",
+        "psutil"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "3.0\\adapters\\system_adapter.py",
+      "size": 9992,
+      "lines": 278,
+      "imports": [
+        "win32con",
+        "platform",
+        "core.health_manager",
+        "typing",
+        "ctypes",
+        "os",
+        "datetime",
+        "time",
+        "subprocess",
+        "core.logger",
+        "core.models",
+        "core.task_queue",
+        "core.tool_registry",
+        "adapters.base_adapter",
+        "core.tool_contract",
+        "pydantic",
+        "win32api",
+        "psutil"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\adapters\\voice_adapter.py",
+      "size": 9454,
+      "lines": 250,
+      "imports": [
+        "re",
+        "numpy",
+        "core.logger",
+        "typing",
+        "time",
+        "pyttsx3",
+        "speech_recognition",
+        "core.models",
+        "core.tool_registry",
+        "nlu.language_normalizer",
+        "core.events",
+        "sounddevice",
+        "core.config",
+        "adapters.base_adapter",
+        "core.tool_contract",
+        "threading",
+        "concurrent.futures",
+        "queue"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "3.0\\adapters\\whatsapp_adapter.py",
+      "size": 10612,
+      "lines": 291,
+      "imports": [
+        "re",
+        "webbrowser",
+        "win32con",
+        "core.logger",
+        "urllib.parse",
+        "typing",
+        "ctypes",
+        "os",
+        "time",
+        "core.models",
+        "core.tool_registry",
+        "win32gui",
+        "adapters.base_adapter",
+        "core.tool_contract",
+        "pydantic",
+        "adapters.browser_adapter",
+        "threading",
+        "win32api"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "3.0\\adapters\\youtube_adapter.py",
+      "size": 19720,
+      "lines": 497,
+      "imports": [
+        "re",
+        "win32con",
+        "core.logger",
+        "urllib.parse",
+        "typing",
+        "ctypes",
+        "time",
+        "core.models",
+        "core.tool_registry",
+        "win32gui",
+        "urllib.request",
+        "adapters.base_adapter",
+        "adapters.browser_adapter",
+        "pydantic",
+        "core.tool_contract",
+        "win32api",
+        "asyncio"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "3.0\\adapters\\__init__.py",
+      "size": 1838,
+      "lines": 51,
+      "imports": [
+        "adapters.file_manager_adapter",
+        "adapters.download_manager",
+        "adapters.whatsapp_adapter",
+        "adapters.system_adapter",
+        "adapters.filesystem_adapter",
+        "adapters.base_adapter",
+        "adapters.youtube_adapter",
+        "adapters.browser_adapter",
+        "adapters.chrome_adapter",
+        "adapters.voice_adapter",
+        "adapters.generic_desktop_adapter"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\ai\\context_manager.py",
+      "size": 3120,
+      "lines": 71,
+      "imports": [
+        "core.tool_registry",
+        "core.models",
+        "core.config",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\ai\\gemini_planner.py",
+      "size": 3437,
+      "lines": 97,
+      "imports": [
+        "ai.provider",
+        "core.logger",
+        "typing",
+        "core.tool_registry",
+        "ai.context_manager",
+        "pydantic",
+        "core.task_state"
+      ],
+      "has_todo": false,
+      "has_mock": true,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\ai\\provider.py",
+      "size": 7614,
+      "lines": 198,
+      "imports": [
+        "core.logger",
+        "typing",
+        "time",
+        "abc",
+        "httpx",
+        "core.config",
+        "pydantic",
+        "json"
+      ],
+      "has_todo": false,
+      "has_mock": true,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "3.0\\ai\\__init__.py",
+      "size": 442,
+      "lines": 15,
+      "imports": [
+        "ai.gemini_planner",
+        "ai.provider",
+        "ai.context_manager"
+      ],
+      "has_todo": false,
+      "has_mock": true,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\api\\routes.py",
+      "size": 6438,
+      "lines": 183,
+      "imports": [
+        "apps.application_registry",
+        "adapters.download_manager",
+        "core.bug_finder",
+        "core.health_manager",
+        "typing",
+        "core.task_queue",
+        "core.tool_registry",
+        "core.permissions",
+        "memory.memory_manager",
+        "fastapi",
+        "pydantic",
+        "engine.jarvis_engine",
+        "asyncio",
+        "apps.capability_discovery",
+        "adapters.voice_adapter",
+        "core.task_manager"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\api\\__init__.py",
+      "size": 84,
+      "lines": 4,
+      "imports": [
+        "api.routes"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\apps\\application_discovery.py",
+      "size": 14453,
+      "lines": 352,
+      "imports": [
+        "re",
+        "core.logger",
+        "typing",
+        "os",
+        "sys",
+        "pathlib",
+        "enum",
+        "pydantic",
+        "winreg"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\apps\\application_registry.py",
+      "size": 3281,
+      "lines": 89,
+      "imports": [
+        "apps.application_discovery",
+        "core.logger",
+        "core.events",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\apps\\capability_discovery.py",
+      "size": 4409,
+      "lines": 108,
+      "imports": [
+        "apps.application_registry",
+        "core.logger",
+        "core.health_manager",
+        "typing",
+        "core.tool_registry",
+        "apps.application_discovery",
+        "pydantic",
+        "enum"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\apps\\__init__.py",
+      "size": 790,
+      "lines": 31,
+      "imports": [
+        "apps.application_registry",
+        "apps.capability_discovery",
+        "apps.application_discovery"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\core\\bug_finder.py",
+      "size": 2372,
+      "lines": 66,
+      "imports": [
+        "core.tool_registry",
+        "pydantic",
+        "core.logger",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\core\\config.py",
+      "size": 2925,
+      "lines": 92,
+      "imports": [
+        "functools",
+        "typing",
+        "os",
+        "pathlib",
+        "pydantic",
+        "pydantic_settings"
+      ],
+      "has_todo": false,
+      "has_mock": true,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\core\\diagnostics_engine.py",
+      "size": 7963,
+      "lines": 217,
+      "imports": [
+        "core.logger",
+        "typing",
+        "datetime",
+        "time",
+        "uuid",
+        "pathlib",
+        "enum",
+        "threading",
+        "json"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "3.0\\core\\events.py",
+      "size": 3487,
+      "lines": 101,
+      "imports": [
+        "core.logger",
+        "typing",
+        "datetime",
+        "dataclasses",
+        "enum",
+        "threading",
+        "asyncio"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\core\\health_manager.py",
+      "size": 4482,
+      "lines": 126,
+      "imports": [
+        "core.logger",
+        "typing",
+        "time",
+        "core.events",
+        "pydantic",
+        "enum",
+        "threading"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\core\\logger.py",
+      "size": 1610,
+      "lines": 46,
+      "imports": [
+        "re",
+        "typing",
+        "sys",
+        "logging"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\core\\models.py",
+      "size": 2526,
+      "lines": 80,
+      "imports": [
+        "pydantic",
+        "enum",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\core\\permissions.py",
+      "size": 5837,
+      "lines": 151,
+      "imports": [
+        "core.logger",
+        "typing",
+        "core.models",
+        "core.config",
+        "pydantic"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\core\\recovery_engine.py",
+      "size": 4050,
+      "lines": 97,
+      "imports": [
+        "core.logger",
+        "typing",
+        "time",
+        "core.models",
+        "core.tool_contract",
+        "asyncio"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\core\\resource_manager.py",
+      "size": 4935,
+      "lines": 136,
+      "imports": [
+        "core.logger",
+        "typing",
+        "datetime",
+        "time",
+        "threading",
+        "asyncio"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "3.0\\core\\task_manager.py",
+      "size": 7211,
+      "lines": 189,
+      "imports": [
+        "core.resource_manager",
+        "core.logger",
+        "typing",
+        "datetime",
+        "time",
+        "core.models",
+        "uuid",
+        "core.tool_registry",
+        "core.verification_engine",
+        "core.events",
+        "core.permissions",
+        "core.task_state",
+        "core.recovery_engine",
+        "asyncio"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\core\\task_queue.py",
+      "size": 4197,
+      "lines": 112,
+      "imports": [
+        "core.resource_manager",
+        "core.logger",
+        "heapq",
+        "typing",
+        "time",
+        "core.events",
+        "core.task_state",
+        "core.task_manager",
+        "asyncio"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\core\\task_state.py",
+      "size": 2409,
+      "lines": 68,
+      "imports": [
+        "typing",
+        "datetime",
+        "time",
+        "pydantic",
+        "enum"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\core\\tool_contract.py",
+      "size": 10660,
+      "lines": 264,
+      "imports": [
+        "core.logger",
+        "typing",
+        "time",
+        "abc",
+        "core.models",
+        "inspect",
+        "pydantic",
+        "asyncio"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "3.0\\core\\tool_registry.py",
+      "size": 5711,
+      "lines": 152,
+      "imports": [
+        "core.logger",
+        "typing",
+        "core.models",
+        "core.events",
+        "core.tool_contract",
+        "pydantic"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\core\\verification_engine.py",
+      "size": 11928,
+      "lines": 285,
+      "imports": [
+        "core.logger",
+        "typing",
+        "time",
+        "win32process",
+        "core.models",
+        "win32gui",
+        "psutil"
+      ],
+      "has_todo": false,
+      "has_mock": true,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "3.0\\core\\__init__.py",
+      "size": 2053,
+      "lines": 69,
+      "imports": [
+        "core.resource_manager",
+        "core.diagnostics_engine",
+        "core.bug_finder",
+        "core.logger",
+        "core.health_manager",
+        "core.task_queue",
+        "core.models",
+        "core.tool_registry",
+        "core.verification_engine",
+        "core.events",
+        "core.permissions",
+        "core.config",
+        "core.tool_contract",
+        "core.task_state",
+        "core.recovery_engine",
+        "core.task_manager"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\engine\\jarvis_engine.py",
+      "size": 9188,
+      "lines": 211,
+      "imports": [
+        "core.diagnostics_engine",
+        "core.logger",
+        "core.health_manager",
+        "core.task_queue",
+        "adapters",
+        "ai.gemini_planner",
+        "core.task_manager",
+        "nlu.canonical_intents",
+        "nlu.deterministic_router",
+        "core.tool_registry",
+        "memory.memory_manager",
+        "time",
+        "core.models",
+        "core.permissions",
+        "asyncio",
+        "typing",
+        "core.events",
+        "pydantic",
+        "core.task_state"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\engine\\__init__.py",
+      "size": 175,
+      "lines": 4,
+      "imports": [
+        "engine.jarvis_engine"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\frontend\\app.js",
+      "size": 21355,
+      "lines": 0,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\frontend\\index.html",
+      "size": 7889,
+      "lines": 179,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": true,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\frontend\\style.css",
+      "size": 16099,
+      "lines": 0,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\memory\\memory_manager.py",
+      "size": 4588,
+      "lines": 138,
+      "imports": [
+        "core.logger",
+        "typing",
+        "datetime",
+        "time",
+        "pathlib",
+        "pydantic",
+        "threading",
+        "json"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\memory\\__init__.py",
+      "size": 306,
+      "lines": 16,
+      "imports": [
+        "memory.memory_manager"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\nlu\\canonical_intents.py",
+      "size": 3647,
+      "lines": 101,
+      "imports": [
+        "enum"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\nlu\\deterministic_router.py",
+      "size": 21232,
+      "lines": 323,
+      "imports": [
+        "re",
+        "apps.application_registry",
+        "core.logger",
+        "typing",
+        "nlu.language_normalizer",
+        "pydantic",
+        "nlu.canonical_intents"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\nlu\\language_normalizer.py",
+      "size": 6463,
+      "lines": 172,
+      "imports": [
+        "re",
+        "pydantic",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\nlu\\__init__.py",
+      "size": 367,
+      "lines": 12,
+      "imports": [
+        "nlu.language_normalizer",
+        "nlu.deterministic_router",
+        "nlu.canonical_intents"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\tests\\test_application_discovery.py",
+      "size": 1589,
+      "lines": 41,
+      "imports": [
+        "apps.application_registry",
+        "apps.capability_discovery",
+        "apps.application_discovery",
+        "pytest"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\tests\\test_chrome_and_downloads.py",
+      "size": 1367,
+      "lines": 41,
+      "imports": [
+        "adapters.chrome_adapter",
+        "core.tool_registry",
+        "adapters.download_manager",
+        "pytest"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\tests\\test_developer_commands.py",
+      "size": 1556,
+      "lines": 42,
+      "imports": [
+        "nlu.deterministic_router",
+        "pytest",
+        "engine.jarvis_engine"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\tests\\test_diagnostics_and_health.py",
+      "size": 1936,
+      "lines": 56,
+      "imports": [
+        "core.diagnostics_engine",
+        "core.bug_finder",
+        "pytest",
+        "core.health_manager"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\tests\\test_file_manager_adapter.py",
+      "size": 954,
+      "lines": 28,
+      "imports": [
+        "adapters.file_manager_adapter",
+        "core.tool_registry",
+        "pytest"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\tests\\test_full_pipeline.py",
+      "size": 1665,
+      "lines": 47,
+      "imports": [
+        "engine.jarvis_engine",
+        "pytest"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\tests\\test_generic_desktop_adapter.py",
+      "size": 1187,
+      "lines": 36,
+      "imports": [
+        "core.tool_registry",
+        "pytest",
+        "adapters.generic_desktop_adapter"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\tests\\test_language_normalizer.py",
+      "size": 3055,
+      "lines": 72,
+      "imports": [
+        "nlu",
+        "pytest"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\tests\\test_memory_manager.py",
+      "size": 941,
+      "lines": 27,
+      "imports": [
+        "memory.memory_manager",
+        "pytest"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\tests\\test_resource_locks.py",
+      "size": 1288,
+      "lines": 36,
+      "imports": [
+        "core.resource_manager",
+        "asyncio",
+        "pytest"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\tests\\test_task_manager_and_queue.py",
+      "size": 1790,
+      "lines": 51,
+      "imports": [
+        "core.task_queue",
+        "core.models",
+        "core.tool_registry",
+        "pytest",
+        "core.task_state",
+        "core.task_manager"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\tests\\test_tool_registry.py",
+      "size": 1760,
+      "lines": 62,
+      "imports": [
+        "core.tool_registry",
+        "core.models",
+        "pytest",
+        "core.tool_contract",
+        "pydantic"
+      ],
+      "has_todo": false,
+      "has_mock": true,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\tests\\test_youtube_adapter.py",
+      "size": 1137,
+      "lines": 34,
+      "imports": [
+        "core.tool_registry",
+        "adapters.youtube_adapter",
+        "pytest"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "3.0\\tests\\__init__.py",
+      "size": 34,
+      "lines": 1,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\main.py",
+      "size": 2384,
+      "lines": 82,
+      "imports": [
+        "backend.database.database",
+        "uvicorn",
+        "os",
+        "contextlib",
+        "fastapi.staticfiles",
+        "backend.api.routes",
+        "backend.core.config",
+        "fastapi.middleware.cors",
+        "fastapi.responses",
+        "fastapi",
+        "backend.core.logger",
+        "backend.api.health"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\__init__.py",
+      "size": 67,
+      "lines": 2,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\adapters\\system_adapter.py",
+      "size": 4215,
+      "lines": 96,
+      "imports": [
+        "backend.tools.browser_tools",
+        "typing",
+        "backend.tools.power_tools",
+        "backend.core.logger",
+        "backend.tools.cleaner_tools",
+        "backend.core.task_manager",
+        "backend.tools.media_tools"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\adapters\\whatsapp_adapter.py",
+      "size": 3991,
+      "lines": 80,
+      "imports": [
+        "backend.core.task_manager",
+        "backend.tools.whatsapp_tools",
+        "backend.core.logger",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\adapters\\youtube_adapter.py",
+      "size": 7902,
+      "lines": 170,
+      "imports": [
+        "backend.tools.browser_tools",
+        "typing",
+        "win32gui",
+        "backend.core.logger",
+        "backend.core.task_manager",
+        "backend.tools.media_tools"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\adapters\\__init__.py",
+      "size": 594,
+      "lines": 12,
+      "imports": [
+        "backend.adapters.whatsapp_adapter",
+        "backend.adapters.youtube_adapter",
+        "backend.adapters.system_adapter"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\ai\\action_planner.py",
+      "size": 82364,
+      "lines": 1244,
+      "imports": [
+        "re",
+        "typing",
+        "backend.ai.providers",
+        "backend.tools.app_tools",
+        "backend.ai.semantic_matcher",
+        "pydantic",
+        "enum",
+        "backend.core.logger",
+        "backend.ai.context_memory"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\ai\\agent.py",
+      "size": 25928,
+      "lines": 553,
+      "imports": [
+        "backend.core.observability",
+        "backend.ai.state_observer",
+        "backend.ai.verification_engine",
+        "backend.tools.registry",
+        "backend.ai.providers",
+        "backend.diagnostics.engine",
+        "backend.nlu",
+        "enum",
+        "backend.ai.context_memory",
+        "backend.core.config",
+        "backend.core.permissions",
+        "backend.ai.action_planner",
+        "time",
+        "backend.ai.intent_engine",
+        "json",
+        "backend.database.repositories",
+        "typing",
+        "backend.diagnostics.models",
+        "pydantic",
+        "backend.core.logger",
+        "backend.ai.prompts"
+      ],
+      "has_todo": false,
+      "has_mock": true,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\ai\\context_memory.py",
+      "size": 8164,
+      "lines": 201,
+      "imports": [
+        "re",
+        "typing",
+        "time",
+        "backend.ai.semantic_matcher",
+        "pydantic",
+        "backend.core.logger"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\ai\\intent_engine.py",
+      "size": 58427,
+      "lines": 1003,
+      "imports": [
+        "re",
+        "backend.voice.text_to_speech",
+        "typing",
+        "backend.ai.providers",
+        "backend.skills.context",
+        "backend.tools.app_tools",
+        "pydantic"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\ai\\prompts.py",
+      "size": 1824,
+      "lines": 25,
+      "imports": [
+        "backend.ai.user_profile"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\ai\\providers.py",
+      "size": 20675,
+      "lines": 466,
+      "imports": [
+        "typing",
+        "abc",
+        "httpx",
+        "backend.tools.app_tools",
+        "backend.core.config",
+        "pydantic",
+        "backend.core.logger",
+        "json"
+      ],
+      "has_todo": false,
+      "has_mock": true,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\ai\\semantic_matcher.py",
+      "size": 6640,
+      "lines": 179,
+      "imports": [
+        "re",
+        "pydantic",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\ai\\state_observer.py",
+      "size": 7542,
+      "lines": 204,
+      "imports": [
+        "typing",
+        "ctypes",
+        "os",
+        "time",
+        "pydantic",
+        "backend.core.logger",
+        "psutil"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\ai\\user_profile.py",
+      "size": 4098,
+      "lines": 109,
+      "imports": [
+        "os",
+        "json",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\ai\\verification_engine.py",
+      "size": 7296,
+      "lines": 175,
+      "imports": [
+        "backend.ai.state_observer",
+        "typing",
+        "time",
+        "pydantic",
+        "backend.core.logger"
+      ],
+      "has_todo": false,
+      "has_mock": true,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\ai\\__init__.py",
+      "size": 529,
+      "lines": 18,
+      "imports": [
+        "backend.ai.agent",
+        "backend.ai.providers",
+        "backend.ai.prompts"
+      ],
+      "has_todo": false,
+      "has_mock": true,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\api\\health.py",
+      "size": 508,
+      "lines": 18,
+      "imports": [
+        "backend.core.config",
+        "fastapi"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\api\\routes.py",
+      "size": 8546,
+      "lines": 234,
+      "imports": [
+        "backend.core.permissions",
+        "backend.problem_solver.history",
+        "backend.database.repositories",
+        "typing",
+        "backend.tools.registry",
+        "backend.problem_solver.timeline_engine",
+        "backend.problem_solver.problem_solver_engine",
+        "backend.core.emergency_stop",
+        "backend.plugins",
+        "backend.diagnostics.engine",
+        "backend.problem_solver.system_health",
+        "fastapi",
+        "pydantic",
+        "backend.plugins.gesture",
+        "backend.ai.context_memory",
+        "backend.ai.agent",
+        "backend.database.models"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\api\\__init__.py",
+      "size": 183,
+      "lines": 5,
+      "imports": [
+        "backend.api.health",
+        "backend.api.routes"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\core\\config.py",
+      "size": 3274,
+      "lines": 97,
+      "imports": [
+        "functools",
+        "typing",
+        "pathlib",
+        "pydantic",
+        "pydantic_settings"
+      ],
+      "has_todo": false,
+      "has_mock": true,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\core\\emergency_stop.py",
+      "size": 1872,
+      "lines": 57,
+      "imports": [
+        "time",
+        "backend.plugins.files.file_transfer_manager",
+        "backend.core.logger",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\core\\logger.py",
+      "size": 2418,
+      "lines": 70,
+      "imports": [
+        "re",
+        "typing",
+        "os",
+        "sys",
+        "pathlib",
+        "logging"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\core\\observability.py",
+      "size": 2194,
+      "lines": 60,
+      "imports": [
+        "time",
+        "pydantic",
+        "backend.core.logger",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\core\\permissions.py",
+      "size": 7862,
+      "lines": 205,
+      "imports": [
+        "typing",
+        "time",
+        "pydantic",
+        "enum",
+        "backend.core.config"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\core\\security.py",
+      "size": 2677,
+      "lines": 74,
+      "imports": [
+        "pathlib",
+        "backend.core.config",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\core\\task_manager.py",
+      "size": 9653,
+      "lines": 257,
+      "imports": [
+        "typing",
+        "datetime",
+        "time",
+        "uuid",
+        "enum",
+        "pydantic",
+        "backend.core.logger",
+        "threading",
+        "asyncio"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\core\\__init__.py",
+      "size": 493,
+      "lines": 15,
+      "imports": [
+        "backend.core.security",
+        "backend.core.permissions",
+        "backend.core.config",
+        "backend.core.logger"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\database\\database.py",
+      "size": 3229,
+      "lines": 95,
+      "imports": [
+        "sqlite3",
+        "typing",
+        "pathlib",
+        "backend.core.logger",
+        "backend.core.config"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\database\\models.py",
+      "size": 1061,
+      "lines": 34,
+      "imports": [
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\database\\repositories.py",
+      "size": 8786,
+      "lines": 227,
+      "imports": [
+        "backend.database.database",
+        "backend.database.models",
+        "backend.core.logger",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\database\\__init__.py",
+      "size": 505,
+      "lines": 20,
+      "imports": [
+        "backend.database.database",
+        "backend.database.repositories",
+        "backend.database.models"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\diagnostics\\engine.py",
+      "size": 21140,
+      "lines": 434,
+      "imports": [
+        "re",
+        "typing",
+        "datetime",
+        "os",
+        "time",
+        "uuid",
+        "pathlib",
+        "backend.diagnostics.models",
+        "backend.core.logger",
+        "threading",
+        "json"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\diagnostics\\fingerprint_manager.py",
+      "size": 4650,
+      "lines": 126,
+      "imports": [
+        "hashlib",
+        "typing",
+        "datetime",
+        "os",
+        "time",
+        "pathlib",
+        "pydantic",
+        "backend.core.logger",
+        "threading",
+        "json"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\diagnostics\\issue_tracker.py",
+      "size": 5434,
+      "lines": 148,
+      "imports": [
+        "typing",
+        "datetime",
+        "os",
+        "time",
+        "pathlib",
+        "pydantic",
+        "backend.core.logger",
+        "threading",
+        "json"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\diagnostics\\models.py",
+      "size": 6772,
+      "lines": 171,
+      "imports": [
+        "typing",
+        "datetime",
+        "time",
+        "pydantic",
+        "enum"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\diagnostics\\nemotron_debugger.py",
+      "size": 9910,
+      "lines": 220,
+      "imports": [
+        "typing",
+        "datetime",
+        "os",
+        "httpx",
+        "backend.core.config",
+        "backend.diagnostics.fingerprint_manager",
+        "pydantic",
+        "backend.core.logger",
+        "json",
+        "backend.diagnostics.nemotron_guard"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\diagnostics\\nemotron_guard.py",
+      "size": 10886,
+      "lines": 244,
+      "imports": [
+        "typing",
+        "datetime",
+        "os",
+        "time",
+        "pathlib",
+        "backend.core.config",
+        "enum",
+        "pydantic",
+        "backend.core.logger",
+        "threading",
+        "json"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\diagnostics\\self_debug_manager.py",
+      "size": 4103,
+      "lines": 88,
+      "imports": [
+        "typing",
+        "datetime",
+        "os",
+        "backend.diagnostics.issue_tracker",
+        "rich.console",
+        "rich.panel",
+        "backend.diagnostics.nemotron_debugger",
+        "backend.core.logger",
+        "rich.table",
+        "backend.observability.command_tracer",
+        "json"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\diagnostics\\startup_checker.py",
+      "size": 6811,
+      "lines": 148,
+      "imports": [
+        "socket",
+        "comtypes",
+        "typing",
+        "time",
+        "ctypes",
+        "win32gui",
+        "sounddevice",
+        "backend.core.logger",
+        "pycaw.pycaw",
+        "psutil"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\nlu\\debug.py",
+      "size": 1968,
+      "lines": 36,
+      "imports": [
+        "rich.table",
+        "backend.nlu.models",
+        "rich.console",
+        "rich.panel"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\nlu\\entities.py",
+      "size": 10905,
+      "lines": 238,
+      "imports": [
+        "re",
+        "backend.nlu.models",
+        "backend.skills.context",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\nlu\\models.py",
+      "size": 5024,
+      "lines": 156,
+      "imports": [
+        "pydantic",
+        "enum",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\nlu\\normalizer.py",
+      "size": 6212,
+      "lines": 174,
+      "imports": [
+        "re",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\nlu\\router.py",
+      "size": 20500,
+      "lines": 465,
+      "imports": [
+        "re",
+        "typing",
+        "backend.nlu.models",
+        "pydantic",
+        "backend.core.logger",
+        "backend.nlu.semantic_engine"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\nlu\\semantic_engine.py",
+      "size": 39700,
+      "lines": 577,
+      "imports": [
+        "re",
+        "backend.nlu.translator",
+        "typing",
+        "win32gui",
+        "backend.skills.context",
+        "backend.nlu.entities",
+        "backend.nlu.models",
+        "backend.core.logger",
+        "backend.nlu.normalizer"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\nlu\\translator.py",
+      "size": 7482,
+      "lines": 113,
+      "imports": [
+        "re",
+        "backend.core.logger",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\nlu\\__init__.py",
+      "size": 787,
+      "lines": 27,
+      "imports": [
+        "backend.nlu.router",
+        "backend.nlu.entities",
+        "backend.nlu.models",
+        "backend.nlu.debug",
+        "backend.nlu.normalizer",
+        "backend.nlu.semantic_engine"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\observability\\command_tracer.py",
+      "size": 9345,
+      "lines": 230,
+      "imports": [
+        "typing",
+        "datetime",
+        "os",
+        "time",
+        "pathlib",
+        "pydantic",
+        "backend.core.logger",
+        "threading",
+        "json"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\observability\\failure_bundle.py",
+      "size": 3921,
+      "lines": 97,
+      "imports": [
+        "typing",
+        "datetime",
+        "os",
+        "shutil",
+        "pathlib",
+        "traceback",
+        "rich.console",
+        "backend.core.logger",
+        "backend.observability.command_tracer",
+        "json"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\observability\\playwright_tracer.py",
+      "size": 5317,
+      "lines": 138,
+      "imports": [
+        "typing",
+        "datetime",
+        "os",
+        "time",
+        "playwright.async_api",
+        "pathlib",
+        "pydantic",
+        "backend.core.logger",
+        "threading",
+        "asyncio"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\observability\\sentry_monitor.py",
+      "size": 5405,
+      "lines": 140,
+      "imports": [
+        "functools",
+        "re",
+        "sentry_sdk",
+        "typing",
+        "os",
+        "sentry_sdk.integrations.logging",
+        "inspect",
+        "backend.core.logger",
+        "backend.core.config"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\observability\\__init__.py",
+      "size": 914,
+      "lines": 21,
+      "imports": [
+        "backend.observability.playwright_tracer",
+        "backend.observability.command_tracer",
+        "backend.observability.sentry_monitor",
+        "backend.observability.failure_bundle"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\plugins\\base.py",
+      "size": 1639,
+      "lines": 50,
+      "imports": [
+        "backend.core.permissions",
+        "typing",
+        "pydantic",
+        "abc"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\plugins\\manager.py",
+      "size": 3005,
+      "lines": 70,
+      "imports": [
+        "backend.plugins.browser",
+        "backend.plugins.vision",
+        "typing",
+        "backend.plugins.messaging",
+        "backend.plugins.memory",
+        "backend.plugins.base",
+        "backend.plugins.system",
+        "backend.plugins.media",
+        "backend.plugins.youtube",
+        "backend.core.logger"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\plugins\\__init__.py",
+      "size": 247,
+      "lines": 5,
+      "imports": [
+        "backend.plugins.base",
+        "backend.plugins.manager"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\plugins\\browser\\browser_plugin.py",
+      "size": 1836,
+      "lines": 38,
+      "imports": [
+        "backend.plugins.base",
+        "backend.core.permissions",
+        "backend.tools.browser_tools",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\plugins\\browser\\__init__.py",
+      "size": 123,
+      "lines": 3,
+      "imports": [
+        "backend.plugins.browser.browser_plugin"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\plugins\\files\\file_transfer_manager.py",
+      "size": 4644,
+      "lines": 129,
+      "imports": [
+        "os",
+        "pydantic",
+        "backend.core.logger",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\plugins\\files\\__init__.py",
+      "size": 326,
+      "lines": 14,
+      "imports": [
+        "backend.plugins.files.file_transfer_manager"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\plugins\\gesture\\gesture_engine.py",
+      "size": 9440,
+      "lines": 241,
+      "imports": [
+        "typing",
+        "time",
+        "math",
+        "pydantic",
+        "enum",
+        "backend.core.logger"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\plugins\\gesture\\gesture_loop.py",
+      "size": 9803,
+      "lines": 221,
+      "imports": [
+        "backend.plugins.gesture.gesture_engine",
+        "numpy",
+        "typing",
+        "os",
+        "time",
+        "math",
+        "mediapipe",
+        "logging",
+        "cv2",
+        "threading",
+        "asyncio"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\plugins\\gesture\\__init__.py",
+      "size": 393,
+      "lines": 18,
+      "imports": [
+        "backend.plugins.gesture.gesture_engine"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\plugins\\media\\media_plugin.py",
+      "size": 1356,
+      "lines": 33,
+      "imports": [
+        "backend.plugins.base",
+        "backend.core.permissions",
+        "backend.tools.media_tools",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\plugins\\media\\__init__.py",
+      "size": 113,
+      "lines": 3,
+      "imports": [
+        "backend.plugins.media.media_plugin"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\plugins\\memory\\memory_plugin.py",
+      "size": 1761,
+      "lines": 39,
+      "imports": [
+        "backend.plugins.base",
+        "backend.core.permissions",
+        "backend.ai.context_memory",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\plugins\\memory\\__init__.py",
+      "size": 118,
+      "lines": 3,
+      "imports": [
+        "backend.plugins.memory.memory_plugin"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\plugins\\messaging\\messaging_plugin.py",
+      "size": 1861,
+      "lines": 39,
+      "imports": [
+        "backend.plugins.base",
+        "backend.core.permissions",
+        "backend.tools.whatsapp_tools",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\plugins\\messaging\\__init__.py",
+      "size": 133,
+      "lines": 3,
+      "imports": [
+        "backend.plugins.messaging.messaging_plugin"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\plugins\\system\\system_plugin.py",
+      "size": 2320,
+      "lines": 45,
+      "imports": [
+        "backend.core.permissions",
+        "typing",
+        "backend.tools.app_tools",
+        "backend.plugins.base",
+        "backend.tools.ui_automation"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\plugins\\system\\__init__.py",
+      "size": 118,
+      "lines": 3,
+      "imports": [
+        "backend.plugins.system.system_plugin"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\plugins\\vision\\vision_plugin.py",
+      "size": 1171,
+      "lines": 29,
+      "imports": [
+        "backend.plugins.base",
+        "backend.core.permissions",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\plugins\\vision\\__init__.py",
+      "size": 118,
+      "lines": 3,
+      "imports": [
+        "backend.plugins.vision.vision_plugin"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\plugins\\youtube\\youtube_plugin.py",
+      "size": 1714,
+      "lines": 37,
+      "imports": [
+        "backend.plugins.base",
+        "backend.core.permissions",
+        "backend.tools.browser_tools",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\plugins\\youtube\\__init__.py",
+      "size": 123,
+      "lines": 3,
+      "imports": [
+        "backend.plugins.youtube.youtube_plugin"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\problem_solver\\driver_engine.py",
+      "size": 8325,
+      "lines": 177,
+      "imports": [
+        "typing",
+        "os",
+        "datetime",
+        "subprocess",
+        "backend.core.logger",
+        "backend.problem_solver.models",
+        "json"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\problem_solver\\history.py",
+      "size": 2716,
+      "lines": 74,
+      "imports": [
+        "typing",
+        "os",
+        "datetime",
+        "uuid",
+        "backend.core.logger",
+        "backend.problem_solver.models",
+        "json"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\problem_solver\\knowledge_base.py",
+      "size": 4363,
+      "lines": 69,
+      "imports": [
+        "backend.problem_solver.models",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\problem_solver\\models.py",
+      "size": 6086,
+      "lines": 145,
+      "imports": [
+        "datetime",
+        "pydantic",
+        "enum",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\problem_solver\\problem_solver_engine.py",
+      "size": 11189,
+      "lines": 217,
+      "imports": [
+        "backend.problem_solver.knowledge_base",
+        "backend.problem_solver.diagnostics.app_diagnostic",
+        "backend.problem_solver.diagnostics.display_diagnostic",
+        "backend.problem_solver.repair_executor",
+        "backend.problem_solver.diagnostics.audio_diagnostic",
+        "backend.problem_solver.models",
+        "backend.problem_solver.diagnostics.dev_env_diagnostic",
+        "backend.problem_solver.diagnostics.performance_diagnostic",
+        "re",
+        "backend.problem_solver.root_cause_engine",
+        "backend.problem_solver.diagnostics.wifi_network_diagnostic",
+        "backend.problem_solver.history",
+        "datetime",
+        "backend.problem_solver.diagnostics.storage_diagnostic",
+        "backend.problem_solver.diagnostics.windows_update_diagnostic",
+        "backend.problem_solver.repair_verifier",
+        "typing",
+        "backend.problem_solver.diagnostics.usb_input_diagnostic",
+        "backend.problem_solver.repair_planner",
+        "backend.problem_solver.timeline_engine",
+        "backend.problem_solver.diagnostics.bluetooth_diagnostic",
+        "backend.problem_solver.system_health",
+        "backend.core.logger",
+        "backend.problem_solver.rollback_manager"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\problem_solver\\repair_executor.py",
+      "size": 4988,
+      "lines": 122,
+      "imports": [
+        "backend.problem_solver.repairs.windows_repair",
+        "backend.problem_solver.repairs.storage_repair",
+        "typing",
+        "ctypes",
+        "backend.problem_solver.repairs.dev_env_repair",
+        "backend.problem_solver.repairs.bluetooth_repair",
+        "backend.problem_solver.repairs.network_repair",
+        "backend.problem_solver.repairs.audio_repair",
+        "backend.problem_solver.repairs.performance_repair",
+        "backend.problem_solver.models",
+        "backend.core.logger",
+        "backend.problem_solver.safety"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\problem_solver\\repair_planner.py",
+      "size": 8509,
+      "lines": 206,
+      "imports": [
+        "typing",
+        "datetime",
+        "uuid",
+        "backend.problem_solver.models",
+        "backend.core.logger"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\problem_solver\\repair_verifier.py",
+      "size": 3229,
+      "lines": 67,
+      "imports": [
+        "typing",
+        "datetime",
+        "backend.problem_solver.diagnostics.storage_diagnostic",
+        "backend.problem_solver.diagnostics.bluetooth_diagnostic",
+        "backend.problem_solver.diagnostics.audio_diagnostic",
+        "backend.problem_solver.models",
+        "backend.core.logger",
+        "backend.problem_solver.diagnostics.dev_env_diagnostic",
+        "backend.problem_solver.diagnostics.performance_diagnostic",
+        "backend.problem_solver.diagnostics.wifi_network_diagnostic"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\problem_solver\\rollback_manager.py",
+      "size": 3352,
+      "lines": 84,
+      "imports": [
+        "typing",
+        "datetime",
+        "uuid",
+        "subprocess",
+        "backend.core.logger",
+        "backend.problem_solver.models",
+        "psutil"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\problem_solver\\root_cause_engine.py",
+      "size": 12412,
+      "lines": 256,
+      "imports": [
+        "re",
+        "typing",
+        "datetime",
+        "backend.problem_solver.models",
+        "backend.core.logger",
+        "backend.problem_solver.safety"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\problem_solver\\safety.py",
+      "size": 5158,
+      "lines": 98,
+      "imports": [
+        "re",
+        "typing",
+        "backend.problem_solver.models",
+        "backend.core.logger",
+        "shlex"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\problem_solver\\system_health.py",
+      "size": 5792,
+      "lines": 113,
+      "imports": [
+        "backend.problem_solver.diagnostics.wifi_network_diagnostic",
+        "typing",
+        "datetime",
+        "backend.problem_solver.diagnostics.display_diagnostic",
+        "backend.problem_solver.diagnostics.windows_update_diagnostic",
+        "backend.problem_solver.diagnostics.storage_diagnostic",
+        "backend.problem_solver.diagnostics.bluetooth_diagnostic",
+        "backend.problem_solver.diagnostics.audio_diagnostic",
+        "backend.problem_solver.models",
+        "backend.core.logger",
+        "backend.problem_solver.diagnostics.performance_diagnostic",
+        "psutil"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\problem_solver\\timeline_engine.py",
+      "size": 2957,
+      "lines": 61,
+      "imports": [
+        "typing",
+        "datetime",
+        "subprocess",
+        "backend.core.logger",
+        "json",
+        "backend.problem_solver.diagnostics.event_log_analyzer"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\problem_solver\\__init__.py",
+      "size": 1422,
+      "lines": 27,
+      "imports": [
+        "backend.problem_solver.history",
+        "backend.problem_solver.repair_planner",
+        "backend.problem_solver.problem_solver_engine",
+        "backend.problem_solver.root_cause_engine",
+        "backend.problem_solver.repair_executor",
+        "backend.problem_solver.system_health",
+        "backend.problem_solver.models",
+        "backend.problem_solver.rollback_manager",
+        "backend.problem_solver.safety",
+        "backend.problem_solver.repair_verifier"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\problem_solver\\diagnostics\\app_diagnostic.py",
+      "size": 4613,
+      "lines": 108,
+      "imports": [
+        "typing",
+        "os",
+        "backend.tools.app_tools",
+        "backend.problem_solver.models",
+        "backend.core.logger",
+        "psutil"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\problem_solver\\diagnostics\\audio_diagnostic.py",
+      "size": 6099,
+      "lines": 140,
+      "imports": [
+        "typing",
+        "subprocess",
+        "backend.problem_solver.models",
+        "backend.core.logger",
+        "json",
+        "psutil"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\problem_solver\\diagnostics\\bluetooth_diagnostic.py",
+      "size": 6388,
+      "lines": 137,
+      "imports": [
+        "typing",
+        "subprocess",
+        "backend.problem_solver.models",
+        "backend.core.logger",
+        "json",
+        "psutil"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\problem_solver\\diagnostics\\dev_env_diagnostic.py",
+      "size": 4158,
+      "lines": 101,
+      "imports": [
+        "typing",
+        "os",
+        "subprocess",
+        "shutil",
+        "backend.core.logger",
+        "backend.problem_solver.models"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\problem_solver\\diagnostics\\display_diagnostic.py",
+      "size": 4438,
+      "lines": 105,
+      "imports": [
+        "typing",
+        "ctypes",
+        "subprocess",
+        "backend.problem_solver.models",
+        "backend.core.logger",
+        "json"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\problem_solver\\diagnostics\\event_log_analyzer.py",
+      "size": 3745,
+      "lines": 86,
+      "imports": [
+        "typing",
+        "datetime",
+        "subprocess",
+        "backend.problem_solver.models",
+        "backend.core.logger",
+        "json"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\problem_solver\\diagnostics\\performance_diagnostic.py",
+      "size": 7439,
+      "lines": 171,
+      "imports": [
+        "typing",
+        "os",
+        "subprocess",
+        "backend.core.logger",
+        "backend.problem_solver.models",
+        "json",
+        "psutil"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\problem_solver\\diagnostics\\storage_diagnostic.py",
+      "size": 6662,
+      "lines": 159,
+      "imports": [
+        "typing",
+        "os",
+        "pathlib",
+        "backend.core.logger",
+        "backend.problem_solver.models",
+        "psutil"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\problem_solver\\diagnostics\\usb_input_diagnostic.py",
+      "size": 4466,
+      "lines": 110,
+      "imports": [
+        "typing",
+        "subprocess",
+        "backend.problem_solver.models",
+        "backend.core.logger",
+        "json"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\problem_solver\\diagnostics\\wifi_network_diagnostic.py",
+      "size": 10256,
+      "lines": 237,
+      "imports": [
+        "socket",
+        "typing",
+        "time",
+        "subprocess",
+        "backend.core.logger",
+        "backend.problem_solver.models",
+        "psutil"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\problem_solver\\diagnostics\\windows_update_diagnostic.py",
+      "size": 4382,
+      "lines": 102,
+      "imports": [
+        "typing",
+        "subprocess",
+        "backend.problem_solver.models",
+        "backend.core.logger",
+        "psutil"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\problem_solver\\diagnostics\\__init__.py",
+      "size": 69,
+      "lines": 1,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\problem_solver\\repairs\\audio_repair.py",
+      "size": 2025,
+      "lines": 48,
+      "imports": [
+        "typing",
+        "time",
+        "subprocess",
+        "backend.core.logger",
+        "backend.tools.media_tools"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\problem_solver\\repairs\\bluetooth_repair.py",
+      "size": 2423,
+      "lines": 54,
+      "imports": [
+        "typing",
+        "time",
+        "subprocess",
+        "backend.problem_solver.models",
+        "backend.core.logger"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\problem_solver\\repairs\\dev_env_repair.py",
+      "size": 1031,
+      "lines": 26,
+      "imports": [
+        "subprocess",
+        "backend.core.logger",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\problem_solver\\repairs\\network_repair.py",
+      "size": 3351,
+      "lines": 73,
+      "imports": [
+        "time",
+        "subprocess",
+        "backend.core.logger",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\problem_solver\\repairs\\performance_repair.py",
+      "size": 1774,
+      "lines": 47,
+      "imports": [
+        "os",
+        "psutil",
+        "backend.core.logger",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\problem_solver\\repairs\\storage_repair.py",
+      "size": 2520,
+      "lines": 66,
+      "imports": [
+        "typing",
+        "os",
+        "shutil",
+        "backend.core.logger",
+        "backend.tools.cleaner_tools"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\problem_solver\\repairs\\windows_repair.py",
+      "size": 1383,
+      "lines": 33,
+      "imports": [
+        "time",
+        "subprocess",
+        "backend.core.logger",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\problem_solver\\repairs\\__init__.py",
+      "size": 65,
+      "lines": 1,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\skills\\actions.py",
+      "size": 14476,
+      "lines": 368,
+      "imports": [
+        "re",
+        "win32con",
+        "typing",
+        "ctypes",
+        "os",
+        "time",
+        "win32process",
+        "win32gui",
+        "backend.skills.models",
+        "comtypes.client",
+        "backend.core.logger",
+        "win32api",
+        "asyncio",
+        "win32clipboard"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\skills\\context.py",
+      "size": 7021,
+      "lines": 171,
+      "imports": [
+        "re",
+        "typing",
+        "time",
+        "win32process",
+        "win32gui",
+        "backend.skills.models",
+        "backend.core.logger"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\skills\\generator.py",
+      "size": 2229,
+      "lines": 58,
+      "imports": [
+        "typing",
+        "os",
+        "backend.skills.models",
+        "backend.core.logger",
+        "json"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\skills\\init_skills.py",
+      "size": 5755,
+      "lines": 118,
+      "imports": [
+        "os",
+        "json"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\skills\\models.py",
+      "size": 4955,
+      "lines": 132,
+      "imports": [
+        "pydantic",
+        "enum",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\skills\\registry.py",
+      "size": 5474,
+      "lines": 142,
+      "imports": [
+        "backend.skills.scanner",
+        "typing",
+        "os",
+        "time",
+        "backend.skills.generator",
+        "backend.skills.models",
+        "backend.core.logger"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\skills\\scanner.py",
+      "size": 12984,
+      "lines": 293,
+      "imports": [
+        "typing",
+        "os",
+        "time",
+        "win32process",
+        "win32gui",
+        "backend.skills.models",
+        "sys",
+        "backend.core.logger"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\skills\\verifier.py",
+      "size": 2446,
+      "lines": 61,
+      "imports": [
+        "typing",
+        "time",
+        "backend.skills.generator",
+        "backend.skills.models",
+        "backend.skills.registry",
+        "backend.core.logger",
+        "backend.skills.actions"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\skills\\__init__.py",
+      "size": 1349,
+      "lines": 44,
+      "imports": [
+        "backend.skills.scanner",
+        "backend.skills.generator",
+        "backend.skills.models",
+        "backend.skills.context",
+        "backend.skills.registry",
+        "backend.skills.actions",
+        "backend.skills.verifier"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\tools\\app_tools.py",
+      "size": 41760,
+      "lines": 972,
+      "imports": [
+        "re",
+        "backend.core.permissions",
+        "win32com.client",
+        "typing",
+        "ctypes",
+        "os",
+        "backend.tools.registry",
+        "time",
+        "subprocess",
+        "shutil",
+        "pathlib",
+        "pydantic",
+        "backend.core.logger",
+        "backend.tools.ui_automation",
+        "threading",
+        "json",
+        "psutil",
+        "glob"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\tools\\autosubmit_watcher.py",
+      "size": 5737,
+      "lines": 176,
+      "imports": [
+        "re",
+        "win32con",
+        "typing",
+        "ctypes",
+        "os",
+        "time",
+        "win32gui",
+        "logging",
+        "threading",
+        "win32api",
+        "psutil"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\tools\\browser_tools.py",
+      "size": 39288,
+      "lines": 990,
+      "imports": [
+        "subprocess",
+        "backend.ai.semantic_matcher",
+        "requests",
+        "re",
+        "webbrowser",
+        "ctypes",
+        "backend.tools.registry",
+        "win32gui",
+        "urllib.request",
+        "backend.ai.context_memory",
+        "backend.tools.media_tools",
+        "win32con",
+        "backend.core.permissions",
+        "time",
+        "os",
+        "win32clipboard",
+        "urllib.parse",
+        "typing",
+        "win32process",
+        "pydantic",
+        "backend.core.logger",
+        "win32api",
+        "psutil"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\tools\\cleaner_tools.py",
+      "size": 4491,
+      "lines": 119,
+      "imports": [
+        "backend.core.permissions",
+        "typing",
+        "os",
+        "backend.tools.registry",
+        "tempfile",
+        "subprocess",
+        "shutil",
+        "pathlib",
+        "backend.core.logger",
+        "psutil"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\tools\\file_tools.py",
+      "size": 13677,
+      "lines": 375,
+      "imports": [
+        "backend.core.permissions",
+        "typing",
+        "datetime",
+        "os",
+        "fnmatch",
+        "backend.tools.registry",
+        "shutil",
+        "pathlib",
+        "pydantic",
+        "backend.core.security"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\tools\\media_tools.py",
+      "size": 22469,
+      "lines": 513,
+      "imports": [
+        "re",
+        "win32con",
+        "backend.core.permissions",
+        "typing",
+        "time",
+        "backend.tools.registry",
+        "ctypes",
+        "backend.tools.browser_tools",
+        "win32gui",
+        "pydantic",
+        "backend.core.logger",
+        "pycaw.pycaw",
+        "win32api",
+        "win32clipboard"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\tools\\power_tools.py",
+      "size": 5686,
+      "lines": 150,
+      "imports": [
+        "backend.core.permissions",
+        "typing",
+        "os",
+        "time",
+        "backend.tools.registry",
+        "subprocess",
+        "backend.tools.app_tools",
+        "pydantic",
+        "backend.core.logger"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\tools\\registry.py",
+      "size": 10310,
+      "lines": 269,
+      "imports": [
+        "backend.core.permissions",
+        "typing",
+        "time",
+        "backend.adapters.whatsapp_adapter",
+        "backend.adapters.youtube_adapter",
+        "inspect",
+        "pydantic",
+        "backend.core.logger",
+        "backend.adapters.system_adapter",
+        "asyncio"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\tools\\skill_tools.py",
+      "size": 5048,
+      "lines": 127,
+      "imports": [
+        "backend.core.permissions",
+        "backend.skills.scanner",
+        "typing",
+        "backend.tools.registry",
+        "backend.skills.models",
+        "backend.skills.context",
+        "backend.skills.registry",
+        "pydantic",
+        "backend.core.logger"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\tools\\system_tools.py",
+      "size": 6650,
+      "lines": 184,
+      "imports": [
+        "socket",
+        "backend.core.permissions",
+        "platform",
+        "typing",
+        "datetime",
+        "os",
+        "backend.tools.registry",
+        "backend.problem_solver.problem_solver_engine",
+        "backend.problem_solver.system_health",
+        "pydantic",
+        "psutil"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\tools\\ui_automation.py",
+      "size": 20911,
+      "lines": 538,
+      "imports": [
+        "re",
+        "win32con",
+        "backend.core.permissions",
+        "backend.ai.state_observer",
+        "typing",
+        "ctypes",
+        "os",
+        "time",
+        "backend.tools.registry",
+        "win32gui",
+        "win32process",
+        "backend.tools.app_tools",
+        "pydantic",
+        "backend.core.logger",
+        "win32api",
+        "psutil",
+        "win32clipboard"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\tools\\whatsapp_tools.py",
+      "size": 23654,
+      "lines": 591,
+      "imports": [
+        "comtypes.client",
+        "backend.skills.actions",
+        "re",
+        "webbrowser",
+        "backend.tools.browser_tools",
+        "backend.tools.registry",
+        "win32gui",
+        "threading",
+        "win32con",
+        "backend.core.permissions",
+        "os",
+        "time",
+        "asyncio",
+        "backend.database.repositories",
+        "urllib.parse",
+        "typing",
+        "pydantic",
+        "backend.core.logger",
+        "win32api"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\tools\\__init__.py",
+      "size": 1087,
+      "lines": 20,
+      "imports": [
+        "backend.tools.browser_tools",
+        "backend.tools.registry",
+        "backend.tools.app_tools",
+        "backend.tools.whatsapp_tools",
+        "backend.tools.power_tools",
+        "backend.tools.file_tools",
+        "backend.tools.cleaner_tools",
+        "backend.tools.ui_automation",
+        "backend.tools.skill_tools",
+        "backend.tools.system_tools",
+        "backend.tools.media_tools"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\voice\\audio_manager.py",
+      "size": 2300,
+      "lines": 76,
+      "imports": [
+        "typing",
+        "os",
+        "winsound",
+        "backend.core.logger",
+        "threading"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\voice\\clap_detector.py",
+      "size": 6080,
+      "lines": 175,
+      "imports": [
+        "numpy",
+        "typing",
+        "os",
+        "time",
+        "winsound",
+        "sys",
+        "sounddevice",
+        "backend.core.logger",
+        "threading"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\voice\\speech_to_text.py",
+      "size": 13883,
+      "lines": 355,
+      "imports": [
+        "re",
+        "backend.voice.text_to_speech",
+        "numpy",
+        "typing",
+        "time",
+        "speech_recognition",
+        "backend.diagnostics.engine",
+        "sounddevice",
+        "backend.diagnostics.models",
+        "backend.core.logger",
+        "backend.core.config",
+        "concurrent.futures",
+        "queue"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\voice\\text_to_speech.py",
+      "size": 10180,
+      "lines": 249,
+      "imports": [
+        "typing",
+        "ctypes",
+        "os",
+        "time",
+        "backend.voice.tts_providers",
+        "tempfile",
+        "backend.core.logger",
+        "threading",
+        "backend.core.config",
+        "queue"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\voice\\__init__.py",
+      "size": 399,
+      "lines": 13,
+      "imports": [
+        "backend.voice.speech_to_text",
+        "backend.voice.audio_manager",
+        "backend.voice.text_to_speech"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\voice\\tts_providers\\base.py",
+      "size": 1399,
+      "lines": 45,
+      "imports": [
+        "typing",
+        "pydantic",
+        "abc"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\voice\\tts_providers\\edge_provider.py",
+      "size": 2775,
+      "lines": 76,
+      "imports": [
+        "edge_tts",
+        "typing",
+        "os",
+        "backend.core.logger",
+        "backend.voice.tts_providers.normalizer",
+        "backend.voice.tts_providers.base",
+        "asyncio"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\voice\\tts_providers\\elevenlabs_provider.py",
+      "size": 2473,
+      "lines": 66,
+      "imports": [
+        "os",
+        "requests",
+        "backend.voice.tts_providers.base",
+        "backend.core.logger"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\voice\\tts_providers\\gtts_provider.py",
+      "size": 1962,
+      "lines": 55,
+      "imports": [
+        "os",
+        "gtts",
+        "backend.voice.tts_providers.normalizer",
+        "backend.core.logger",
+        "backend.voice.tts_providers.base"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\voice\\tts_providers\\normalizer.py",
+      "size": 5785,
+      "lines": 147,
+      "imports": [
+        "re",
+        "typing"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "backend\\voice\\tts_providers\\offline_provider.py",
+      "size": 2331,
+      "lines": 74,
+      "imports": [
+        "pyttsx3",
+        "os",
+        "pythoncom",
+        "backend.core.logger",
+        "backend.voice.tts_providers.base"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "backend\\voice\\tts_providers\\__init__.py",
+      "size": 685,
+      "lines": 17,
+      "imports": [
+        "backend.voice.tts_providers.offline_provider",
+        "backend.voice.tts_providers.edge_provider",
+        "backend.voice.tts_providers.normalizer",
+        "backend.voice.tts_providers.elevenlabs_provider",
+        "backend.voice.tts_providers.gtts_provider",
+        "backend.voice.tts_providers.base"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "frontend\\index.html",
+      "size": 24609,
+      "lines": 632,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": true,
+      "has_pass": false
+    },
+    {
+      "path": "logs\\jarvis.log",
+      "size": 1966800,
+      "lines": 0,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "logs\\diagnostics\\diagnosis_cache.json",
+      "size": 1009,
+      "lines": 13,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "logs\\diagnostics\\diagnostic_traces.jsonl",
+      "size": 710494,
+      "lines": 0,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "logs\\diagnostics\\nemotron_quota.json",
+      "size": 339,
+      "lines": 13,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "logs\\observability\\command_traces.jsonl",
+      "size": 31323,
+      "lines": 0,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "logs\\observability\\playwright_traces\\reproduce_shorts_20260827_145855.png",
+      "size": 8057,
+      "lines": 0,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "logs\\observability\\playwright_traces\\reproduce_shorts_20260827_145855.zip",
+      "size": 1615578,
+      "lines": 0,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scratch\\check_packages.py",
+      "size": 314,
+      "lines": 9,
+      "imports": [
+        "sys"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scratch\\diagnose_mic_deep.py",
+      "size": 2909,
+      "lines": 83,
+      "imports": [
+        "wave",
+        "numpy",
+        "speech_recognition",
+        "time",
+        "os",
+        "io",
+        "sounddevice"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scratch\\list_desktop_windows.py",
+      "size": 564,
+      "lines": 17,
+      "imports": [
+        "win32gui"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scratch\\test_all_features_live.py",
+      "size": 2140,
+      "lines": 78,
+      "imports": [
+        "os",
+        "sys",
+        "backend.diagnostics.engine",
+        "backend.ai.agent",
+        "asyncio"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "scratch\\test_all_youtube_live.py",
+      "size": 3057,
+      "lines": 77,
+      "imports": [
+        "os",
+        "backend.ai.agent",
+        "asyncio",
+        "sys"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "scratch\\test_audio_native.py",
+      "size": 789,
+      "lines": 22,
+      "imports": [
+        "sounddevice",
+        "numpy",
+        "time",
+        "speech_recognition"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scratch\\test_focus_chrome.py",
+      "size": 1834,
+      "lines": 51,
+      "imports": [
+        "win32con",
+        "win32process",
+        "ctypes",
+        "time",
+        "win32gui",
+        "win32api"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scratch\\test_gain_levels.py",
+      "size": 1328,
+      "lines": 35,
+      "imports": [
+        "speech_recognition",
+        "wave",
+        "numpy",
+        "io"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scratch\\test_live_commands.py",
+      "size": 1034,
+      "lines": 36,
+      "imports": [
+        "os",
+        "backend.nlu.semantic_engine",
+        "sys",
+        "backend.nlu.router"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scratch\\test_live_mic_realtime.py",
+      "size": 3495,
+      "lines": 98,
+      "imports": [
+        "wave",
+        "numpy",
+        "time",
+        "speech_recognition",
+        "os",
+        "sys",
+        "sounddevice"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "scratch\\test_mic_live.py",
+      "size": 1199,
+      "lines": 37,
+      "imports": [
+        "sounddevice",
+        "numpy",
+        "time",
+        "speech_recognition"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scratch\\test_mic_output.wav",
+      "size": 265868,
+      "lines": 0,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scratch\\test_native_resample.py",
+      "size": 1744,
+      "lines": 55,
+      "imports": [
+        "wave",
+        "numpy",
+        "speech_recognition",
+        "io",
+        "sounddevice"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scratch\\test_navigate_url.py",
+      "size": 1584,
+      "lines": 50,
+      "imports": [
+        "win32con",
+        "time",
+        "ctypes",
+        "win32gui",
+        "win32api",
+        "win32clipboard"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scratch\\test_phonetic_shorts.py",
+      "size": 1339,
+      "lines": 41,
+      "imports": [
+        "os",
+        "backend.voice.speech_to_text",
+        "backend.nlu.router",
+        "sys",
+        "backend.nlu.semantic_engine"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scratch\\test_play_first_video.py",
+      "size": 1313,
+      "lines": 38,
+      "imports": [
+        "os",
+        "backend.nlu.router",
+        "sys",
+        "asyncio",
+        "backend.ai.agent",
+        "backend.nlu.semantic_engine"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scratch\\test_pure_hindi.py",
+      "size": 1788,
+      "lines": 55,
+      "imports": [
+        "os",
+        "backend.voice.speech_to_text",
+        "backend.nlu.router",
+        "sys",
+        "backend.nlu.semantic_engine"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scratch\\test_resample_stt.py",
+      "size": 2129,
+      "lines": 54,
+      "imports": [
+        "sounddevice",
+        "numpy",
+        "time",
+        "speech_recognition"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scratch\\test_scancodes.py",
+      "size": 732,
+      "lines": 23,
+      "imports": [
+        "ctypes",
+        "time"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scratch\\test_scroll_bulletproof.py",
+      "size": 1668,
+      "lines": 48,
+      "imports": [
+        "ctypes",
+        "win32con",
+        "win32gui",
+        "time"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scratch\\test_sd_wav.py",
+      "size": 1070,
+      "lines": 40,
+      "imports": [
+        "wave",
+        "numpy",
+        "speech_recognition",
+        "io",
+        "sounddevice"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scratch\\test_short_clicks.py",
+      "size": 1291,
+      "lines": 42,
+      "imports": [
+        "os",
+        "backend.nlu.semantic_engine",
+        "sys",
+        "backend.nlu.router"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scratch\\test_sr_native.py",
+      "size": 1202,
+      "lines": 31,
+      "imports": [
+        "speech_recognition",
+        "time"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scratch\\test_sr_standard.py",
+      "size": 1015,
+      "lines": 24,
+      "imports": [
+        "speech_recognition",
+        "time"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scratch\\test_stt_live2.py",
+      "size": 309,
+      "lines": 8,
+      "imports": [
+        "backend.voice.speech_to_text",
+        "time"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scratch\\test_user_phrases.py",
+      "size": 996,
+      "lines": 32,
+      "imports": [
+        "os",
+        "backend.nlu.semantic_engine",
+        "sys",
+        "backend.nlu.router"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scratch\\test_vad_live.py",
+      "size": 2064,
+      "lines": 58,
+      "imports": [
+        "time",
+        "numpy",
+        "sounddevice",
+        "speech_recognition"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scratch\\test_whisper_vad.py",
+      "size": 1426,
+      "lines": 42,
+      "imports": [
+        "sounddevice",
+        "numpy",
+        "time"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scratch\\test_window_enum.py",
+      "size": 895,
+      "lines": 27,
+      "imports": [
+        "win32process",
+        "win32con",
+        "win32gui",
+        "ctypes"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scratch\\test_window_rect_scroll.py",
+      "size": 1754,
+      "lines": 55,
+      "imports": [
+        "win32con",
+        "ctypes",
+        "os",
+        "time",
+        "win32gui",
+        "sys"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scripts\\clap_listener.py",
+      "size": 2749,
+      "lines": 82,
+      "imports": [
+        "backend.voice.clap_detector",
+        "os",
+        "time",
+        "winsound",
+        "subprocess",
+        "sys",
+        "backend.core.logger"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "scripts\\cli.py",
+      "size": 7396,
+      "lines": 192,
+      "imports": [
+        "backend.database.repositories",
+        "os",
+        "backend.tools.registry",
+        "sys",
+        "pathlib",
+        "rich.console",
+        "rich.panel",
+        "rich.text",
+        "rich.table",
+        "backend.ai.agent",
+        "backend.core.config",
+        "asyncio"
+      ],
+      "has_todo": false,
+      "has_mock": true,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scripts\\create_desktop_shortcut.py",
+      "size": 1648,
+      "lines": 44,
+      "imports": [
+        "os",
+        "subprocess",
+        "sys"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scripts\\create_shortcuts.py",
+      "size": 1417,
+      "lines": 36,
+      "imports": [
+        "os",
+        "pathlib",
+        "win32com.client"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scripts\\hotkey_listener.py",
+      "size": 2922,
+      "lines": 94,
+      "imports": [
+        "ctypes",
+        "os",
+        "time",
+        "winsound",
+        "subprocess",
+        "sys"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "scripts\\reproduce_debug.py",
+      "size": 5227,
+      "lines": 128,
+      "imports": [
+        "backend.observability.playwright_tracer",
+        "backend.nlu.semantic_engine",
+        "os",
+        "backend.adapters.whatsapp_adapter",
+        "backend.nlu.router",
+        "sys",
+        "rich.console",
+        "rich.panel",
+        "backend.adapters.youtube_adapter",
+        "rich.table",
+        "backend.observability.command_tracer",
+        "backend.adapters.system_adapter",
+        "asyncio",
+        "argparse"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "scripts\\self_verifier.py",
+      "size": 6299,
+      "lines": 178,
+      "imports": [
+        "backend.voice.clap_detector",
+        "numpy",
+        "backend.nlu.semantic_engine",
+        "os",
+        "time",
+        "sys",
+        "backend.tools.whatsapp_tools",
+        "backend.nlu.models",
+        "rich.console",
+        "rich.panel",
+        "rich.table",
+        "asyncio",
+        "backend.tools.media_tools"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scripts\\setup_startup.py",
+      "size": 1099,
+      "lines": 30,
+      "imports": [
+        "os",
+        "shutil",
+        "sys"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scripts\\start_jarvis_background.vbs",
+      "size": 226,
+      "lines": 3,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "scripts\\test_live_mic_clap.py",
+      "size": 2671,
+      "lines": 81,
+      "imports": [
+        "numpy",
+        "os",
+        "time",
+        "winsound",
+        "subprocess",
+        "sys",
+        "sounddevice"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "scripts\\test_voice_pipeline.py",
+      "size": 8814,
+      "lines": 225,
+      "imports": [
+        "time",
+        "sys",
+        "pathlib",
+        "rich.console",
+        "rich.panel",
+        "backend.nlu",
+        "backend.core.logger",
+        "rich.table",
+        "backend.ai.agent",
+        "asyncio",
+        "argparse"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "scripts\\voice_cli.py",
+      "size": 25753,
+      "lines": 482,
+      "imports": [
+        "backend.voice.text_to_speech",
+        "scripts.reproduce_debug",
+        "backend.tools.autosubmit_watcher",
+        "subprocess",
+        "backend.diagnostics.issue_tracker",
+        "backend.diagnostics.startup_checker",
+        "backend.observability.failure_bundle",
+        "backend.diagnostics.nemotron_guard",
+        "re",
+        "backend.diagnostics.self_debug_manager",
+        "ctypes",
+        "sys",
+        "backend.diagnostics.engine",
+        "rich.console",
+        "rich.panel",
+        "rich.table",
+        "backend.core.config",
+        "backend.ai.action_planner",
+        "os",
+        "backend.voice.speech_to_text",
+        "pathlib",
+        "backend.ai.intent_engine",
+        "asyncio",
+        "backend.observability.command_tracer",
+        "rich.text",
+        "backend.core.logger",
+        "backend.voice.audio_manager",
+        "backend.ai.agent"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": true
+    },
+    {
+      "path": "skills\\chrome\\skill.json",
+      "size": 936,
+      "lines": 44,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "skills\\edge\\skill.json",
+      "size": 6472,
+      "lines": 238,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "skills\\file-explorer\\skill.json",
+      "size": 490,
+      "lines": 12,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "skills\\file_explorer\\skill.json",
+      "size": 5126,
+      "lines": 188,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "skills\\messaging\\skill.json",
+      "size": 699,
+      "lines": 31,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "skills\\spotify\\skill.json",
+      "size": 726,
+      "lines": 35,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "skills\\system\\skill.json",
+      "size": 861,
+      "lines": 37,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "skills\\vscode\\skill.json",
+      "size": 803,
+      "lines": 35,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "skills\\youtube\\skill.json",
+      "size": 1557,
+      "lines": 73,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "tests\\test_adapters.py",
+      "size": 1835,
+      "lines": 47,
+      "imports": [
+        "backend.tools.registry",
+        "backend.adapters.whatsapp_adapter",
+        "pytest",
+        "backend.adapters.youtube_adapter",
+        "backend.adapters.system_adapter"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "tests\\test_agent.py",
+      "size": 3938,
+      "lines": 101,
+      "imports": [
+        "backend.core.permissions",
+        "backend.tools.registry",
+        "backend.ai.providers",
+        "pytest",
+        "backend.ai.agent",
+        "backend.core.config"
+      ],
+      "has_todo": false,
+      "has_mock": true,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "tests\\test_app_tools.py",
+      "size": 2939,
+      "lines": 90,
+      "imports": [
+        "pytest",
+        "backend.tools.app_tools"
+      ],
+      "has_todo": false,
+      "has_mock": true,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "tests\\test_browser_tools.py",
+      "size": 3109,
+      "lines": 86,
+      "imports": [
+        "pytest",
+        "backend.tools.browser_tools"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "tests\\test_clap_detector.py",
+      "size": 3177,
+      "lines": 93,
+      "imports": [
+        "backend.voice.clap_detector",
+        "numpy",
+        "os",
+        "time",
+        "pytest",
+        "sys"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "tests\\test_cleaner_tools.py",
+      "size": 830,
+      "lines": 30,
+      "imports": [
+        "backend.tools.cleaner_tools",
+        "pytest"
+      ],
+      "has_todo": false,
+      "has_mock": true,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "tests\\test_computer_agent.py",
+      "size": 4286,
+      "lines": 106,
+      "imports": [
+        "backend.core.observability",
+        "backend.ai.verification_engine",
+        "backend.ai.action_planner",
+        "backend.ai.state_observer",
+        "pytest",
+        "backend.tools.ui_automation"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "tests\\test_config.py",
+      "size": 767,
+      "lines": 20,
+      "imports": [
+        "pathlib",
+        "backend.core.config"
+      ],
+      "has_todo": false,
+      "has_mock": true,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "tests\\test_context_memory.py",
+      "size": 1464,
+      "lines": 38,
+      "imports": [
+        "backend.ai.context_memory",
+        "backend.ai.semantic_matcher",
+        "pytest"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "tests\\test_database.py",
+      "size": 2195,
+      "lines": 77,
+      "imports": [
+        "backend.database.database",
+        "backend.database.repositories",
+        "pytest"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "tests\\test_diagnostics.py",
+      "size": 6489,
+      "lines": 169,
+      "imports": [
+        "time",
+        "pytest",
+        "backend.diagnostics.engine",
+        "backend.diagnostics.models",
+        "backend.diagnostics.startup_checker"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "tests\\test_dual_ai_diagnostics.py",
+      "size": 6388,
+      "lines": 148,
+      "imports": [
+        "time",
+        "os",
+        "pytest",
+        "pathlib",
+        "backend.diagnostics.issue_tracker",
+        "backend.diagnostics.fingerprint_manager",
+        "backend.diagnostics.nemotron_debugger",
+        "json",
+        "backend.diagnostics.nemotron_guard"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "tests\\test_file_tools.py",
+      "size": 5897,
+      "lines": 159,
+      "imports": [
+        "backend.core.permissions",
+        "backend.tools.registry",
+        "backend.core",
+        "pytest",
+        "backend.ai.providers",
+        "pathlib",
+        "backend.tools.file_tools",
+        "backend.ai.agent",
+        "backend.core.config",
+        "backend.core.security"
+      ],
+      "has_todo": false,
+      "has_mock": true,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "tests\\test_media_tools.py",
+      "size": 1226,
+      "lines": 39,
+      "imports": [
+        "backend.tools",
+        "pytest",
+        "backend.tools.media_tools"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "tests\\test_new_architecture.py",
+      "size": 4448,
+      "lines": 124,
+      "imports": [
+        "backend.core.permissions",
+        "pytest",
+        "backend.ai.providers",
+        "backend.core.emergency_stop",
+        "backend.plugins",
+        "backend.plugins.gesture",
+        "backend.plugins.files"
+      ],
+      "has_todo": false,
+      "has_mock": true,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "tests\\test_permissions.py",
+      "size": 1005,
+      "lines": 22,
+      "imports": [
+        "backend.core.permissions",
+        "backend.core.config"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "tests\\test_power_tools.py",
+      "size": 1557,
+      "lines": 49,
+      "imports": [
+        "pytest",
+        "backend.tools.power_tools"
+      ],
+      "has_todo": false,
+      "has_mock": true,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "tests\\test_problem_solver.py",
+      "size": 12662,
+      "lines": 286,
+      "imports": [
+        "backend.problem_solver.knowledge_base",
+        "backend.problem_solver.diagnostics.app_diagnostic",
+        "backend.problem_solver.diagnostics.display_diagnostic",
+        "backend.problem_solver.repair_executor",
+        "backend.problem_solver.diagnostics.audio_diagnostic",
+        "backend.problem_solver.models",
+        "backend.problem_solver.diagnostics.dev_env_diagnostic",
+        "backend.problem_solver.diagnostics.performance_diagnostic",
+        "backend.problem_solver.root_cause_engine",
+        "pytest",
+        "backend.problem_solver.diagnostics.wifi_network_diagnostic",
+        "backend.problem_solver.history",
+        "backend.ai.action_planner",
+        "backend.problem_solver.problem_solver_engine",
+        "backend.problem_solver.diagnostics.storage_diagnostic",
+        "backend.ai.intent_engine",
+        "backend.problem_solver.diagnostics.windows_update_diagnostic",
+        "backend.problem_solver.repair_verifier",
+        "backend.problem_solver.diagnostics.usb_input_diagnostic",
+        "backend.problem_solver.repair_planner",
+        "backend.problem_solver.driver_engine",
+        "backend.problem_solver.timeline_engine",
+        "backend.problem_solver.diagnostics.bluetooth_diagnostic",
+        "backend.problem_solver.system_health",
+        "backend.problem_solver.rollback_manager",
+        "backend.problem_solver.diagnostics.event_log_analyzer",
+        "backend.problem_solver.safety"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "tests\\test_regression_suite.py",
+      "size": 4527,
+      "lines": 111,
+      "imports": [
+        "os",
+        "pytest",
+        "backend.nlu.router",
+        "pathlib",
+        "backend.observability.sentry_monitor",
+        "backend.observability.command_tracer",
+        "json",
+        "backend.nlu.semantic_engine"
+      ],
+      "has_todo": false,
+      "has_mock": true,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "tests\\test_semantic_matcher.py",
+      "size": 2535,
+      "lines": 70,
+      "imports": [
+        "backend.ai.semantic_matcher",
+        "pytest"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "tests\\test_semantic_nlu_engine.py",
+      "size": 5331,
+      "lines": 133,
+      "imports": [
+        "pathlib",
+        "backend.nlu",
+        "sys"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "tests\\test_task_manager.py",
+      "size": 2234,
+      "lines": 74,
+      "imports": [
+        "time",
+        "backend.core.task_manager",
+        "pytest"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "tests\\test_tools.py",
+      "size": 2195,
+      "lines": 72,
+      "imports": [
+        "backend.core.permissions",
+        "backend.tools.registry",
+        "pytest",
+        "pydantic",
+        "backend.tools.system_tools"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "tests\\test_universal_app_skills.py",
+      "size": 2617,
+      "lines": 67,
+      "imports": [
+        "os",
+        "backend.skills.context",
+        "sys",
+        "backend.skills.registry",
+        "backend.ai.intent_engine",
+        "backend.skills.actions",
+        "backend.tools.skill_tools"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "tests\\test_voice.py",
+      "size": 1462,
+      "lines": 43,
+      "imports": [
+        "backend.voice.text_to_speech",
+        "backend.voice.speech_to_text",
+        "pytest",
+        "backend.voice.audio_manager",
+        "backend.core.config"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "tests\\test_voice_reliability.py",
+      "size": 7836,
+      "lines": 155,
+      "imports": [
+        "backend.nlu",
+        "pytest",
+        "backend.nlu.entities"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "tests\\test_whatsapp_tools.py",
+      "size": 3891,
+      "lines": 104,
+      "imports": [
+        "pytest",
+        "backend.tools.whatsapp_tools"
+      ],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    },
+    {
+      "path": "tests\\__init__.py",
+      "size": 40,
+      "lines": 1,
+      "imports": [],
+      "has_todo": false,
+      "has_mock": false,
+      "has_placeholder": false,
+      "has_pass": false
+    }
+  ],
+  "apps": [],
+  "tools": [],
+  "skills": [],
+  "adapters": [],
+  "fake_implementations": [],
+  "gemini_calls": [],
+  "nemotron_calls": [],
+  "voice_modules": [],
+  "global_state": [],
+  "command_handlers": [],
+  "imports": {},
+  "file_status_map": {}
+}

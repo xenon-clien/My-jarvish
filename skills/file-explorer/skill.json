@@ -1,0 +1,12 @@
+{
+  "application": "file-explorer",
+  "display_name": "Windows File Explorer",
+  "version": "Windows 11 / 10",
+  "category": "files",
+  "capabilities": [
+    "open", "close", "open_folder", "open_this_pc", "open_downloads", "open_documents",
+    "open_desktop", "navigate_path", "search_files", "create_folder", "create_file",
+    "select_all", "copy_item", "paste_item", "rename_item", "delete_safe_recycle_bin",
+    "sort_by_name", "sort_by_date", "sort_by_size", "view_properties"
+  ]
+}

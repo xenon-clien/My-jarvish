@@ -1,0 +1,188 @@
+{
+  "application": "file_explorer",
+  "display_name": "Windows File Explorer",
+  "version": "Windows 11 / 10",
+  "process_names": [],
+  "window_classes": [],
+  "url_patterns": [],
+  "category": "general",
+  "capabilities": [
+    "Open Folder",
+    "Navigate Path",
+    "Search Files",
+    "Create Folder",
+    "Create File",
+    "Copy File",
+    "Move File",
+    "Rename File",
+    "Delete File (Safe)",
+    "Sort Files",
+    "Storage Health",
+    "Recycle Bin Empty",
+    "Junk Files Clean"
+  ],
+  "actions": {},
+  "navigation": [
+    "This PC",
+    "Desktop",
+    "Downloads",
+    "Documents",
+    "Drives"
+  ],
+  "mediaControls": [],
+  "inputControls": [
+    "Address Bar",
+    "Search Bar"
+  ],
+  "stateInformation": [],
+  "accessibilityCapabilities": [],
+  "browserCapabilities": [],
+  "permissions": [],
+  "verificationMethods": [],
+  "feature_matrix": {
+    "Open Folder": {
+      "capability": "Open Folder",
+      "available": true,
+      "implemented": true,
+      "tested": true,
+      "verified": true,
+      "fallback_method": "KEYBOARD_SHORTCUT",
+      "status": "WORKING",
+      "last_checked": "2026-09-01 19:32:28",
+      "error_message": null
+    },
+    "Navigate Path": {
+      "capability": "Navigate Path",
+      "available": true,
+      "implemented": true,
+      "tested": true,
+      "verified": true,
+      "fallback_method": "KEYBOARD_SHORTCUT",
+      "status": "WORKING",
+      "last_checked": "2026-09-01 19:32:28",
+      "error_message": null
+    },
+    "Search Files": {
+      "capability": "Search Files",
+      "available": true,
+      "implemented": true,
+      "tested": true,
+      "verified": true,
+      "fallback_method": "KEYBOARD_SHORTCUT",
+      "status": "WORKING",
+      "last_checked": "2026-09-01 19:32:28",
+      "error_message": null
+    },
+    "Create Folder": {
+      "capability": "Create Folder",
+      "available": true,
+      "implemented": true,
+      "tested": true,
+      "verified": true,
+      "fallback_method": "KEYBOARD_SHORTCUT",
+      "status": "WORKING",
+      "last_checked": "2026-09-01 19:32:28",
+      "error_message": null
+    },
+    "Create File": {
+      "capability": "Create File",
+      "available": true,
+      "implemented": true,
+      "tested": true,
+      "verified": true,
+      "fallback_method": "KEYBOARD_SHORTCUT",
+      "status": "WORKING",
+      "last_checked": "2026-09-01 19:32:28",
+      "error_message": null
+    },
+    "Copy File": {
+      "capability": "Copy File",
+      "available": true,
+      "implemented": true,
+      "tested": true,
+      "verified": true,
+      "fallback_method": "KEYBOARD_SHORTCUT",
+      "status": "WORKING",
+      "last_checked": "2026-09-01 19:32:28",
+      "error_message": null
+    },
+    "Move File": {
+      "capability": "Move File",
+      "available": true,
+      "implemented": true,
+      "tested": true,
+      "verified": true,
+      "fallback_method": "KEYBOARD_SHORTCUT",
+      "status": "WORKING",
+      "last_checked": "2026-09-01 19:32:28",
+      "error_message": null
+    },
+    "Rename File": {
+      "capability": "Rename File",
+      "available": true,
+      "implemented": true,
+      "tested": true,
+      "verified": true,
+      "fallback_method": "KEYBOARD_SHORTCUT",
+      "status": "WORKING",
+      "last_checked": "2026-09-01 19:32:28",
+      "error_message": null
+    },
+    "Delete File (Safe)": {
+      "capability": "Delete File (Safe)",
+      "available": true,
+      "implemented": true,
+      "tested": true,
+      "verified": true,
+      "fallback_method": "KEYBOARD_SHORTCUT",
+      "status": "WORKING",
+      "last_checked": "2026-09-01 19:32:28",
+      "error_message": null
+    },
+    "Sort Files": {
+      "capability": "Sort Files",
+      "available": true,
+      "implemented": true,
+      "tested": true,
+      "verified": true,
+      "fallback_method": "KEYBOARD_SHORTCUT",
+      "status": "WORKING",
+      "last_checked": "2026-09-01 19:32:28",
+      "error_message": null
+    },
+    "Storage Health": {
+      "capability": "Storage Health",
+      "available": true,
+      "implemented": true,
+      "tested": true,
+      "verified": true,
+      "fallback_method": "KEYBOARD_SHORTCUT",
+      "status": "WORKING",
+      "last_checked": "2026-09-01 19:32:28",
+      "error_message": null
+    },
+    "Recycle Bin Empty": {
+      "capability": "Recycle Bin Empty",
+      "available": true,
+      "implemented": true,
+      "tested": true,
+      "verified": true,
+      "fallback_method": "KEYBOARD_SHORTCUT",
+      "status": "WORKING",
+      "last_checked": "2026-09-01 19:32:28",
+      "error_message": null
+    },
+    "Junk Files Clean": {
+      "capability": "Junk Files Clean",
+      "available": true,
+      "implemented": true,
+      "tested": true,
+      "verified": true,
+      "fallback_method": "KEYBOARD_SHORTCUT",
+      "status": "WORKING",
+      "last_checked": "2026-09-01 19:32:28",
+      "error_message": null
+    }
+  },
+  "last_updated": "2026-08-21 18:04:34"
+}
