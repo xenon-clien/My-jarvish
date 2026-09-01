@@ -73,7 +73,23 @@ class WhatsAppAdapter:
             required_locks=[self.RESOURCE_LOCK],
             immediate_response="Ji Boss, call mic mute toggle kar diya.",
         )
-        return task_manager.execute_task_sync(task=task, executor_fn=control_whatsapp_call).result or {"status": "success"}
+    def open(self) -> Dict[str, Any]:
+        """Open WhatsApp Desktop application."""
+        return self.send_message(contact_or_phone="active", message="", auto_send=False)
+
+    def mute_call(self) -> Dict[str, Any]:
+        """Alias for toggle call mute."""
+        return self.toggle_call_mute()
+
+    def view_status(self) -> Dict[str, Any]:
+        """View WhatsApp Status feed."""
+        from backend.tools.whatsapp_tools import control_whatsapp_status
+        return control_whatsapp_status(action="open")
+
+    def delete_message(self, mode: str = "last_sent") -> Dict[str, Any]:
+        """Delete / unsend message."""
+        from backend.tools.whatsapp_tools import delete_whatsapp_message
+        return delete_whatsapp_message(mode=mode)
 
 
 # Global Singleton WhatsApp Adapter

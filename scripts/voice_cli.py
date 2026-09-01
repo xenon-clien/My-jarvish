@@ -372,72 +372,45 @@ async def run_voice_loop():
             # Play subtle wake chime
             audio_manager.play_wake_chime()
 
-            # ── Observability Command Trace Lifecycle ─────────────────────────
-            from backend.observability.command_tracer import command_tracer
+            # ── Canonical Command Processor Execution ─────────────────────────
+            from backend.core.command_processor import command_processor, ExecutionStatus
             from backend.observability.failure_bundle import failure_bundle_manager
-            cmd_trace = command_tracer.start_trace(user_text)
 
-            with console.status(f"[bold cyan]JARVIS [{cmd_trace.command_id}] is processing & executing...[/bold cyan]", spinner="dots"):
-                response = await agent.process_user_input(user_text)
-
-            # Update trace with results
-            if response.tool_results:
-                res_first = response.tool_results[0]
-                selected_t = getattr(res_first, "tool_name", "") or getattr(res_first, "name", "") or "executed_tool"
-                command_tracer.update_trace(
-                    command_id=cmd_trace.command_id,
-                    selected_tool=selected_t,
-                    executed_function=selected_t,
-                )
+            with console.status("[bold cyan]JARVIS is executing...[/bold cyan]", spinner="dots"):
+                ctx = await command_processor.process_command(user_text, source="voice")
 
             # Display and speak response
-            if response.state == AgentState.AWAITING_CONFIRMATION:
-                command_tracer.finish_trace(cmd_trace.command_id, verification_status="AWAITING_CONFIRMATION")
-                console.print(Panel(
-                    f"[bold yellow]⚠️ Confirmation Required:[/bold yellow]\n{response.message}",
-                    border_style="red",
-                ))
-                audio_manager.play_error_chime()
-                tts_manager.speak(response.message, block=True)
-            elif response.state == AgentState.ERROR:
-                command_tracer.finish_trace(cmd_trace.command_id, verification_status="FAIL", error=response.message)
+            if ctx.status == ExecutionStatus.VERIFIED_FAILURE:
                 failure_bundle_manager.create_failure_bundle(
-                    command_id=cmd_trace.command_id,
-                    error_message=response.message,
+                    command_id=ctx.command_id,
+                    error_message=ctx.response_message,
                 )
                 console.print(Panel(
-                    f"[bold red]❌ Error:[/bold red] {response.message}",
+                    f"[bold red]❌ Error:[/bold red] {ctx.response_message}",
                     border_style="red",
                 ))
                 audio_manager.play_error_chime()
                 tts_manager.speak("Boss, action execute karne mein issue aaya.", block=True)
             else:
-                command_tracer.finish_trace(cmd_trace.command_id, verification_status="PASS", verification_details="Executed successfully")
-                console.print(f"[bold cyan]JARVIS ({cmd_trace.command_id}):[/bold cyan] {response.message}\n")
+                console.print(f"[bold cyan]JARVIS ({ctx.command_id}):[/bold cyan] {ctx.response_message}\n")
                 audio_manager.play_complete_chime()
 
-                is_media_action = any(
-                    tr.success and any(k in str(tr.data).lower() for k in ["youtube", "video", "shorts", "watch?v=", "click", "media"])
-                    for tr in response.tool_results
-                ) or any(re.search(r"\b" + re.escape(w) + r"\b", cleaned_text) for w in [
-                    "video", "song", "gaana", "vlog", "reel", "reels", "short", "shorts", "youtube", "click", "like", "scroll", "next", "previous"
+                is_media_action = ctx.domain == "media" or any(re.search(r"\b" + re.escape(w) + r"\b", cleaned_text) for w in [
+                    "video", "song", "gaana", "vlog", "reel", "reels", "short", "shorts", "youtube", "click", "like", "scroll", "next", "previous", "pause", "play"
                 ])
-
-                # Check if it's an action/implementation execution (has tool results)
-                has_executed_tools = bool(response.tool_results)
 
                 if is_media_action:
                     # Ultra-short acknowledgement so it never overlaps with media
                     tts_manager.speak("जी बॉस!", block=True)
-                elif has_executed_tools:
-                    # Keep implementation voice concise (speak first sentence only or short confirmation)
-                    spoken_txt = response.message.split("\n")[0].split(".")[0].strip()
+                elif ctx.action:
+                    # Keep implementation voice concise
+                    spoken_txt = ctx.response_message.split("\n")[0].split(".")[0].strip()
                     if not spoken_txt or len(spoken_txt) > 50:
                         spoken_txt = "Ji Boss, ho gaya."
                     tts_manager.speak(spoken_txt, block=False)
-                elif response.message:
+                elif ctx.response_message:
                     # Conversational dialogue: speak cleanly
-                    tts_manager.speak(response.message, block=False)
+                    tts_manager.speak(ctx.response_message, block=False)
 
         except (KeyboardInterrupt, EOFError):
             console.print("\n[bold yellow]Voice Assistant stopped by user.[/bold yellow]")

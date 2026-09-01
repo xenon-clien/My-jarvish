@@ -155,6 +155,34 @@ class YouTubeAdapter:
         )
         return task_manager.execute_task_sync(task=task, executor_fn=control_media).result or {"status": "success"}
 
+    def play_video(self, query: str = "") -> Dict[str, Any]:
+        """Alias for opening/playing a YouTube video query."""
+        return self.open(query=query)
+
+    def play_short(self, ordinal: int = 1, index: Optional[int] = None) -> Dict[str, Any]:
+        """Alias for playing N-th YouTube Short."""
+        idx = index or ordinal or 1
+        return self.play_first_short(index=idx)
+
+    def pause_resume(self) -> Dict[str, Any]:
+        """Alias for play/pause toggle."""
+        return self.play()
+
+    def seek(self, seconds: int = 10, direction: str = "forward") -> Dict[str, Any]:
+        """Seek forward or backward."""
+        if direction in ["backward", "rewind", "peeche", "piche"]:
+            return self.seek_backward(seconds=seconds)
+        return self.seek_forward(seconds=seconds)
+
+    def volume(self, action: str = "volume_up", level: Optional[int] = None) -> Dict[str, Any]:
+        """Adjust or set volume level."""
+        from backend.tools.media_tools import control_media
+        return control_media(action=action, level=level)
+
+    def fullscreen(self) -> Dict[str, Any]:
+        """Alias for fullscreen toggle."""
+        return self.toggle_fullscreen()
+
     def _verify_youtube_active(self, task: Any, result: Any) -> bool:
         """Verify that YouTube or Chrome is active in foreground."""
         try:

@@ -195,10 +195,8 @@ class SpeechToTextManager:
                         if len(ambient_rms_samples) > 10:
                             ambient_rms_samples.pop(0)
 
-                        ambient_mean = float(np.mean(ambient_rms_samples)) if ambient_rms_samples else 100.0
-
-                        # Ultra-sensitive whisper trigger (+12.0 delta above baseline, zero yelling required)
-                        threshold = ambient_mean + 12.0
+                        # Highly sensitive natural speech trigger (+6.0 delta above dynamic ambient baseline)
+                        threshold = ambient_mean + 6.0
 
                         if elapsed_total > timeout:
                             return None
@@ -216,12 +214,12 @@ class SpeechToTextManager:
                         if elapsed_total > phrase_time_limit:
                             break
 
-                        # Ultra-fast 0.32s silence cutoff for instant command execution
-                        silence_cutoff = ambient_mean + 8.0
+                        # Natural 0.65s silence cutoff to accommodate conversational cadence
+                        silence_cutoff = ambient_mean + 3.0
                         if rms < silence_cutoff:
                             if silence_start_time is None:
                                 silence_start_time = time.time()
-                            elif time.time() - silence_start_time >= 0.32:
+                            elif time.time() - silence_start_time >= 0.65:
                                 break
                         else:
                             silence_start_time = None
