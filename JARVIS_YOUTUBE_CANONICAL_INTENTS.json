@@ -1,0 +1,273 @@
+{
+  "version": "1.0",
+  "domain": "media",
+  "application": "youtube",
+  "canonical_intents": {
+    "youtube.open": {
+      "description": "Open YouTube homepage or bring existing tab to focus",
+      "arguments": {},
+      "aliases": [
+        "kholo",
+        "open",
+        "launch",
+        "chalu karo"
+      ]
+    },
+    "youtube.search": {
+      "description": "Search YouTube for a query, song, creator, or topic",
+      "arguments": {
+        "query": {
+          "type": "string",
+          "required": true
+        }
+      },
+      "aliases": [
+        "search",
+        "dhundo",
+        "dhoondo",
+        "khojo",
+        "find"
+      ]
+    },
+    "youtube.play_video": {
+      "description": "Search and play a specific video query, or play N-th video",
+      "arguments": {
+        "query": {
+          "type": "string",
+          "required": false
+        },
+        "ordinal": {
+          "type": "integer",
+          "required": false,
+          "default": 1
+        }
+      },
+      "aliases": [
+        "chalao",
+        "play",
+        "laga do",
+        "video chalao",
+        "baja"
+      ]
+    },
+    "youtube.play_short": {
+      "description": "Play first or N-th YouTube Short from screen feed/shelf",
+      "arguments": {
+        "ordinal": {
+          "type": "integer",
+          "required": true,
+          "default": 1
+        }
+      },
+      "aliases": [
+        "pehla short",
+        "first short",
+        "short chalao",
+        "reel play karo"
+      ]
+    },
+    "youtube.next_short": {
+      "description": "Navigate down to the next YouTube Short",
+      "arguments": {},
+      "aliases": [
+        "agla short",
+        "next short",
+        "next",
+        "scroll down short",
+        "agli wali"
+      ]
+    },
+    "youtube.previous_short": {
+      "description": "Navigate up to the previous YouTube Short",
+      "arguments": {},
+      "aliases": [
+        "pichla short",
+        "prev short",
+        "previous",
+        "scroll up short",
+        "pichli wali"
+      ]
+    },
+    "youtube.pause": {
+      "description": "Pause active YouTube video or Short",
+      "arguments": {},
+      "aliases": [
+        "pause",
+        "rok do",
+        "thoda rok",
+        "hold karo",
+        "stop video"
+      ]
+    },
+    "youtube.resume": {
+      "description": "Resume / Unpause active YouTube video or Short",
+      "arguments": {},
+      "aliases": [
+        "resume",
+        "chala do",
+        "unpause",
+        "continue",
+        "wapas chalao"
+      ]
+    },
+    "youtube.seek_forward": {
+      "description": "Fast-forward playback by N seconds (default 10s)",
+      "arguments": {
+        "seconds": {
+          "type": "integer",
+          "required": false,
+          "default": 10
+        }
+      },
+      "aliases": [
+        "aage karo",
+        "forward",
+        "skip",
+        "fast forward",
+        "10 sec aage"
+      ]
+    },
+    "youtube.seek_backward": {
+      "description": "Rewind playback by N seconds (default 10s)",
+      "arguments": {
+        "seconds": {
+          "type": "integer",
+          "required": false,
+          "default": 10
+        }
+      },
+      "aliases": [
+        "peeche karo",
+        "rewind",
+        "backward",
+        "10 sec peeche"
+      ]
+    },
+    "youtube.seek_timestamp": {
+      "description": "Jump directly to specific timecode or minute",
+      "arguments": {
+        "timestamp": {
+          "type": "string",
+          "required": true
+        }
+      },
+      "aliases": [
+        "iss time pe",
+        "exact time",
+        "jump to time"
+      ]
+    },
+    "youtube.volume_up": {
+      "description": "Increase audio volume level",
+      "arguments": {
+        "step": {
+          "type": "integer",
+          "required": false,
+          "default": 10
+        }
+      },
+      "aliases": [
+        "volume badhao",
+        "aawaz badhao",
+        "sound up"
+      ]
+    },
+    "youtube.volume_down": {
+      "description": "Decrease audio volume level",
+      "arguments": {
+        "step": {
+          "type": "integer",
+          "required": false,
+          "default": 10
+        }
+      },
+      "aliases": [
+        "volume kam karo",
+        "aawaz kam karo",
+        "sound down"
+      ]
+    },
+    "youtube.mute": {
+      "description": "Mute video audio",
+      "arguments": {},
+      "aliases": [
+        "mute",
+        "aawaz band",
+        "sound off"
+      ]
+    },
+    "youtube.unmute": {
+      "description": "Unmute video audio",
+      "arguments": {},
+      "aliases": [
+        "unmute",
+        "aawaz kholo",
+        "sound on"
+      ]
+    },
+    "youtube.fullscreen": {
+      "description": "Toggle fullscreen mode",
+      "arguments": {},
+      "aliases": [
+        "fullscreen",
+        "bada karo",
+        "large screen",
+        "screen badi karo"
+      ]
+    },
+    "youtube.theater_mode": {
+      "description": "Toggle cinema/theater mode",
+      "arguments": {},
+      "aliases": [
+        "theater mode",
+        "cinema mode"
+      ]
+    },
+    "youtube.captions": {
+      "description": "Toggle subtitles/captions on or off",
+      "arguments": {},
+      "aliases": [
+        "captions",
+        "subtitles",
+        "subtitle on",
+        "subtitle off"
+      ]
+    },
+    "youtube.like": {
+      "description": "Like current video",
+      "arguments": {},
+      "aliases": [
+        "like",
+        "video like karo",
+        "like thok"
+      ]
+    },
+    "youtube.speed_up": {
+      "description": "Increase playback speed (1.25x, 1.5x, 2x)",
+      "arguments": {},
+      "aliases": [
+        "speed badhao",
+        "fast karo",
+        "tez chalao"
+      ]
+    },
+    "youtube.speed_down": {
+      "description": "Decrease playback speed (0.75x, 0.5x)",
+      "arguments": {},
+      "aliases": [
+        "speed kam karo",
+        "slow karo",
+        "dheere chalao"
+      ]
+    },
+    "youtube.replay": {
+      "description": "Restart video from beginning",
+      "arguments": {},
+      "aliases": [
+        "replay",
+        "shuru se chalao",
+        "start again"
+      ]
+    }
+  }
+}

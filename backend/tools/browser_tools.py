@@ -222,13 +222,13 @@ def click_screen_video(index: int = 1, section: Optional[str] = "auto") -> Dict[
                 }
         else:
             # On YouTube Home, Search, or Playlist: Click the exact visible Short card on screen!
-            # Horizontal cards in the Shorts shelf on screen (4-column standard desktop layout)
+            # Horizontal cards in the Shorts shelf on screen (5-column modern desktop layout with left nav)
             shorts_grid = {
-                1: (int(left + width * 0.28), int(top + height * 0.45)),  # 1st Short Card
-                2: (int(left + width * 0.48), int(top + height * 0.45)),  # 2nd Short Card
-                3: (int(left + width * 0.68), int(top + height * 0.45)),  # 3rd Short Card
-                4: (int(left + width * 0.88), int(top + height * 0.45)),  # 4th Short Card
-                5: (int(left + width * 0.88), int(top + height * 0.45)),  # 5th Short Card (or right-most)
+                1: (int(left + width * 0.22), int(top + height * 0.46)),  # 1st Short Card (Grounded on Card #1)
+                2: (int(left + width * 0.38), int(top + height * 0.46)),  # 2nd Short Card
+                3: (int(left + width * 0.54), int(top + height * 0.46)),  # 3rd Short Card
+                4: (int(left + width * 0.70), int(top + height * 0.46)),  # 4th Short Card
+                5: (int(left + width * 0.86), int(top + height * 0.46)),  # 5th Short Card
             }
             click_x, click_y = shorts_grid.get(index, shorts_grid[1])
 

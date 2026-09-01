@@ -1,0 +1,526 @@
+[
+  {
+    "text": "pehli short chalao",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "first short chala",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "first short laga do",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "sabse pehli wali short play karo",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "jo pehli short dikh rahi hai woh kholo",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "shorts mein first wali laga",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "upar jo pehli short hai use play kar",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "bhai pehli wali short chala",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "yaar first short chala de",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "sabse pehle wali short play kar",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "pehle number wali short kholo",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "shorts mein top wali chala",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "first wali open kar",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "jo sabse pehli short hai woh laga de",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "number one wali short chalao",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "zara pehli short laga dena",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "ek kaam karo pehla short chala do",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "short mein jo top pe hai use play karo",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "pahli short chalao",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "pehli reel laga",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "\u092a\u0939\u0932\u0940 \u0936\u0949\u0930\u094d\u091f \u091a\u0932\u093e\u0913",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "\u0938\u092c\u0938\u0947 \u092a\u0939\u0932\u0940 \u0935\u093e\u0932\u0940 \u0936\u0949\u0930\u094d\u091f \u091a\u0932\u093e \u0926\u094b",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "\u092a\u0939\u0932\u0947 \u0928\u0902\u092c\u0930 \u0935\u093e\u0932\u0940 \u0936\u0949\u0930\u094d\u091f \u0916\u094b\u0932\u094b",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "\u092a\u0939\u0932\u093e \u0936\u0949\u0930\u094d\u091f \u092a\u094d\u0932\u0947 \u0915\u0930\u094b",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "\u092a\u0939\u0932\u0940 \u0935\u093e\u0932\u0940 \u0936\u0949\u0930\u094d\u091f \u0932\u0917\u093e \u0926\u094b",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "\u0936\u0949\u0930\u094d\u091f\u094d\u0938 \u092e\u0947\u0902 \u092a\u0939\u0932\u0940 \u0935\u093e\u0932\u0940 \u091a\u0932\u093e",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "YouTube pe pehli short chalao",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "play first short on youtube",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "open the first short",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "launch top short",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "doosri short chalao",
+    "action": "youtube.play_short",
+    "ordinal": 2
+  },
+  {
+    "text": "second short laga do",
+    "action": "youtube.play_short",
+    "ordinal": 2
+  },
+  {
+    "text": "dusri wali short play karo",
+    "action": "youtube.play_short",
+    "ordinal": 2
+  },
+  {
+    "text": "teesri short chala",
+    "action": "youtube.play_short",
+    "ordinal": 3
+  },
+  {
+    "text": "third short laga de",
+    "action": "youtube.play_short",
+    "ordinal": 3
+  },
+  {
+    "text": "chauthi short play karo",
+    "action": "youtube.play_short",
+    "ordinal": 4
+  },
+  {
+    "text": "4th short kholo",
+    "action": "youtube.play_short",
+    "ordinal": 4
+  },
+  {
+    "text": "paanchvi short chalao",
+    "action": "youtube.play_short",
+    "ordinal": 5
+  },
+  {
+    "text": "5th short open karo",
+    "action": "youtube.play_short",
+    "ordinal": 5
+  },
+  {
+    "text": "\u0926\u0942\u0938\u0930\u0940 \u0936\u0949\u0930\u094d\u091f \u091a\u0932\u093e\u0913",
+    "action": "youtube.play_short",
+    "ordinal": 2
+  },
+  {
+    "text": "\u0924\u0940\u0938\u0930\u0940 \u0936\u0949\u0930\u094d\u091f \u0932\u0917\u093e\u0913",
+    "action": "youtube.play_short",
+    "ordinal": 3
+  },
+  {
+    "text": "\u091a\u094c\u0925\u0940 \u0936\u0949\u0930\u094d\u091f \u092a\u094d\u0932\u0947 \u0915\u0930\u094b",
+    "action": "youtube.play_short",
+    "ordinal": 4
+  },
+  {
+    "text": "next short",
+    "action": "youtube.next_short"
+  },
+  {
+    "text": "agla short chala",
+    "action": "youtube.next_short"
+  },
+  {
+    "text": "agli short lagao",
+    "action": "youtube.next_short"
+  },
+  {
+    "text": "next short chala do",
+    "action": "youtube.next_short"
+  },
+  {
+    "text": "agla wala short kholo",
+    "action": "youtube.next_short"
+  },
+  {
+    "text": "short niche scroll karo",
+    "action": "youtube.next_short"
+  },
+  {
+    "text": "iske baad wali short chalao",
+    "action": "youtube.next_short"
+  },
+  {
+    "text": "aage wali short play karo",
+    "action": "youtube.next_short"
+  },
+  {
+    "text": "bhai agla short laga",
+    "action": "youtube.next_short"
+  },
+  {
+    "text": "yaar next short dikhao",
+    "action": "youtube.next_short"
+  },
+  {
+    "text": "\u0905\u0917\u0932\u093e \u0936\u0949\u0930\u094d\u091f \u091a\u0932\u093e\u0913",
+    "action": "youtube.next_short"
+  },
+  {
+    "text": "\u0905\u0917\u0932\u0940 \u0936\u0949\u0930\u094d\u091f \u0932\u0917\u093e \u0926\u094b",
+    "action": "youtube.next_short"
+  },
+  {
+    "text": "\u0905\u0917\u0932\u093e \u0936\u0949\u0930\u094d\u091f \u092a\u094d\u0932\u0947 \u0915\u0930\u094b",
+    "action": "youtube.next_short"
+  },
+  {
+    "text": "pichla short",
+    "action": "youtube.previous_short"
+  },
+  {
+    "text": "previous short chala",
+    "action": "youtube.previous_short"
+  },
+  {
+    "text": "pichli short lagao",
+    "action": "youtube.previous_short"
+  },
+  {
+    "text": "peeche wali short play karo",
+    "action": "youtube.previous_short"
+  },
+  {
+    "text": "pichhla short dikhao",
+    "action": "youtube.previous_short"
+  },
+  {
+    "text": "short upar scroll karo",
+    "action": "youtube.previous_short"
+  },
+  {
+    "text": "\u092a\u093f\u091b\u0932\u093e \u0936\u0949\u0930\u094d\u091f \u091a\u0932\u093e\u0913",
+    "action": "youtube.previous_short"
+  },
+  {
+    "text": "\u092a\u093f\u091b\u0932\u0940 \u0936\u0949\u0930\u094d\u091f \u0932\u0917\u093e\u0913",
+    "action": "youtube.previous_short"
+  },
+  {
+    "text": "pause",
+    "action": "youtube.pause"
+  },
+  {
+    "text": "pause karo",
+    "action": "youtube.pause"
+  },
+  {
+    "text": "rok do",
+    "action": "youtube.pause"
+  },
+  {
+    "text": "video rok do",
+    "action": "youtube.pause"
+  },
+  {
+    "text": "thoda rok",
+    "action": "youtube.pause"
+  },
+  {
+    "text": "abhi ke liye rok do",
+    "action": "youtube.pause"
+  },
+  {
+    "text": "hold karo",
+    "action": "youtube.pause"
+  },
+  {
+    "text": "stop video",
+    "action": "youtube.pause"
+  },
+  {
+    "text": "bhai video pause kar",
+    "action": "youtube.pause"
+  },
+  {
+    "text": "yaar thodi der rok de",
+    "action": "youtube.pause"
+  },
+  {
+    "text": "\u092a\u0949\u091c \u0915\u0930\u094b",
+    "action": "youtube.pause"
+  },
+  {
+    "text": "\u0930\u094b\u0915 \u0926\u094b",
+    "action": "youtube.pause"
+  },
+  {
+    "text": "\u0935\u0940\u0921\u093f\u092f\u094b \u0930\u094b\u0915\u094b",
+    "action": "youtube.pause"
+  },
+  {
+    "text": "resume",
+    "action": "youtube.resume"
+  },
+  {
+    "text": "resume karo",
+    "action": "youtube.resume"
+  },
+  {
+    "text": "chala do",
+    "action": "youtube.resume"
+  },
+  {
+    "text": "phir se chalao",
+    "action": "youtube.resume"
+  },
+  {
+    "text": "continue karo",
+    "action": "youtube.resume"
+  },
+  {
+    "text": "video wapas chalao",
+    "action": "youtube.resume"
+  },
+  {
+    "text": "unpause",
+    "action": "youtube.resume"
+  },
+  {
+    "text": "\u091a\u093e\u0932\u0942 \u0915\u0930\u094b",
+    "action": "youtube.resume"
+  },
+  {
+    "text": "\u0926\u094b\u092c\u093e\u0930\u093e \u091a\u0932\u093e\u0913",
+    "action": "youtube.resume"
+  },
+  {
+    "text": "fullscreen",
+    "action": "youtube.fullscreen"
+  },
+  {
+    "text": "fullscreen karo",
+    "action": "youtube.fullscreen"
+  },
+  {
+    "text": "screen badi karo",
+    "action": "youtube.fullscreen"
+  },
+  {
+    "text": "bada karo",
+    "action": "youtube.fullscreen"
+  },
+  {
+    "text": "large screen kar do",
+    "action": "youtube.fullscreen"
+  },
+  {
+    "text": "\u092b\u0941\u0932\u0938\u094d\u0915\u094d\u0930\u0940\u0928 \u0915\u0930\u094b",
+    "action": "youtube.fullscreen"
+  },
+  {
+    "text": "aage karo",
+    "action": "youtube.seek_forward"
+  },
+  {
+    "text": "10 second aage badhao",
+    "action": "youtube.seek_forward"
+  },
+  {
+    "text": "fast forward",
+    "action": "youtube.seek_forward"
+  },
+  {
+    "text": "thoda aage kar do",
+    "action": "youtube.seek_forward"
+  },
+  {
+    "text": "peeche karo",
+    "action": "youtube.seek_backward"
+  },
+  {
+    "text": "10 sec peeche karo",
+    "action": "youtube.seek_backward"
+  },
+  {
+    "text": "rewind karo",
+    "action": "youtube.seek_backward"
+  },
+  {
+    "text": "thoda peeche le jao",
+    "action": "youtube.seek_backward"
+  },
+  {
+    "text": "volume badhao",
+    "action": "youtube.volume_up"
+  },
+  {
+    "text": "aawaz badhao",
+    "action": "youtube.volume_up"
+  },
+  {
+    "text": "volume kam karo",
+    "action": "youtube.volume_down"
+  },
+  {
+    "text": "aawaz kam karo",
+    "action": "youtube.volume_down"
+  },
+  {
+    "text": "mute karo",
+    "action": "youtube.mute"
+  },
+  {
+    "text": "aawaz band kar do",
+    "action": "youtube.mute"
+  },
+  {
+    "text": "unmute karo",
+    "action": "youtube.unmute"
+  },
+  {
+    "text": "aawaz kholo",
+    "action": "youtube.unmute"
+  },
+  {
+    "text": "pause mat karna",
+    "action": "youtube.none_negated"
+  },
+  {
+    "text": "video mat rokna",
+    "action": "youtube.none_negated"
+  },
+  {
+    "text": "next short mat chala",
+    "action": "youtube.none_negated"
+  },
+  {
+    "text": "volume kam mat karo",
+    "action": "youtube.none_negated"
+  },
+  {
+    "text": "second nahi first short chalao",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "third nahi first wali short laga",
+    "action": "youtube.play_short",
+    "ordinal": 1
+  },
+  {
+    "text": "pause nahi mute karo",
+    "action": "youtube.mute"
+  },
+  {
+    "text": "YouTube pe MrBeast search karo",
+    "action": "youtube.search",
+    "query": "mrbeast"
+  },
+  {
+    "text": "CarryMinati search karo",
+    "action": "youtube.search",
+    "query": "carryminati"
+  },
+  {
+    "text": "Technical Guruji dhundo",
+    "action": "youtube.search",
+    "query": "technical guruji"
+  },
+  {
+    "text": "Aarush Laila song search karo",
+    "action": "youtube.search",
+    "query": "aarush laila song"
+  },
+  {
+    "text": "YouTube kholo",
+    "action": "youtube.open"
+  }
+]

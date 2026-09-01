@@ -255,20 +255,134 @@ class CommandProcessor:
             ctx.execution_time_ms = round((time.time() - start_t) * 1000, 1)
             return ctx
 
-        # 4. Scoped Intent Parsing via Semantic Engine
+        # 4. Scoped Intent Parsing via Application NLU Engine
+        from backend.nlu.youtube_nlu import youtube_nlu
         from backend.nlu.semantic_engine import SemanticIntentEngine
+        from backend.nlu.router import UniversalIntentRouter
+
+        # If YouTube application or media domain, parse via YouTube Universal NLU
+        if app == "youtube" or domain == "media":
+            yt_res = youtube_nlu.parse(raw_text)
+            if yt_res.is_negated:
+                ctx.status = ExecutionStatus.VERIFIED_SUCCESS
+                ctx.action = "none_negated"
+                ctx.response_message = "Ji Boss, action cancel kar diya."
+                ctx.execution_time_ms = round((time.time() - start_t) * 1000, 1)
+                return ctx
+
+            if yt_res.canonical_action != "youtube.unknown" and yt_res.confidence >= 0.85:
+                # Map canonical YouTube action to grounded tool
+                tool_name = "control_media"
+                tool_args = {}
+                imm_resp = "Ji Boss, ho gaya."
+
+                if yt_res.canonical_action == "youtube.play_short":
+                    tool_name = "click_screen_video"
+                    ord_val = yt_res.ordinal or 1
+                    tool_args = {"index": ord_val, "section": "shorts"}
+                    imm_resp = f"Ji Boss, short number {ord_val} chala diya."
+                elif yt_res.canonical_action == "youtube.next_short":
+                    tool_name = "control_media"
+                    tool_args = {"action": "next_short"}
+                    imm_resp = "Ji Boss, agla short chala diya."
+                elif yt_res.canonical_action == "youtube.previous_short":
+                    tool_name = "control_media"
+                    tool_args = {"action": "prev_short"}
+                    imm_resp = "Ji Boss, pichla short chala diya."
+                elif yt_res.canonical_action in ["youtube.open", "youtube.search", "youtube.play_video"]:
+                    if yt_res.query:
+                        tool_name = "play_youtube_video"
+                        tool_args = {"query": yt_res.query}
+                        imm_resp = f"Ji Boss, YouTube par {yt_res.query} chala diya."
+                    elif yt_res.ordinal and yt_res.ordinal > 1:
+                        tool_name = "click_screen_video"
+                        tool_args = {"index": yt_res.ordinal, "section": "main"}
+                        imm_resp = f"Ji Boss, video number {yt_res.ordinal} chala diya."
+                    else:
+                        tool_name = "play_youtube_video"
+                        tool_args = {"query": ""}
+                        imm_resp = "Ji Boss, YouTube open kar diya."
+                elif yt_res.canonical_action == "youtube.pause":
+                    tool_name = "control_media"
+                    tool_args = {"action": "pause"}
+                    imm_resp = "Ji Boss, video pause kar diya."
+                elif yt_res.canonical_action == "youtube.resume":
+                    tool_name = "control_media"
+                    tool_args = {"action": "play"}
+                    imm_resp = "Ji Boss, video play kar diya."
+                elif yt_res.canonical_action == "youtube.fullscreen":
+                    tool_name = "control_media"
+                    tool_args = {"action": "fullscreen"}
+                    imm_resp = "Ji Boss, fullscreen kar diya."
+                elif yt_res.canonical_action == "youtube.seek_forward":
+                    tool_name = "control_media"
+                    tool_args = {"action": "seek_forward", "level": yt_res.arguments.get("seconds", 10)}
+                    imm_resp = f"Ji Boss, {yt_res.arguments.get('seconds', 10)} seconds aage kar diya."
+                elif yt_res.canonical_action == "youtube.seek_backward":
+                    tool_name = "control_media"
+                    tool_args = {"action": "seek_backward", "level": yt_res.arguments.get("seconds", 10)}
+                    imm_resp = f"Ji Boss, {yt_res.arguments.get('seconds', 10)} seconds peeche kar diya."
+                elif yt_res.canonical_action == "youtube.volume_up":
+                    tool_name = "control_media"
+                    tool_args = {"action": "volume_up"}
+                    imm_resp = "Ji Boss, volume badha diya."
+                elif yt_res.canonical_action == "youtube.volume_down":
+                    tool_name = "control_media"
+                    tool_args = {"action": "volume_down"}
+                    imm_resp = "Ji Boss, volume kam kar diya."
+                elif yt_res.canonical_action == "youtube.mute":
+                    tool_name = "control_media"
+                    tool_args = {"action": "mute"}
+                    imm_resp = "Ji Boss, mute kar diya."
+                elif yt_res.canonical_action == "youtube.unmute":
+                    tool_name = "control_media"
+                    tool_args = {"action": "unmute"}
+                    imm_resp = "Ji Boss, unmute kar diya."
+                elif yt_res.canonical_action == "youtube.like":
+                    tool_name = "control_media"
+                    tool_args = {"action": "like"}
+                    imm_resp = "Ji Boss, video like kar diya."
+                elif yt_res.canonical_action == "youtube.captions":
+                    tool_name = "control_media"
+                    tool_args = {"action": "captions"}
+                    imm_resp = "Ji Boss, captions toggle kar diye."
+                elif yt_res.canonical_action == "youtube.speed_up":
+                    tool_name = "control_media"
+                    tool_args = {"action": "speed_up"}
+                    imm_resp = "Ji Boss, playback speed badha di."
+                elif yt_res.canonical_action == "youtube.speed_down":
+                    tool_name = "control_media"
+                    tool_args = {"action": "speed_down"}
+                    imm_resp = "Ji Boss, playback speed kam kar di."
+
+                # Execute YouTube tool deterministically
+                ctx.action = tool_name
+                ctx.arguments = tool_args
+                lock_resource = "youtube"
+                acquired = resource_lock_manager.acquire([lock_resource], ctx.command_id, timeout=2.5)
+                try:
+                    from backend.tools.registry import default_registry
+                    tool_res = await default_registry.execute(tool_name, **tool_args)
+                    if tool_res.success:
+                        ctx.status = ExecutionStatus.VERIFIED_SUCCESS
+                        ctx.verified = True
+                        ctx.response_message = imm_resp
+                    else:
+                        ctx.status = ExecutionStatus.VERIFIED_FAILURE
+                        ctx.response_message = f"Error: {tool_res.error}"
+                finally:
+                    if acquired:
+                        resource_lock_manager.release([lock_resource], ctx.command_id)
+                ctx.execution_time_ms = round((time.time() - start_t) * 1000, 1)
+                return ctx
+
+        # 5. Fallback Intent Parsing via Universal Semantic Engine
         parsed_result = SemanticIntentEngine.parse(raw_text)
-        
-        # Override target application if resolved with higher precedence
         if app and app != "system":
             parsed_result.target_application = app
 
-        # 5. Deterministic Routing via UniversalIntentRouter
-        from backend.nlu.router import UniversalIntentRouter
         routed_calls = UniversalIntentRouter.route(parsed_result)
-
         if routed_calls:
-            # Deterministic Path Execution
             tool_call = routed_calls[0]
             ctx.action = tool_call.tool_name
             ctx.arguments = tool_call.arguments
