@@ -192,16 +192,20 @@ class SpeechToTextManager:
                             pre_buffer.pop(0)
 
                         ambient_rms_samples.append(rms)
-                        if len(ambient_rms_samples) > 10:
+                        if len(ambient_rms_samples) > 15:
                             ambient_rms_samples.pop(0)
 
-                        # Highly sensitive natural speech trigger (+6.0 delta above dynamic ambient baseline)
-                        threshold = ambient_mean + 6.0
+                        # Dynamically calibrate ambient baseline from real room environment
+                        ambient_mean = float(np.mean(ambient_rms_samples)) if len(ambient_rms_samples) >= 3 else rms
+
+                        # Adaptive speech trigger (+35% or +35.0 RMS above dynamic room ambient)
+                        threshold = max(ambient_mean * 1.35, ambient_mean + 35.0)
 
                         if elapsed_total > timeout:
                             return None
 
-                        if rms > threshold:
+                        # Require at least 3 initial calibration frames before triggering
+                        if len(ambient_rms_samples) >= 3 and rms > threshold:
                             speech_started = True
                             speech_peak_rms = rms
                             recorded_chunks.extend(pre_buffer)
@@ -214,12 +218,12 @@ class SpeechToTextManager:
                         if elapsed_total > phrase_time_limit:
                             break
 
-                        # Natural 0.65s silence cutoff to accommodate conversational cadence
-                        silence_cutoff = ambient_mean + 3.0
+                        # Dynamic silence cutoff (drops back near ambient floor)
+                        silence_cutoff = max(ambient_mean * 1.15, ambient_mean + 15.0)
                         if rms < silence_cutoff:
                             if silence_start_time is None:
                                 silence_start_time = time.time()
-                            elif time.time() - silence_start_time >= 0.65:
+                            elif time.time() - silence_start_time >= 0.55:
                                 break
                         else:
                             silence_start_time = None
