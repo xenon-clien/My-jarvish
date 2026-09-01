@@ -314,6 +314,14 @@ class CommandProcessor:
                     tool_name = "control_media"
                     tool_args = {"action": "fullscreen"}
                     imm_resp = "Ji Boss, fullscreen kar diya." if yt_res.arguments.get("enabled", True) else "Ji Boss, fullscreen se bahar aa gaye."
+                elif yt_res.canonical_action == "youtube.set_theater_mode":
+                    tool_name = "control_media"
+                    tool_args = {"action": "theater"}
+                    imm_resp = "Ji Boss, theater mode on kar diya." if yt_res.arguments.get("enabled", True) else "Ji Boss, theater mode band kar diya."
+                elif yt_res.canonical_action == "youtube.set_miniplayer":
+                    tool_name = "control_media"
+                    tool_args = {"action": "miniplayer"}
+                    imm_resp = "Ji Boss, miniplayer on kar diya." if yt_res.arguments.get("enabled", True) else "Ji Boss, miniplayer band kar diya."
                 elif yt_res.canonical_action in ["youtube.captions", "youtube.set_captions"]:
                     tool_name = "control_media"
                     tool_args = {"action": "captions"}
@@ -325,9 +333,10 @@ class CommandProcessor:
                     imm_resp = f"Ji Boss, playback speed {rate}x kar di."
                 elif yt_res.canonical_action == "youtube.seek_timestamp":
                     tool_name = "control_media"
-                    ts = yt_res.arguments.get("timestamp", "00:00")
-                    tool_args = {"action": "seek_forward", "level": yt_res.arguments.get("seconds", 10)}
-                    imm_resp = f"Ji Boss, video {ts} par le gaye."
+                    secs = yt_res.arguments.get("seconds", 0)
+                    raw_ts = yt_res.arguments.get("raw_timestamp", "")
+                    tool_args = {"action": "seek_timestamp", "level": secs, "time_str": raw_ts}
+                    imm_resp = f"Ji Boss, video {raw_ts or str(secs)+'s'} par le gaye."
                 elif yt_res.canonical_action == "youtube.seek_forward":
                     tool_name = "control_media"
                     tool_args = {"action": "seek_forward", "level": yt_res.arguments.get("seconds", 10)}
@@ -336,6 +345,11 @@ class CommandProcessor:
                     tool_name = "control_media"
                     tool_args = {"action": "seek_backward", "level": yt_res.arguments.get("seconds", 10)}
                     imm_resp = f"Ji Boss, {yt_res.arguments.get('seconds', 10)} seconds peeche kar diya."
+                elif yt_res.canonical_action == "youtube.set_volume":
+                    tool_name = "control_media"
+                    v_level = yt_res.arguments.get("level", 50)
+                    tool_args = {"action": "set_volume", "level": v_level}
+                    imm_resp = f"Ji Boss, volume {v_level}% kar diya."
                 elif yt_res.canonical_action == "youtube.volume_up":
                     tool_name = "control_media"
                     tool_args = {"action": "volume_up"}
@@ -352,10 +366,10 @@ class CommandProcessor:
                     tool_name = "control_media"
                     tool_args = {"action": "unmute"}
                     imm_resp = "Ji Boss, unmute kar diya."
-                elif yt_res.canonical_action == "youtube.like":
+                elif yt_res.canonical_action in ["youtube.like", "youtube.set_like"]:
                     tool_name = "control_media"
                     tool_args = {"action": "like"}
-                    imm_resp = "Ji Boss, video like kar diya."
+                    imm_resp = "Ji Boss, video like kar diya." if yt_res.arguments.get("enabled", True) else "Ji Boss, like hata diya."
                 elif yt_res.canonical_action == "youtube.replay":
                     tool_name = "control_media"
                     tool_args = {"action": "replay"}
