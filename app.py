@@ -111,13 +111,8 @@ def _start_background_services():
     """Start Voice, Gesture, and AutoSubmit background daemon services."""
     start_autosubmit_watcher()
 
-    # Start Gesture Camera Loop with real-time UI split callback
-    try:
-        from backend.plugins.gesture.gesture_loop import start_gesture_loop
-        start_gesture_loop(command_callback=_on_gesture_event)
-        logger.info("Gesture Loop initialized with Desktop UI bridge.")
-    except Exception as e:
-        logger.warning(f"Gesture Loop init failed: {e}")
+    # Camera & Gesture loop completely disabled for user privacy and security
+    logger.info("Camera & Gesture loop disabled for user privacy — camera will never be accessed.")
 
     # Start continuous background voice listener thread
     threading.Thread(target=_voice_listen_loop, daemon=True, name="JarvisVoiceListener").start()

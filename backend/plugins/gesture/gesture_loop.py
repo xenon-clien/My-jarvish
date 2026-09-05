@@ -43,12 +43,9 @@ def set_command_callback(cb: Callable[[str], None]):
 
 
 def _gesture_loop():
-    """Main gesture capture loop (runs in daemon thread)."""
-    global _running
-    try:
-        import cv2
-        import numpy as np
-        from backend.plugins.gesture.gesture_engine import GestureType, gesture_engine
+    """Main gesture capture loop — permanently disabled for user privacy."""
+    logger.info("GestureLoop: Camera is permanently disabled. No video devices will ever be queried or accessed.")
+    return
 
         # Check if MediaPipe solutions API is available
         mp_hands = None
@@ -200,18 +197,11 @@ def _gesture_loop():
 
 
 def start_gesture_loop(command_callback: Optional[Callable[[str], None]] = None):
-    """Start the gesture capture daemon thread (idempotent)."""
-    global _loop_thread, _running, _command_callback
-    with _loop_lock:
-        if _running and _loop_thread and _loop_thread.is_alive():
-            logger.debug("GestureLoop already running.")
-            return
-        if command_callback:
-            _command_callback = command_callback
-        _running = True
-        _loop_thread = threading.Thread(target=_gesture_loop, daemon=True, name="GestureLoop")
-        _loop_thread.start()
-        logger.info("GestureLoop: Gesture daemon thread started.")
+    """Completely disabled for user privacy — camera will NEVER be accessed or recorded."""
+    global _running
+    _running = False
+    logger.info("GestureLoop: Camera is permanently DISABLED for user privacy.")
+    return
 
 
 def stop_gesture_loop():

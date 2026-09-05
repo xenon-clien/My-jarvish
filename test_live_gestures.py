@@ -5,11 +5,9 @@ import math
 import sys
 sys.path.insert(0, r"c:\Users\shivam\Downloads\chatbot")
 
-print("=== TESTING HAND GESTURE LIVE CAMERA DETECTION ===")
-cap = cv2.VideoCapture(0)
-if not cap.isOpened():
-    print("❌ Error: Could not open webcam index 0!")
-    sys.exit(1)
+print("=== HAND GESTURE CAMERA PERMANENTLY DISABLED ===")
+print("Camera access has been disabled for user privacy.")
+sys.exit(0)
 
 print("Webcam opened successfully! Hold your hand (Open Palm or Fist) in front of camera for 5 seconds...")
 
