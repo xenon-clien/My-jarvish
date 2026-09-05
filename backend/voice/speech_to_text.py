@@ -228,19 +228,20 @@ class SpeechToTextManager:
 
                     # Dynamic Multi-Stage Threshold Calculation
                     noise_ceiling = max(self.noise_profile.p90_rms, self.noise_profile.mean_rms + 20.0, 80.0)
-                    adaptive_margin = max(35.0, self.noise_profile.p90_rms * 0.25)
+                    adaptive_margin = max(30.0, self.noise_profile.p90_rms * 0.20)
                     speech_start_threshold = noise_ceiling + adaptive_margin
-                    silence_cutoff = max(self.noise_profile.p75_rms, self.noise_profile.median_rms * 1.15 + 15.0)
+                    # Silence cutoff: Ambient room noise (200-225 RMS) is recognized as silence; speech is >300 RMS
+                    silence_cutoff = max(noise_ceiling + 25.0, self.noise_profile.mean_rms + 25.0)
 
                     # Frame-level speech candidate evidence (energy above noise + separation)
-                    is_speech_frame = (rms > speech_start_threshold * 0.88) and (rms - noise_ceiling > 18.0)
+                    is_speech_frame = (rms > speech_start_threshold * 0.85) and (rms - noise_ceiling > 12.0)
 
                     if is_debug and time.time() - last_debug_log_time >= 0.40:
                         last_debug_log_time = time.time()
                         print(
                             f"  [VOICE_DEBUG] rms={rms:5.1f} | peak={peak:4d} | noise_ceiling={noise_ceiling:5.1f} | "
-                            f"start_thresh={speech_start_threshold:5.1f} | candidate_frames={sum(candidate_window)}/5 | "
-                            f"speech_started={speech_started}",
+                            f"start_thresh={speech_start_threshold:5.1f} | silence_cutoff={silence_cutoff:5.1f} | "
+                            f"candidate_frames={sum(candidate_window)}/5 | speech_started={speech_started}",
                             flush=True
                         )
 
@@ -272,8 +273,8 @@ class SpeechToTextManager:
                         if elapsed_total > timeout:
                             return None
 
-                        # Multi-Stage Gate: Require at least 3 of last 5 frames AND current frame above start threshold
-                        if sum(candidate_window) >= 3 and rms > speech_start_threshold:
+                        # Multi-Stage Gate: Require at least 2 of last 5 frames AND current frame above start threshold
+                        if sum(candidate_window) >= 2 and rms > speech_start_threshold:
                             speech_started = True
                             speech_start_time = time.time()
                             speech_peak_rms = rms
@@ -291,10 +292,10 @@ class SpeechToTextManager:
 
                         speech_duration = time.time() - speech_start_time
 
-                        # False-start protection: If within first 0.35s the signal collapses back to ambient noise, abort candidate
-                        if speech_duration >= 0.30 and len(recorded_chunks) <= (max_pre_buffer_chunks + 5):
+                        # False-start protection: only abort if amplitude never reached speech level and drops below mean noise
+                        if speech_duration >= 0.35 and len(recorded_chunks) <= (max_pre_buffer_chunks + 6):
                             recent_rms = rms
-                            if recent_rms < noise_ceiling:
+                            if recent_rms < self.noise_profile.mean_rms and speech_peak_amp < 600:
                                 if is_debug:
                                     print(f"  [VAD_FALSE_START] Transient noise spike aborted (duration: {speech_duration:.2f}s).", flush=True)
                                 # Reset state back to listening
@@ -307,28 +308,28 @@ class SpeechToTextManager:
                             break
 
                         # Dynamic silence cutoff hysteresis
-                        if rms < silence_cutoff:
+                        if rms <= silence_cutoff:
                             if silence_start_time is None:
                                 silence_start_time = time.time()
                             elif time.time() - silence_start_time >= silence_limit:
                                 if is_debug:
-                                    print(f"  [VAD_SPEECH_END] Silence duration: {time.time() - silence_start_time:.2f}s, Total: {speech_duration:.2f}s", flush=True)
+                                    print(f"  [VAD_SPEECH_END] Silence detected: {time.time() - silence_start_time:.2f}s, Total speech: {speech_duration:.2f}s", flush=True)
                                 break
                         else:
                             silence_start_time = None
 
-            if not recorded_chunks or not speech_started or len(recorded_chunks) < 4:
+            if not recorded_chunks or not speech_started or len(recorded_chunks) < 3:
                 return None
 
             # 1. Combine recorded chunks (Natively 16kHz Mono)
             raw_16k = np.frombuffer(b"".join(recorded_chunks), dtype=np.int16).astype(np.float64)
 
-            # 2. Post-Capture Validity Check (Do NOT send noise to Google STT)
+            # 2. Post-Capture Validity Check (Do NOT send pure flat silence to Google STT)
             phrase_peak = float(np.max(np.abs(raw_16k))) if len(raw_16k) > 0 else 0
             phrase_mean_rms = float(np.sqrt(np.mean(raw_16k ** 2))) if len(raw_16k) > 0 else 0
-            if phrase_mean_rms < self.noise_profile.p90_rms + 25.0 or phrase_peak < self.noise_profile.typical_peak * 1.25:
+            if phrase_mean_rms < self.noise_profile.mean_rms and phrase_peak < 600:
                 if is_debug:
-                    print(f"  [STT_SKIPPED] Captured audio has no SNR separation from ambient noise (Peak: {phrase_peak:.0f}, RMS: {phrase_mean_rms:.1f}).", flush=True)
+                    print(f"  [STT_SKIPPED] Captured audio has no signal separation from ambient noise (Peak: {phrase_peak:.0f}, RMS: {phrase_mean_rms:.1f}).", flush=True)
                 return None
 
             # 3. Studio AGC Normalization: Boost quiet natural speech up to 30x

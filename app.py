@@ -79,7 +79,7 @@ def _voice_listen_loop():
                 continue
 
             if stt_manager.enabled and stt_manager.is_microphone_available():
-                user_text = stt_manager.listen_once(timeout=6.0, phrase_time_limit=12.0, silence_limit=0.95)
+                user_text = stt_manager.listen_once(timeout=4.0, phrase_time_limit=5.0, silence_limit=0.45)
                 if user_text and len(user_text.strip()) > 1:
                     tts_manager.stop()
                     logger.info(f"Voice speech captured: '{user_text}'")

@@ -552,8 +552,9 @@
             }
         }
 
-        // Real-time status polling for speaking & gesture events
+        // Real-time status polling only when running in hosted browser mode
         async function pollStatus() {
+            if (window.pywebview || window.location.protocol === 'file:') return;
             try {
                 const res = await fetch('/api/status');
                 if (res.ok) {
@@ -566,7 +567,9 @@
                 }
             } catch (e) {}
         }
-        setInterval(pollStatus, 500);
+        if (!window.pywebview && window.location.protocol !== 'file:') {
+            setInterval(pollStatus, 2000);
+        }
 
         // ── User Input & Command Bridge ──────────────────────────────────────
         async function sendCommand() {
