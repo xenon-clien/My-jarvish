@@ -306,6 +306,35 @@ class YouTubeSemanticEngine:
                 normalized_text=corrected_text
             )
 
+        # ── 3b. Play Video by Ordinal (e.g. "play first video", "pehla video chalao", "2nd video play karo") ───
+        if ordinal is not None and re.search(r"\b(?:video|gaana|song|card|result|item|waala|wali|wala)\b", corrected_text):
+            rem = corrected_text
+            for ord_pat in [
+                r"\b(?:pehla|pehli|pehle|pahla|pahli|first|1st|one|number\s*(?:1|one)|top|sabse\s+pehla)\b",
+                r"\b(?:dusra|dusri|doosra|doosri|second|2nd|two|number\s*(?:2|two))\b",
+                r"\b(?:teesra|teesri|tisra|tisri|third|3rd|three|number\s*(?:3|three))\b",
+                r"\b(?:chautha|chauthi|fourth|4th|four|number\s*(?:4|four))\b",
+                r"\b(?:paanchva|paanchvi|fifth|5th|five|number\s*(?:5|five))\b",
+                r"\b(?:video|song|gaana|chalao|play|laga|kholo|open|launch|start|dikha)\b"
+            ]:
+                rem = re.sub(ord_pat, " ", rem, flags=re.IGNORECASE)
+            for f in cls.FILLERS:
+                rem = re.sub(f, " ", rem, flags=re.IGNORECASE)
+            rem = " ".join(rem.split()).strip()
+
+            if not rem or len(rem) < 2:
+                return YouTubeSemanticResult(
+                    canonical_action="youtube.play_video",
+                    arguments={"ordinal": ordinal},
+                    content_type="video",
+                    ordinal=ordinal,
+                    query="",
+                    desired_state="VIDEO_PLAYING",
+                    confidence=0.98,
+                    raw_text=raw_text,
+                    normalized_text=corrected_text
+                )
+
         # ── 4. Fullscreen State-Aware (Desired State: ON vs OFF) ─────────────
         if re.search(r"\b(?:fullscreen\s+(?:hatao|exit|band|close|hata)|exit\s+fullscreen|chhota\s+karo)\b", corrected_text):
             return YouTubeSemanticResult(

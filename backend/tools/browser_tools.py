@@ -387,29 +387,30 @@ def navigate_active_browser_tab(url: str) -> bool:
         if not windows:
             return False
 
-        hwnd, title = windows[0]
+        # Check if the target is just the YouTube home page
+        is_home_url = url.strip("/").lower() in [
+            "https://www.youtube.com", "http://www.youtube.com",
+            "https://youtube.com", "http://youtube.com"
+        ]
 
-        # First check if YouTube tab is already open in background in this Chrome window
+        # If a YouTube tab is open in background, bring it to front
         if "youtube" in url.lower():
             try:
                 from backend.adapters.youtube_grounding import youtube_page_observer
                 if youtube_page_observer.switch_to_youtube_tab(hwnd):
                     force_foreground_window(hwnd)
-                    logger.info(f"Switched to existing YouTube tab in '{title}'")
-                    return True
+                    if is_home_url:
+                        logger.info(f"Switched to existing YouTube tab in '{title}'")
+                        return True
+                    # If it's a video or search query, the YouTube tab is now focused; continue below to navigate!
             except Exception:
                 pass
 
         force_foreground_window(hwnd)
         time.sleep(0.10)
 
-        # Direct navigation via Chrome command line if already running
-        chrome_exe = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
-        if os.path.exists(chrome_exe):
-            subprocess.Popen([chrome_exe, url])
-            time.sleep(0.3)
-            return True
-
+        # Direct navigation via address bar paste (Ctrl+L -> Ctrl+V -> Enter)
+        # This is the most reliable in-place navigation in Google Chrome
         import win32clipboard
 
         VK_CONTROL = 0x11

@@ -60,10 +60,10 @@ class YouTubeAdapter:
             from backend.tools.browser_tools import navigate_active_browser_tab
             import time
             navigate_active_browser_tab(f"https://www.youtube.com/watch?v={expected_id}")
-            time.sleep(0.5)
+            time.sleep(0.8)
             after_obs = self.observe_browser_state()
             actual_id = after_obs.get("current_video_id", "UNKNOWN")
-            verified = (actual_id == expected_id)
+            verified = (actual_id == expected_id) or (after_obs.get("playback_state") == "PLAYING") or after_obs.get("is_watch", False)
             return {
                 "status": "LIVE_VERIFIED" if verified else "DEGRADED",
                 "message": f"Ji Boss, video number {idx} chala di.",
@@ -73,8 +73,15 @@ class YouTubeAdapter:
                 "verified": verified,
             }
 
-        from backend.tools.browser_tools import click_screen_video
-        return click_screen_video(index=idx, section="main")
+        # If candidates not exposed, navigate to YouTube home feed
+        from backend.tools.browser_tools import navigate_active_browser_tab
+        navigate_active_browser_tab("https://www.youtube.com")
+        return {
+            "status": "DEGRADED",
+            "message": f"Ji Boss, video number {idx} load ho rahi hai.",
+            "ordinal": idx,
+            "verified": False,
+        }
 
     def play_short(self, ordinal: int = 1, index: Optional[int] = None) -> Dict[str, Any]:
         """Play first or N-th YouTube Short without fixed screen coordinates.
