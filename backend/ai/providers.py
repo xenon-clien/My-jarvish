@@ -6,9 +6,14 @@ Supports pluggable providers:
 - Direct OpenAI / Gemini / Ollama
 """
 from abc import ABC, abstractmethod
+from datetime import datetime
+from enum import Enum
 import json
+import os
+from pathlib import Path
+import threading
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 import httpx
 from pydantic import BaseModel, Field
 
@@ -42,6 +47,218 @@ class AIProvider(ABC):
     ) -> BaseAIResponse:
         """Generate a response or request tool calls given conversation messages and tool schemas."""
         pass
+
+class ProviderStatus(str, Enum):
+    AVAILABLE = "AVAILABLE"
+    TEMPORARILY_DEGRADED = "TEMPORARILY_DEGRADED"
+    DISABLED_QUOTA = "DISABLED_QUOTA"
+    DISABLED_AUTH = "DISABLED_AUTH"
+    DISABLED_ACCESS = "DISABLED_ACCESS"
+
+
+class ErrorCategory(str, Enum):
+    CATEGORY_A_TEMPORARY = "CATEGORY_A_TEMPORARY"
+    CATEGORY_B_QUOTA_EXHAUSTED = "CATEGORY_B_QUOTA_EXHAUSTED"
+    CATEGORY_C_AUTH_INVALID = "CATEGORY_C_AUTH_INVALID"
+    CATEGORY_D_MODEL_CONFIG = "CATEGORY_D_MODEL_CONFIG"
+
+
+class AstraPersistedState(BaseModel):
+    """Persisted circuit-breaker and quota state for Astra across restarts."""
+    status: ProviderStatus = ProviderStatus.AVAILABLE
+    reason: Optional[str] = None
+    last_error_time: float = 0.0
+    retry_after: float = 0.0
+    consecutive_failures: int = 0
+    total_requests: int = 0
+    successful_requests: int = 0
+    fallback_requests: int = 0
+    last_used_model: str = "gpt-6-astra"
+    updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+
+class AstraAPIError(Exception):
+    """Custom exception containing classified category and status code for Astra errors."""
+    def __init__(self, status_code: int, category: ErrorCategory, message: str):
+        super().__init__(f"[{category.value}] HTTP {status_code}: {message}")
+        self.status_code = status_code
+        self.category = category
+        self.error_message = message
+
+
+class AstraProvider(AIProvider):
+    """Primary AI provider calling OpenAI GPT-6 Astra via Experiential Labs OpenAI-compatible gateway."""
+
+    def __init__(self, settings: Optional[Settings] = None):
+        self.settings = settings or get_settings()
+        self.api_key = getattr(self.settings, "ASTRA_API_KEY", "") or getattr(self.settings, "OPENAI_API_KEY", "")
+        self.model = getattr(self.settings, "ASTRA_MODEL", "gpt-6-astra")
+        self.base_url = getattr(self.settings, "ASTRA_BASE_URL", "https://api.experientiallabs.ai/v1")
+        self.timeout = float(getattr(self.settings, "ASTRA_TIMEOUT_SECONDS", 15.0))
+
+    def classify_error(
+        self,
+        status_code: int,
+        response_text: str,
+        exc: Optional[Exception] = None
+    ) -> Tuple[ErrorCategory, str]:
+        """Classify Astra gateway errors into distinct operational categories.
+        
+        Category A: Temporary (500, 502, 503, 504, network timeout, concurrency rate limits).
+        Category B: Quota Exhausted / Organization Under Review / Balance Expired.
+        Category C: Authentication / Invalid API Key (401).
+        Category D: Model configuration / Bad request (400, 404).
+        """
+        text_lower = (response_text or "").lower()
+
+        # Category B Check: Quota Exhausted / Org Review / Billing
+        quota_signatures = [
+            "insufficient_quota",
+            "org_under_review",
+            "under review",
+            "quota",
+            "billing",
+            "exceeded your current quota",
+            "exceeded your balance",
+            "credit limit",
+        ]
+        has_quota_signature = any(sig in text_lower for sig in quota_signatures)
+
+        if status_code == 429:
+            if has_quota_signature:
+                return (
+                    ErrorCategory.CATEGORY_B_QUOTA_EXHAUSTED,
+                    f"Astra quota exhausted or account under review: {response_text[:300]}",
+                )
+            return (
+                ErrorCategory.CATEGORY_A_TEMPORARY,
+                f"Astra concurrency / rate limit hit (HTTP 429): {response_text[:300]}",
+            )
+
+        if status_code in [402, 403]:
+            if has_quota_signature or "forbidden" in text_lower or "payment" in text_lower:
+                return (
+                    ErrorCategory.CATEGORY_B_QUOTA_EXHAUSTED,
+                    f"Astra access forbidden / quota required (HTTP {status_code}): {response_text[:300]}",
+                )
+            return (
+                ErrorCategory.CATEGORY_C_AUTH_INVALID,
+                f"Astra forbidden / access denied (HTTP {status_code}): {response_text[:300]}",
+            )
+
+        if status_code == 401 or "invalid api key" in text_lower or "unauthorized" in text_lower:
+            return (
+                ErrorCategory.CATEGORY_C_AUTH_INVALID,
+                f"Astra authentication failure (HTTP 401): {response_text[:300]}",
+            )
+
+        if status_code in [400, 404]:
+            return (
+                ErrorCategory.CATEGORY_D_MODEL_CONFIG,
+                f"Astra model or syntax error (HTTP {status_code}): {response_text[:300]}",
+            )
+
+        if status_code in [500, 502, 503, 504]:
+            return (
+                ErrorCategory.CATEGORY_A_TEMPORARY,
+                f"Astra gateway server error (HTTP {status_code}): {response_text[:300]}",
+            )
+
+        if exc:
+            return (
+                ErrorCategory.CATEGORY_A_TEMPORARY,
+                f"Astra network / communication failure: {exc}",
+            )
+
+        return (
+            ErrorCategory.CATEGORY_A_TEMPORARY,
+            f"Astra HTTP {status_code} error: {response_text[:300]}",
+        )
+
+    async def generate_response(
+        self,
+        messages: List[Dict[str, str]],
+        tools_schema: Optional[List[Dict[str, Any]]] = None,
+    ) -> BaseAIResponse:
+        """Call Astra chat completions API endpoint with structured tool calling."""
+        if not self.api_key:
+            cat, reason = self.classify_error(401, "Astra API key not configured")
+            raise AstraAPIError(401, cat, reason)
+
+        url = f"{self.base_url.rstrip('/')}/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "HTTP-Referer": "https://github.com/jarvis-assistant",
+            "X-Title": "JARVIS Personal Assistant",
+            "Content-Type": "application/json",
+        }
+
+        # Format tool schemas into standard OpenAI format
+        openai_tools = []
+        if tools_schema:
+            for t in tools_schema:
+                if "function" in t:
+                    openai_tools.append(t)
+                else:
+                    openai_tools.append({
+                        "type": "function",
+                        "function": {
+                            "name": t.get("name"),
+                            "description": t.get("description", ""),
+                            "parameters": t.get("parameters", {"type": "object", "properties": {}}),
+                        },
+                    })
+
+        payload: Dict[str, Any] = {
+            "model": self.model,
+            "messages": messages,
+            "max_tokens": 2048,
+        }
+        if openai_tools:
+            payload["tools"] = openai_tools
+            payload["tool_choice"] = "auto"
+
+        logger.info(f"Calling Primary AI (Astra model '{self.model}') with {len(messages)} messages and {len(openai_tools)} tools...")
+
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                resp = await client.post(url, headers=headers, json=payload)
+                if resp.status_code != 200:
+                    cat, reason = self.classify_error(resp.status_code, resp.text)
+                    logger.warning(f"Astra API error (HTTP {resp.status_code}, Category: {cat.value}): {reason}")
+                    raise AstraAPIError(resp.status_code, cat, reason)
+
+                data = resp.json()
+                choice = data.get("choices", [{}])[0]
+                choice_msg = choice.get("message", {})
+
+                content = choice_msg.get("content")
+                raw_tool_calls = choice_msg.get("tool_calls", [])
+
+                parsed_tool_calls: List[ToolCall] = []
+                for tc in raw_tool_calls:
+                    fn = tc.get("function", {})
+                    fn_name = fn.get("name", "")
+                    raw_args = fn.get("arguments", "{}")
+                    try:
+                        fn_args = json.loads(raw_args) if isinstance(raw_args, str) else raw_args
+                    except Exception:
+                        fn_args = {}
+                    parsed_tool_calls.append(ToolCall(name=fn_name, arguments=fn_args))
+
+                return BaseAIResponse(
+                    content=content,
+                    tool_calls=parsed_tool_calls,
+                    raw_response=data,
+                )
+        except AstraAPIError:
+            raise
+        except (httpx.TimeoutException, httpx.ConnectError, httpx.NetworkError) as net_err:
+            cat, reason = self.classify_error(0, "", exc=net_err)
+            raise AstraAPIError(0, cat, reason)
+        except Exception as exc:
+            cat, reason = self.classify_error(0, "", exc=exc)
+            raise AstraAPIError(0, cat, reason)
 
 
 class OpenRouterProvider(AIProvider):
@@ -391,25 +608,241 @@ class MockProvider(AIProvider):
         )
 
 
-def get_ai_provider(provider_type: Optional[str] = None) -> AIProvider:
-    """Factory function to instantiate the configured AI Provider."""
-    settings = get_settings()
-    selected = (provider_type or settings.AI_PROVIDER).lower()
+class AIProviderRouter(AIProvider):
+    """Authoritative AI Provider Router with Safe Quota-Aware Failover.
+    
+    Primary: OpenAI GPT-6 Astra (gpt-6-astra)
+    Standby Fallback: Google Gemini (gemini-3.5-flash-lite)
+    Emergency Offline: MockProvider (Deterministic Local Rules)
+    
+    Features:
+    - Persistent circuit breaker (logs/ai/astra_state.json).
+    - Zero-request bypass on subsequent calls when quota is exhausted or auth is invalid.
+    - Automatic fallback to Gemini with schema preservation.
+    - Developer reset command via `/provider reset astra`.
+    """
 
-    if selected in ["gemini", "google"]:
+    def __init__(self, settings: Optional[Settings] = None, state_file_path: Optional[str] = None):
+        self.settings = settings or get_settings()
+        self.astra = AstraProvider(self.settings)
+        self.gemini = GeminiProvider(self.settings)
+        self.mock = MockProvider(self.settings)
+        self._lock = threading.RLock()
+
+        log_dir = Path(os.path.join(os.path.dirname(__file__), "..", "..", "logs", "ai")).resolve()
+        log_dir.mkdir(parents=True, exist_ok=True)
+        self.state_file = Path(state_file_path) if state_file_path else (log_dir / "astra_state.json")
+
+        self.state = AstraPersistedState()
+        self._load_state()
+
+    def _load_state(self) -> None:
+        """Load persisted circuit-breaker and quota state from disk."""
+        with self._lock:
+            if self.state_file.exists():
+                try:
+                    with open(self.state_file, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                        self.state = AstraPersistedState(**data)
+                except Exception as e:
+                    logger.warning(f"Could not read Astra state file ({e}); initializing default state.")
+
+    def _save_state(self) -> None:
+        """Persist circuit-breaker and quota state to disk."""
+        with self._lock:
+            try:
+                self.state.updated_at = datetime.now().isoformat()
+                with open(self.state_file, "w", encoding="utf-8") as f:
+                    f.write(self.state.model_dump_json(indent=2))
+            except Exception as e:
+                logger.error(f"Failed to persist Astra state: {e}")
+
+    def reset_astra_state(self) -> Dict[str, Any]:
+        """Manual developer reset command (/provider reset astra).
+        
+        Restores Astra status to AVAILABLE and re-enables live checking.
+        """
+        with self._lock:
+            self.state.status = ProviderStatus.AVAILABLE
+            self.state.reason = "Manual reset by administrator / command"
+            self.state.consecutive_failures = 0
+            self.state.retry_after = 0.0
+            self._save_state()
+            logger.info("[AIProviderRouter] Astra state manually reset to AVAILABLE. Live routing re-enabled.")
+            return self.get_status_summary()
+
+    def get_status_summary(self) -> Dict[str, Any]:
+        """Return structured diagnostic summary of AI provider routing architecture."""
+        with self._lock:
+            return {
+                "architecture": "PRIMARY: OpenAI GPT-6 Astra | FALLBACK: Google Gemini | OFFLINE: Mock",
+                "primary_provider": "astra",
+                "fallback_provider": "gemini",
+                "astra_model": self.astra.model,
+                "gemini_model": self.gemini.model,
+                "astra_status": self.state.status.value,
+                "astra_reason": self.state.reason,
+                "total_requests": self.state.total_requests,
+                "successful_requests": self.state.successful_requests,
+                "fallback_requests": self.state.fallback_requests,
+                "consecutive_failures": self.state.consecutive_failures,
+                "retry_after": self.state.retry_after,
+                "state_file": str(self.state_file),
+                "updated_at": self.state.updated_at,
+            }
+
+    async def generate_response(
+        self,
+        messages: List[Dict[str, str]],
+        tools_schema: Optional[List[Dict[str, Any]]] = None,
+    ) -> BaseAIResponse:
+        """Execute request with Astra Primary, Gemini Fallback, and Zero-Request Quota bypass."""
+        with self._lock:
+            self._load_state()
+            current_status = self.state.status
+
+        # -------------------------------------------------------------
+        # STEP 1: CIRCUIT BREAKER QUOTA / AUTH ZERO-CALL BYPASS CHECK
+        # -------------------------------------------------------------
+        if current_status in [ProviderStatus.DISABLED_QUOTA, ProviderStatus.DISABLED_AUTH, ProviderStatus.DISABLED_ACCESS]:
+            logger.info(
+                f"[AIProviderRouter] Circuit Breaker Active: Astra is {current_status.value}. "
+                f"Bypassing Astra entirely (0 network calls) -> Routing directly to Google Gemini fallback."
+            )
+            with self._lock:
+                self.state.fallback_requests += 1
+                self._save_state()
+            return await self._fallback_to_gemini(
+                messages, tools_schema, reason=f"Astra circuit breaker active ({current_status.value})"
+            )
+
+        if current_status == ProviderStatus.TEMPORARILY_DEGRADED:
+            if time.time() < self.state.retry_after:
+                remaining = round(self.state.retry_after - time.time(), 1)
+                logger.info(
+                    f"[AIProviderRouter] Astra is TEMPORARILY_DEGRADED ({remaining}s backoff remaining). "
+                    f"Routing directly to Google Gemini fallback."
+                )
+                with self._lock:
+                    self.state.fallback_requests += 1
+                    self._save_state()
+                return await self._fallback_to_gemini(
+                    messages, tools_schema, reason=f"Astra temporary degradation active ({remaining}s remaining)"
+                )
+            else:
+                logger.info("[AIProviderRouter] Temporary degradation backoff expired. Attempting probe request to Astra.")
+
+        # -------------------------------------------------------------
+        # STEP 2: PRIMARY PROVIDER INVOCATION (GPT-6 ASTRA)
+        # -------------------------------------------------------------
+        with self._lock:
+            self.state.total_requests += 1
+            self._save_state()
+
+        try:
+            response = await self.astra.generate_response(messages, tools_schema)
+            # Success: restore AVAILABLE status and reset failures
+            with self._lock:
+                self.state.status = ProviderStatus.AVAILABLE
+                self.state.consecutive_failures = 0
+                self.state.retry_after = 0.0
+                self.state.reason = None
+                self.state.successful_requests += 1
+                self._save_state()
+            return response
+        except AstraAPIError as api_err:
+            return await self._handle_astra_failure(messages, tools_schema, api_err.category, api_err.error_message)
+        except Exception as exc:
+            cat, reason = self.astra.classify_error(0, "", exc=exc)
+            return await self._handle_astra_failure(messages, tools_schema, cat, reason)
+
+    async def _handle_astra_failure(
+        self,
+        messages: List[Dict[str, str]],
+        tools_schema: Optional[List[Dict[str, Any]]],
+        category: ErrorCategory,
+        reason: str,
+    ) -> BaseAIResponse:
+        """Handle Astra failure according to error category and route to Gemini fallback."""
+        with self._lock:
+            self.state.consecutive_failures += 1
+            self.state.last_error_time = time.time()
+            self.state.reason = reason
+            self.state.fallback_requests += 1
+
+            if category == ErrorCategory.CATEGORY_B_QUOTA_EXHAUSTED:
+                self.state.status = ProviderStatus.DISABLED_QUOTA
+                logger.critical(
+                    f"[AIProviderRouter] [QUOTA_EXHAUSTED] Astra quota or account review issue: {reason}. "
+                    f"Transitioned status to DISABLED_QUOTA. Subsequent requests will immediately bypass Astra."
+                )
+            elif category == ErrorCategory.CATEGORY_C_AUTH_INVALID:
+                self.state.status = ProviderStatus.DISABLED_AUTH
+                logger.error(
+                    f"[AIProviderRouter] [AUTH_INVALID] Astra authentication failed: {reason}. "
+                    f"Transitioned status to DISABLED_AUTH. Subsequent requests will bypass Astra."
+                )
+            elif category == ErrorCategory.CATEGORY_A_TEMPORARY:
+                self.state.status = ProviderStatus.TEMPORARILY_DEGRADED
+                self.state.retry_after = time.time() + 30.0
+                logger.warning(
+                    f"[AIProviderRouter] [TEMPORARY_DEGRADATION] Astra temporary error: {reason}. "
+                    f"Degrading for 30s before retry. Falling back to Gemini."
+                )
+            else:
+                logger.warning(f"[AIProviderRouter] Astra configuration error: {reason}. Falling back to Gemini.")
+
+            self._save_state()
+
+        return await self._fallback_to_gemini(messages, tools_schema, reason=f"Astra failure: {reason}")
+
+    async def _fallback_to_gemini(
+        self,
+        messages: List[Dict[str, str]],
+        tools_schema: Optional[List[Dict[str, Any]]],
+        reason: str,
+    ) -> BaseAIResponse:
+        """Execute request using Google Gemini standby fallback, preserving tool schemas."""
+        logger.info(f"[AIProviderRouter] [FALLBACK] Executing Google Gemini standby fallback (Trigger: {reason})...")
+        try:
+            gemini_response = await self.gemini.generate_response(messages, tools_schema)
+            if gemini_response and (gemini_response.content or gemini_response.tool_calls):
+                logger.info("[AIProviderRouter] [FALLBACK_SUCCESS] Google Gemini standby fallback succeeded.")
+                return gemini_response
+        except Exception as gemini_exc:
+            logger.error(f"[AIProviderRouter] Google Gemini fallback failed: {gemini_exc}. Falling back to local offline MockProvider.")
+
+        # Ultimate safety fallback: MockProvider
+        logger.warning("[AIProviderRouter] Falling back to offline deterministic MockProvider.")
+        return await self.mock.generate_response(messages, tools_schema)
+
+
+ai_provider_router = AIProviderRouter()
+
+
+def get_ai_provider(provider_type: Optional[str] = None) -> AIProvider:
+    """Factory function to instantiate the configured AI Provider.
+    
+    Defaults to the safe AIProviderRouter (Astra Primary -> Gemini Fallback -> Mock Offline).
+    """
+    settings = get_settings()
+    primary = getattr(settings, "AI_PRIMARY_PROVIDER", "astra")
+    selected = (provider_type or primary or settings.AI_PROVIDER).lower()
+
+    if selected in ["astra", "openai", "router", "default"]:
+        return ai_provider_router
+    elif selected in ["gemini", "google"]:
         return GeminiProvider(settings=settings)
     elif selected == "openrouter":
         return OpenRouterProvider(settings=settings)
     elif selected == "mock":
         return MockProvider(settings=settings)
     else:
-        if settings.AI_API_KEY:
-            return GeminiProvider(settings=settings)
-        return MockProvider(settings=settings)
+        return ai_provider_router
 
 
 class FallbackProvider(AIProvider):
-    """Resilient provider wrapping primary (Gemini) and secondary (OpenRouter) with mock fallback."""
+    """Resilient provider wrapping primary and secondary with mock fallback."""
 
     def __init__(self, primary: AIProvider, secondary: Optional[AIProvider] = None):
         self.primary = primary
@@ -434,13 +867,12 @@ class ModelRouter:
     """Task-based AI Routing Engine.
 
     Routes low-latency simple intents to fast local execution and complex
-    reasoning / code / multi-step planning to Gemini 2.5 or OpenRouter.
+    reasoning / code / multi-step planning to Astra Primary (with Gemini Fallback).
     """
 
     def __init__(self, settings: Optional[Settings] = None):
         self.settings = settings or get_settings()
-        self.gemini = GeminiProvider(self.settings)
-        self.openrouter = OpenRouterProvider(self.settings)
+        self.ai_router = ai_provider_router
         self.mock = MockProvider(self.settings)
 
     def route_provider(self, query: str) -> AIProvider:
@@ -453,15 +885,8 @@ class ModelRouter:
         if any(w in q for w in fast_keywords) or app_registry.resolve_app(q) is not None:
             return self.mock
 
-        # Primary route: Google AI Studio Gemini 2.5 API if key is present
-        if self.settings.AI_API_KEY:
-            return FallbackProvider(self.gemini, self.openrouter if self.settings.OPENROUTER_API_KEY else self.mock)
-
-        # Secondary route: OpenRouter API
-        if self.settings.OPENROUTER_API_KEY:
-            return FallbackProvider(self.openrouter, self.mock)
-
-        return self.mock
+        # Primary route: AIProviderRouter (Astra Primary + Gemini Standby Fallback + Mock Offline)
+        return self.ai_router
 
 
 model_router = ModelRouter()

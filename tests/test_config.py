@@ -7,7 +7,7 @@ def test_default_settings():
     """Verify default settings initialization."""
     settings = Settings()
     assert settings.APP_NAME == "JARVIS"
-    assert settings.AI_PROVIDER in ["mock", "openrouter", "gemini", "openai", "ollama"]
+    assert settings.AI_PROVIDER in ["astra", "mock", "openrouter", "gemini", "openai", "ollama"]
     assert isinstance(settings.ALLOWED_DIRECTORIES, list)
 
 

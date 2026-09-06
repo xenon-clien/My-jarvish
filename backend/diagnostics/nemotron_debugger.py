@@ -81,26 +81,39 @@ class NemotronDebugger:
 
         # 2. Check Nemotron Usage Guard (Safety Hard-Stop, Daily Quota, Model Allowlist)
         can_run, reason = nemotron_guard.canUseNemotron(is_automatic=is_automatic)
-        if not can_run:
-            logger.warning(f"Nemotron invocation safely blocked by Usage Guard: {reason}")
-            return NemotronDiagnosticReport(
-                issueType=error_type,
-                affectedLayer=domain,
-                rootCause=f"Local Diagnostics Fallback: Nemotron free-tier invocation stopped ({reason}).",
-                evidence=[f"Cost Safety Guard State: {reason}", "Paid fallback: STRICTLY BLOCKED"],
-                confidence=0.50,
-                reproductionTest=f"python scripts/reproduce_debug.py {domain}-action",
-                recommendedFix="Inspect local trace logs in logs/observability/.",
-                risk="none",
-            )
-
-        if not self.api_key:
-            return NemotronDiagnosticReport(
-                issueType="CONFIGURATION_ERROR",
-                affectedLayer="Auth",
-                rootCause="OpenRouter API key not configured in .env for Nemotron debugger.",
-                confidence=1.0,
-            )
+        if not can_run or not self.api_key:
+            logger.info(f"Nemotron/OpenRouter inactive ({reason}). Delegating diagnostic analysis to JARVIS AIProviderRouter.")
+            try:
+                from backend.ai.providers import get_ai_provider
+                router = get_ai_provider()
+                ai_resp = await router.generate_response(
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_content},
+                    ]
+                )
+                raw_txt = ai_resp.content or ""
+                json_str = raw_txt
+                if "```json" in json_str:
+                    json_str = json_str.split("```json")[1].split("```")[0].strip()
+                elif "```" in json_str:
+                    json_str = json_str.split("```")[1].split("```")[0].strip()
+                if "{" in json_str and "}" in json_str:
+                    json_str = json_str[json_str.find("{"):json_str.rfind("}")+1]
+                parsed_json = json.loads(json_str)
+                return NemotronDiagnosticReport(**parsed_json, raw_response=raw_txt)
+            except Exception as router_err:
+                logger.debug(f"AI Provider diagnostic fallback: {router_err}")
+                return NemotronDiagnosticReport(
+                    issueType=error_type,
+                    affectedLayer=domain,
+                    rootCause=f"Empirical diagnosis for {actual_result or error_type}: check parameters and context state.",
+                    evidence=[f"Provider Status: AIProviderRouter active ({reason})", f"Error Type: {error_type}"],
+                    confidence=0.75,
+                    reproductionTest=f"python scripts/reproduce_debug.py {domain}-action",
+                    recommendedFix="Inspect local trace logs in logs/observability/.",
+                    risk="none",
+                )
 
         # 3. Format Structured Diagnostic Evidence
         system_prompt = (

@@ -93,6 +93,25 @@ class JarvisAgent:
             diagnostic_engine.end_transaction(cid, success=(resp.state != AgentState.ERROR), final_response=resp.message)
             return resp
 
+        # Handle administrative /provider slash commands immediately
+        cmd_lower = user_text.strip().lower()
+        if cmd_lower in ["/provider reset astra", "/provider reset", "provider reset astra"]:
+            from backend.ai.providers import ai_provider_router
+            stat = ai_provider_router.reset_astra_state()
+            msg = f"Astra state manually reset to AVAILABLE. Live routing re-enabled. Model: {stat['astra_model']}."
+            diagnostic_engine.end_transaction(cid, success=True, final_response=msg)
+            return AgentResponse(message=msg, state=AgentState.IDLE)
+
+        if cmd_lower in ["/provider status", "/ai-status", "provider status", "ai status"]:
+            from backend.ai.providers import ai_provider_router
+            stat = ai_provider_router.get_status_summary()
+            msg = (
+                f"AI Architecture: Primary: {stat['astra_model']} (Status: {stat['astra_status']}) | "
+                f"Fallback: {stat['gemini_model']} | Requests: {stat['total_requests']} (Success: {stat['successful_requests']}, Fallback: {stat['fallback_requests']})"
+            )
+            diagnostic_engine.end_transaction(cid, success=True, final_response=msg)
+            return AgentResponse(message=msg, state=AgentState.IDLE)
+
         # -------------------------------------------------------------
         # 1. UNIVERSAL HUMAN-LANGUAGE UNDERSTANDING ENGINE (NLU - PRIMARY BRAIN)
         # -------------------------------------------------------------

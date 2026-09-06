@@ -47,6 +47,7 @@ class SelfDiagnosticEngine:
             "CORE": {"attempts": 0, "success": 0, "failures": 0, "unverified": 0, "latencies": [], "last_fail": None, "errors": {}},
             "VOICE": {"attempts": 0, "success": 0, "failures": 0, "unverified": 0, "latencies": [], "last_fail": None, "errors": {}},
             "GEMINI": {"attempts": 0, "success": 0, "failures": 0, "unverified": 0, "latencies": [], "last_fail": None, "errors": {}},
+            "ASTRA": {"attempts": 0, "success": 0, "failures": 0, "unverified": 0, "latencies": [], "last_fail": None, "errors": {}},
             "NEMOTRON": {"attempts": 0, "success": 0, "failures": 0, "unverified": 0, "latencies": [], "last_fail": None, "errors": {}},
             "YOUTUBE": {"attempts": 0, "success": 0, "failures": 0, "unverified": 0, "latencies": [], "last_fail": None, "errors": {}},
             "CHROME": {"attempts": 0, "success": 0, "failures": 0, "unverified": 0, "latencies": [], "last_fail": None, "errors": {}},

@@ -33,20 +33,32 @@ class Settings(BaseSettings):
     WAKE_WORD: str = "Jarvis"
     USER_NAME: str = "Shivam"
 
-    # AI Brain Provider (Google Gemini Primary Brain)
-    # Options: mock, openrouter, gemini, openai, ollama
-    AI_PROVIDER: str = "gemini"
+    # AI Brain Provider Configuration
+    AI_PRIMARY_PROVIDER: str = "astra"
+    AI_FALLBACK_PROVIDER: str = "gemini"
+    AI_PROVIDER: str = "astra"  # backward compatibility alias
+
+    # Astra (Experiential Labs / OpenAI Compatible) Configuration
+    ASTRA_API_KEY: str = ""
+    ASTRA_MODEL: str = "gpt-6-astra"
+    ASTRA_BASE_URL: str = "https://api.experientiallabs.ai/v1"
+    ASTRA_TIMEOUT_SECONDS: float = 15.0
+    OPENAI_API_KEY: str = ""  # OpenAI standard alias
+    OPENAI_BASE_URL: str = ""
+
+    # Google Gemini Standby Fallback Configuration
     AI_API_KEY: str = ""
     AI_MODEL: str = "gemini-3.5-flash-lite"
+    GEMINI_TIMEOUT_SECONDS: float = 15.0
 
-    # OpenRouter & NVIDIA Nemotron Debugger Settings
+    # Deprecated / Disabled OpenRouter & NVIDIA Nemotron
     OPENROUTER_API_KEY: str = ""
     OPENROUTER_MODEL: str = "nvidia/nemotron-3.5-lightning:free"
     OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1"
     OPENROUTER_MAX_TOKENS: int = 2048
     NEMOTRON_MODEL: str = "nvidia/nemotron-3.5-lightning:free"
-    NEMOTRON_ENABLED: bool = True
-    NEMOTRON_DEBUG_ONLY: bool = True
+    NEMOTRON_ENABLED: bool = False
+    NEMOTRON_DEBUG_ONLY: bool = False
     NEMOTRON_MAX_FREE_REQUESTS_PER_DAY: int = 45
     NEMOTRON_WARNING_THRESHOLD: int = 40
 

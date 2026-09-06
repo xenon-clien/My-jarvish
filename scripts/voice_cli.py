@@ -216,24 +216,43 @@ async def run_voice_loop():
                 console.print(Panel(panel_text, title="🔍 Command Lifecycle Trace", border_style="cyan"))
                 continue
 
-            # ── Dual-AI & Developer Commands ──
-            if cleaned_text in ["/ai-status", "ai status", "ai-status"]:
-                from backend.diagnostics.nemotron_guard import nemotron_guard
+            # ── AI Provider Architecture & Developer Commands ──
+            if cleaned_text in ["/provider reset astra", "/provider reset", "provider reset astra"]:
+                from backend.ai.providers import ai_provider_router
+                res = ai_provider_router.reset_astra_state()
+                console.print(Panel(
+                    f"[bold green]✅ Astra State Reset Successful[/bold green]\n"
+                    f"[bold]Status:[/bold]   {res['astra_status']}\n"
+                    f"[bold]Model:[/bold]    {res['astra_model']}\n"
+                    f"[bold]Message:[/bold]  Live routing re-enabled.",
+                    title="⚡ Provider Circuit Breaker Reset",
+                    border_style="green",
+                ))
+                continue
+
+            if cleaned_text in ["/provider status", "provider status", "/ai-status", "ai status", "ai-status"]:
+                from backend.ai.providers import ai_provider_router
+                stat = ai_provider_router.get_status_summary()
+                status_color = "green" if stat['astra_status'] == "AVAILABLE" else "yellow" if stat['astra_status'] == "TEMPORARILY_DEGRADED" else "red"
                 ai_panel = (
-                    "[bold cyan]GOOGLE GEMINI[/bold cyan]\n"
-                    "  [bold]Role:[/bold]         PRIMARY BRAIN / COMMANDER\n"
-                    "  [bold]Purpose:[/bold]      Natural Language + Intent + Complex Planning + Conversation\n"
-                    "  [bold]Model:[/bold]        gemini-3.6-flash\n"
-                    "  [bold]Status:[/bold]       🟢 HEALTHY\n\n"
-                    "[bold magenta]NVIDIA NEMOTRON[/bold magenta]\n"
-                    "  [bold]Role:[/bold]         DEBUGGER / DIAGNOSTIC SPECIALIST\n"
-                    "  [bold]Purpose:[/bold]      Runtime Errors + Logs + Traces + Root Cause Diagnosis\n"
-                    "  [bold]Model:[/bold]        nvidia/nemotron-3.5-lightning:free\n"
-                    f"  [bold]Status:[/bold]       {nemotron_guard.get_status_summary()['status']}\n"
-                    f"  [bold]Requests Today:[/bold] {nemotron_guard.get_status_summary()['requests_today']} / {nemotron_guard.get_status_summary()['max_daily_requests']}\n"
-                    "  [bold]Paid Fallback:[/bold]  🚫 BLOCKED (100% Free Guarantee)"
+                    f"[bold cyan]OPENAI GPT-6 ASTRA[/bold cyan]\n"
+                    f"  [bold]Role:[/bold]              PRIMARY BRAIN / COMMANDER\n"
+                    f"  [bold]Purpose:[/bold]           Natural Language + Structured Tool Calling + Reasoning\n"
+                    f"  [bold]Model:[/bold]             {stat['astra_model']}\n"
+                    f"  [bold]Status:[/bold]            [{status_color}]{stat['astra_status']}[/{status_color}]\n"
+                    f"  [bold]Reason:[/bold]            {stat.get('astra_reason') or 'Nominal operational status'}\n"
+                    f"  [bold]Total Requests:[/bold]    {stat['total_requests']}\n"
+                    f"  [bold]Success / Fail:[/bold]    {stat['successful_requests']} / {stat['consecutive_failures']}\n"
+                    f"  [bold]Fallback Routed:[/bold]   {stat['fallback_requests']}\n\n"
+                    f"[bold blue]GOOGLE GEMINI[/bold blue]\n"
+                    f"  [bold]Role:[/bold]              STANDBY AUTOMATIC FALLBACK\n"
+                    f"  [bold]Purpose:[/bold]           Zero-Downtime High-Reliability Standby Brain\n"
+                    f"  [bold]Model:[/bold]             {stat['gemini_model']}\n"
+                    f"  [bold]Status:[/bold]            🟢 STANDBY READY (Auto-invoked on quota/degradation)\n\n"
+                    f"[bold magenta]NVIDIA NEMOTRON / OPENROUTER[/bold magenta]\n"
+                    f"  [bold]Status:[/bold]            🚫 DISABLED from normal runtime (Decoupled)"
                 )
-                console.print(Panel(ai_panel, title="🤖 DUAL-AI ARCHITECTURE STATUS", border_style="bright_blue"))
+                console.print(Panel(ai_panel, title="🤖 JARVIS AI PROVIDER ARCHITECTURE", border_style="bright_blue"))
                 continue
 
             if cleaned_text in ["/issues", "issues", "bug list"]:
