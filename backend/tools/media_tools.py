@@ -349,10 +349,30 @@ def control_media(action: str, level: Optional[int] = None, time_str: Optional[s
         # Hardware Up Arrow without clicking
         _send_key_event(0x26)  # Up Arrow
         msg = "Pichla short chala diya."
-    elif action_clean in ["mute", "unmute", "audio_mute"]:
-        # Send YouTube native 'M' key (0x4D) and Master Mute
+    elif action_clean in ["mute", "audio_mute"]:
+        try:
+            from pycaw.pycaw import AudioUtilities
+            for s in AudioUtilities.GetAllSessions():
+                if s.Process and any(b in s.Process.name().lower() for b in ["chrome", "edge", "brave"]):
+                    s.SimpleAudioVolume.SetMute(1, None)
+        except Exception:
+            pass
         _send_key_event(0x4D)
-        msg = "Video audio mute/unmute toggle kar diya."
+        msg = "Video audio mute kar diya."
+    elif action_clean in ["unmute", "audio_unmute", "sound_on"]:
+        try:
+            from pycaw.pycaw import AudioUtilities
+            speakers = AudioUtilities.GetSpeakers()
+            if hasattr(speakers, "EndpointVolume"):
+                speakers.EndpointVolume.SetMute(0, None)
+            for s in AudioUtilities.GetAllSessions():
+                if s.Process and any(b in s.Process.name().lower() for b in ["chrome", "edge", "brave"]):
+                    s.SimpleAudioVolume.SetMute(0, None)
+                    s.SimpleAudioVolume.SetMasterVolume(1.0, None)
+        except Exception:
+            pass
+        _send_key_event(0x4D)
+        msg = "Video audio unmute kar diya."
     elif action_clean in ["like", "like_video", "like_karo", "video_like"]:
         # Focus browser window first, then click YouTube Like button
         if WIN32_AVAILABLE:
