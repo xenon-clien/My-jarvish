@@ -60,15 +60,25 @@ class TTSManager:
         self._worker_thread.start()
 
     def _play_audio_native(self, audio_path: str) -> bool:
-        """Play generated MP3/WAV speech file using native Windows Multimedia API (winmm.dll)."""
+        """Play generated MP3/WAV speech file using native Windows Multimedia API (winmm.dll) or winsound."""
         with self._playback_lock:
+            try:
+                with open(audio_path, "rb") as af:
+                    header = af.read(4)
+                if header == b"RIFF":
+                    import winsound
+                    winsound.PlaySound(audio_path, winsound.SND_FILENAME)
+                    return True
+            except Exception as e:
+                logger.debug(f"WAV winsound check error: {e}")
+
             alias = f"jarvis_tts_{int(time.time() * 1000) % 100000}"
             mci = ctypes.windll.winmm.mciSendStringW
             try:
                 mci("close all", None, 0, None)
                 res = mci(f'open "{audio_path}" type mpegvideo alias {alias}', None, 0, None)
                 if res != 0:
-                    # Fallback type for wav
+                    # Fallback type for wav/unknown
                     res = mci(f'open "{audio_path}" alias {alias}', None, 0, None)
                 if res != 0:
                     logger.warning(f"MCI audio open returned code {res}")
