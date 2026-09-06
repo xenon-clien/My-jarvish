@@ -534,6 +534,12 @@ def play_youtube_video(query: Optional[str] = "") -> Dict[str, Any]:
     if not words or all(w in filler_words for w in words):
         clean_query = ""
 
+    # Safe Search Guard: Block inappropriate / accidental slips from auto-playing
+    nsfw_words = {"sexy", "hot", "porn", "xxx", "nude", "sex", "सेक्सी"}
+    if any(w in clean_query.lower() for w in nsfw_words):
+        logger.warning(f"Blocked unsafe/accidental YouTube search query: '{clean_query}'. Defaulting to YouTube Home.")
+        clean_query = ""
+
     if not clean_query:
         target_url = "https://www.youtube.com"
         hindi_msg = "Haan Shivam, YouTube open kar diya hai."

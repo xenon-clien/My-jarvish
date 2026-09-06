@@ -235,8 +235,9 @@ class CommandProcessor:
         import re
         split_pattern = r"\s+(?:aur|and|ke\s+baad|phir|then)\s+"
         sub_intents = [c.strip() for c in re.split(split_pattern, raw_text, flags=re.IGNORECASE) if c.strip()]
-        if len(sub_intents) > 1:
-            logger.info(f"Decomposed compound command into {len(sub_intents)} steps: {sub_intents}")
+        action_verb_pattern = r"\b(?:open|kholo|play|chalao|lagao|search|dhundo|khojo|close|band|pause|roko|stop|mute|unmute|volume|next|prev|forward|backward)\b"
+        if len(sub_intents) > 1 and all(re.search(action_verb_pattern, s, re.IGNORECASE) for s in sub_intents):
+            logger.info(f"Decomposed verified compound command into {len(sub_intents)} steps: {sub_intents}")
             ctx.total_steps = len(sub_intents)
             responses = []
             for step_idx, sub_cmd in enumerate(sub_intents, 1):
