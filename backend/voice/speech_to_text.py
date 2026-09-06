@@ -90,11 +90,11 @@ from dataclasses import dataclass, field
 @dataclass
 class NoiseProfile:
     """Statistical noise profile for dynamic VAD envelope calculation."""
-    median_rms: float = 150.0
-    mean_rms: float = 150.0
-    p75_rms: float = 175.0
-    p90_rms: float = 200.0
-    p95_rms: float = 220.0
+    median_rms: float = 211.0
+    mean_rms: float = 211.0
+    p75_rms: float = 225.0
+    p90_rms: float = 250.0
+    p95_rms: float = 265.0
     typical_peak: float = 600.0
     timestamp: float = field(default_factory=time.time)
     sample_count: int = 0
@@ -156,11 +156,11 @@ class SpeechToTextManager:
         cid = correlation_id or "VOICE-LISTEN"
         is_debug = debug if debug is not None else bool(os.environ.get("JARVIS_VOICE_DEBUG", "0") in ["1", "true", "True"])
 
-        # 1. Prevent audio feedback loop (gentle 0.10s cooldown so user speech is NEVER blocked)
+        # 1. Prevent audio feedback loop (0.70s cooldown so echo/reverberation is never recorded)
         try:
             from backend.voice.text_to_speech import tts_manager
-            if tts_manager.is_speaking() or (time.time() - tts_manager.last_spoken_time < 0.10):
-                time.sleep(0.04)
+            if tts_manager.is_speaking() or (time.time() - tts_manager.last_spoken_time < 0.70):
+                time.sleep(0.05)
                 return None
         except Exception:
             pass
@@ -227,19 +227,20 @@ class SpeechToTextManager:
                     chunk_bytes = clipped_chunk.tobytes()
 
                     # Dynamic Multi-Stage Threshold Calculation
-                    noise_ceiling = max(self.noise_profile.p90_rms, self.noise_profile.mean_rms + 20.0, 80.0)
-                    adaptive_margin = max(30.0, self.noise_profile.p90_rms * 0.20)
-                    speech_start_threshold = noise_ceiling + adaptive_margin
-                    # Silence cutoff: Ambient room noise (200-225 RMS) is recognized as silence; speech is >300 RMS
-                    silence_cutoff = max(noise_ceiling + 25.0, self.noise_profile.mean_rms + 25.0)
+                    # Noise ceiling tracks the room ambient profile smoothly
+                    noise_ceiling = max(self.noise_profile.p90_rms, self.noise_profile.mean_rms + 12.0, 215.0)
+                    # Speech start threshold calibrated for normal conversational desk voice (gentle speaking volume)
+                    speech_start_threshold = max(235.0, noise_ceiling + 14.0)
+                    # Silence cutoff: Returns to silence once voice drops back near noise ceiling
+                    silence_cutoff = noise_ceiling + 5.0
 
-                    # Frame-level speech candidate evidence (energy above noise + separation)
-                    is_speech_frame = (rms > speech_start_threshold * 0.85) and (rms - noise_ceiling > 12.0)
+                    # Frame-level speech candidate evidence (energy clearly above noise ceiling)
+                    is_speech_frame = (rms > speech_start_threshold * 0.88) and (rms - noise_ceiling > 6.0)
 
                     if is_debug and time.time() - last_debug_log_time >= 0.40:
                         last_debug_log_time = time.time()
                         print(
-                            f"  [VOICE_DEBUG] rms={rms:5.1f} | peak={peak:4d} | noise_ceiling={noise_ceiling:5.1f} | "
+                            f"  [VOICE_DEBUG] rms={rms:5.1f} | peak={peak:4d} | noise_floor={noise_floor:5.1f} | "
                             f"start_thresh={speech_start_threshold:5.1f} | silence_cutoff={silence_cutoff:5.1f} | "
                             f"candidate_frames={sum(candidate_window)}/5 | speech_started={speech_started}",
                             flush=True
@@ -273,8 +274,8 @@ class SpeechToTextManager:
                         if elapsed_total > timeout:
                             return None
 
-                        # Multi-Stage Gate: Require at least 2 of last 5 frames AND current frame above start threshold
-                        if sum(candidate_window) >= 2 and rms > speech_start_threshold:
+                        # Multi-Stage Gate: Require at least 2 of last 3 frames AND current frame above start threshold
+                        if sum(candidate_window[-3:]) >= 2 and rms > speech_start_threshold:
                             speech_started = True
                             speech_start_time = time.time()
                             speech_peak_rms = rms
@@ -324,10 +325,10 @@ class SpeechToTextManager:
             # 1. Combine recorded chunks (Natively 16kHz Mono)
             raw_16k = np.frombuffer(b"".join(recorded_chunks), dtype=np.int16).astype(np.float64)
 
-            # 2. Post-Capture Validity Check (Do NOT send pure flat silence to Google STT)
+            # 2. Post-Capture Validity Check (Do NOT send pure flat silence/noise to Google STT)
             phrase_peak = float(np.max(np.abs(raw_16k))) if len(raw_16k) > 0 else 0
             phrase_mean_rms = float(np.sqrt(np.mean(raw_16k ** 2))) if len(raw_16k) > 0 else 0
-            if phrase_mean_rms < self.noise_profile.mean_rms and phrase_peak < 600:
+            if phrase_mean_rms <= self.noise_profile.mean_rms + 6.0 and phrase_peak < 450:
                 if is_debug:
                     print(f"  [STT_SKIPPED] Captured audio has no signal separation from ambient noise (Peak: {phrase_peak:.0f}, RMS: {phrase_mean_rms:.1f}).", flush=True)
                 return None
@@ -378,9 +379,10 @@ class SpeechToTextManager:
                 for f in concurrent.futures.as_completed(futures, timeout=3.5):
                     try:
                         r = f.result()
-                        if r:
+                        if r and len(r.strip()) > 0:
                             candidates.append(r)
-                            break  # Return instantly on the fastest result!
+                            if len(candidates) >= 2:
+                                break
                     except Exception:
                         pass
 

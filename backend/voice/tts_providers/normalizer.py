@@ -122,25 +122,12 @@ def normalize_hindi_tts_text(text: str) -> str:
 
     normalized = text.strip()
 
-    # 1. Expand long digit strings (OTPs/PINs) for clarity
-    normalized = normalize_numbers_and_otp(normalized)
+    # 1. Strip markdown formatting (asterisks, hashes, backticks, emojis) that degrade TTS
+    normalized = re.sub(r"[*_~`#>]", "", normalized)
+    normalized = re.sub(r"\[.*?\]\(.*?\)", "", normalized)
 
-    # 2. If the text is purely English (e.g. "Sure, I can help you with that."), keep it natural English
-    # Check if text is predominantly Latin/English without common Hindi words
-    has_devanagari = any("\u0900" <= c <= "\u097f" for c in normalized)
-    
-    if not has_devanagari:
-        # Check if text contains Hinglish words
-        lower_text = normalized.lower()
-        has_hinglish = any(re.search(r"\b" + re.escape(w) + r"\b", lower_text) for w in [
-            "karti", "karta", "rahi", "raha", "hai", "hain", "karo", "kholo", "mein", "bheja", "diya", "boss", "ji", "aaj", "baje"
-        ])
-        if has_hinglish:
-            # Apply Hinglish to phonetic Devanagari conversion
-            sorted_map = sorted(HINGLISH_PHONETICS_MAP.items(), key=lambda x: len(x[0]), reverse=True)
-            for eng, hin in sorted_map:
-                pattern = re.compile(re.escape(eng), re.IGNORECASE)
-                normalized = pattern.sub(hin, normalized)
+    # 2. Expand long digit strings (OTPs/PINs) for clarity
+    normalized = normalize_numbers_and_otp(normalized)
 
     # 3. Clean up double spaces or awkward trailing marks
     normalized = re.sub(r"\s+", " ", normalized).strip()

@@ -74,12 +74,13 @@ def _voice_listen_loop():
     logger.info("Continuous Voice Assistant thread started.")
     while True:
         try:
-            if tts_manager.is_speaking():
-                time.sleep(0.15)
+            # Prevent microphone from capturing speaker reverberation/echo
+            if tts_manager.is_speaking() or (time.time() - tts_manager.last_spoken_time < 0.70):
+                time.sleep(0.10)
                 continue
 
             if stt_manager.enabled and stt_manager.is_microphone_available():
-                user_text = stt_manager.listen_once(timeout=4.0, phrase_time_limit=5.0, silence_limit=0.45)
+                user_text = stt_manager.listen_once(timeout=6.0, phrase_time_limit=6.5, silence_limit=0.65)
                 if user_text and len(user_text.strip()) > 1:
                     tts_manager.stop()
                     logger.info(f"Voice speech captured: '{user_text}'")
@@ -117,13 +118,32 @@ def _start_background_services():
     # Start continuous background voice listener thread
     threading.Thread(target=_voice_listen_loop, daemon=True, name="JarvisVoiceListener").start()
 
-    # Initial sweet greeting
+    # Initial startup chime (Silent on speech until user speaks)
     audio_manager.play_complete_chime()
-    tts_manager.speak("नमस्ते शिवम! मैं तैयार हूँ, बताइए क्या मदद करूँ?", block=False)
+
+
+_SINGLE_INSTANCE_MUTEX = None
+
+
+def _acquire_single_instance_lock() -> bool:
+    """Ensure strictly ONE instance of JARVIS Desktop App runs at any time across the system."""
+    global _SINGLE_INSTANCE_MUTEX
+    import ctypes
+    ERROR_ALREADY_EXISTS = 183
+    kernel32 = ctypes.windll.kernel32
+    _SINGLE_INSTANCE_MUTEX = kernel32.CreateMutexW(None, False, "JARVIS_DESKTOP_APP_MUTEX_SINGLETON")
+    last_error = kernel32.GetLastError()
+    if last_error == ERROR_ALREADY_EXISTS:
+        logger.warning("Another instance of JARVIS Desktop is already running. Exiting duplicate process immediately.")
+        return False
+    return True
 
 
 def main():
     """Launch native Desktop Application window."""
+    if not _acquire_single_instance_lock():
+        sys.exit(0)
+
     global _webview_window
     logger.info("Launching JARVIS Native Desktop Application...")
 

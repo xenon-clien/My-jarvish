@@ -37,15 +37,20 @@ class TTSManager:
         self.rate = self.settings.TTS_RATE
         self.volume = self.settings.TTS_VOLUME
 
-        # Instantiate providers with Edge Neural Swara as PRIMARY natural human female voice
-        self.edge_provider: TTSProvider = EdgeTTSProvider(voice_id="hi-IN-SwaraNeural")
-        self.offline_provider: TTSProvider = OfflineTTSProvider(rate=self.rate, volume=self.volume)
+        # Instantiate providers with Captain America (Madhur Baritone -22Hz) as PRIMARY heavy voice
+        self.edge_provider: TTSProvider = EdgeTTSProvider(voice_id="hi-IN-MadhurNeural", speed_rate="-4%", pitch="-22Hz")
+        self.edge_madhur_safe: TTSProvider = EdgeTTSProvider(voice_id="hi-IN-MadhurNeural", speed_rate="-4%", pitch="+0Hz")
+        self.edge_prabhat_provider: TTSProvider = EdgeTTSProvider(voice_id="en-IN-PrabhatNeural", speed_rate="-2%", pitch="-15Hz")
+        self.edge_madhur_provider: TTSProvider = self.edge_provider
+        self.edge_swara_provider: TTSProvider = EdgeTTSProvider(voice_id="hi-IN-SwaraNeural")
+        self.offline_male_provider: TTSProvider = OfflineTTSProvider(rate=self.rate, volume=self.volume, gender="male")
+        self.offline_provider: TTSProvider = self.offline_male_provider
         self.secondary_provider: TTSProvider = GoogleTTSProvider(lang="hi", tld="co.in")
         self.elevenlabs_provider: TTSProvider = ElevenLabsProvider()
 
-        # Primary voice is Swara (100% realistic sweet human female voice)
-        self.primary_provider: TTSProvider = self.edge_provider if self.edge_provider.is_available() else self.offline_provider
-        self._active_provider_name = "edge_swara" if self.edge_provider.is_available() else "offline_sapi5"
+        # Primary voice is Captain America (Deep Heavy Baritone Hindi Voice)
+        self.primary_provider: TTSProvider = self.edge_provider if self.edge_provider.is_available() else self.offline_male_provider
+        self._active_provider_name = "captain_america" if self.edge_provider.is_available() else "offline_sapi5"
         self._speech_queue: queue.Queue = queue.Queue()
         self._is_speaking = False
         self._playback_lock = threading.Lock()
@@ -92,16 +97,31 @@ class TTSManager:
             candidate_providers: List[TTSProvider] = []
 
             # 1. Add requested active provider first
-            if self._active_provider_name == "google_hindi":
-                candidate_providers = [self.primary_provider, self.secondary_provider, self.offline_provider]
+            if self._active_provider_name in ("captain_america", "edge_madhur"):
+                # STRICTLY MALE FALLBACK CHAIN - NEVER EVER FALL BACK TO FEMALE
+                candidate_providers = [
+                    self.edge_provider,          # 1. Captain America Deep Heavy Baritone (-22Hz)
+                    self.edge_madhur_safe,      # 2. Hindi Male Madhur (Standard Pitch)
+                    self.edge_prabhat_provider, # 3. Indian Male Prabhat
+                    self.offline_male_provider,  # 4. Windows SAPI5 Male Baritone (David)
+                ]
+            elif self._active_provider_name == "edge_swara":
+                candidate_providers = [self.edge_swara_provider, self.secondary_provider, self.offline_provider]
+            elif self._active_provider_name == "google_hindi":
+                candidate_providers = [self.secondary_provider, self.edge_provider, self.offline_provider]
             elif self._active_provider_name == "elevenlabs" and self.elevenlabs_provider.is_available():
-                candidate_providers = [self.elevenlabs_provider, self.primary_provider, self.secondary_provider, self.offline_provider]
+                candidate_providers = [self.elevenlabs_provider, self.edge_provider, self.secondary_provider, self.offline_provider]
             elif self._active_provider_name == "neerja":
                 neerja = EdgeTTSProvider(voice_id="en-IN-NeerjaNeural")
-                candidate_providers = [neerja, self.primary_provider, self.secondary_provider, self.offline_provider]
+                candidate_providers = [neerja, self.edge_provider, self.secondary_provider, self.offline_provider]
             else:
-                # Default: Edge Neural Swara (Primary) -> Google (Secondary) -> Offline
-                candidate_providers = [self.primary_provider, self.secondary_provider, self.offline_provider]
+                # Default: Captain America Baritone -> Hindi Male -> Offline Male
+                candidate_providers = [
+                    self.edge_provider,
+                    self.edge_madhur_safe,
+                    self.edge_prabhat_provider,
+                    self.offline_male_provider,
+                ]
 
             # Try candidate providers in order
             for provider in candidate_providers:
@@ -202,11 +222,18 @@ class TTSManager:
         """List available Hindi natural voices and their metadata."""
         return [
             {
+                "id": "captain_america",
+                "name": "Captain America (Deep Heavy Baritone Hindi Voice)",
+                "language": "hi-IN",
+                "is_free": True,
+                "recommended": True,
+            },
+            {
                 "id": "edge_swara",
                 "name": "Microsoft Swara (Natural Sweet Hindi Female)",
                 "language": "hi-IN",
                 "is_free": True,
-                "recommended": True,
+                "recommended": False,
             },
             {
                 "id": "google_hindi",

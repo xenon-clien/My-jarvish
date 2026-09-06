@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>J.A.R.V.I.S. Core Interface</title>
     <script src="three.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <style>
         * {
             margin: 0;
@@ -17,7 +19,7 @@
         body {
             background-color: #030201;
             color: #ffaa33;
-            font-family: 'Rajdhani', sans-serif;
+            font-family: 'Rajdhani', 'Segoe UI', system-ui, sans-serif;
             overflow: hidden;
             height: 100vh;
             width: 100vw;
@@ -297,7 +299,7 @@
     <!-- Bottom HUD & Command Bar -->
     <div class="bottom-hud">
         <div id="voice-response" class="voice-output-bubble">
-            "Namaste Shivam! Main taiyar hu, boliye kya karu?"
+            "Main taiyar hoon Shivam. Boliye, kya command hai?"
         </div>
         <div class="input-bar-container">
             <input type="text" id="cmd-input" class="cmd-input" placeholder="Boliye ya type karein (e.g. Open Edge, Minimize, YouTube)..." onkeydown="handleKey(event)" />
@@ -629,7 +631,11 @@
             if (tab === 'dashboard') bubble.innerText = "Dashboard View: 95 Registered Apps, Neural Voice Engine Active.";
         }
 
-        window.onload = initThree;
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initThree);
+        } else {
+            initThree();
+        }
     </script>
 </body>
 </html>

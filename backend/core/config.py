@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     # Options: mock, openrouter, gemini, openai, ollama
     AI_PROVIDER: str = "gemini"
     AI_API_KEY: str = ""
-    AI_MODEL: str = "gemini-3.6-flash"
+    AI_MODEL: str = "gemini-3.5-flash-lite"
 
     # OpenRouter & NVIDIA Nemotron Debugger Settings
     OPENROUTER_API_KEY: str = ""

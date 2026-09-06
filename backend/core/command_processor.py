@@ -301,7 +301,7 @@ class CommandProcessor:
                     else:
                         tool_name = "play_youtube_video"
                         tool_args = {"query": ""}
-                        imm_resp = "Ji Boss, YouTube open kar diya."
+                        imm_resp = "Haan Shivam, YouTube open kar diya hai."
                 elif yt_res.canonical_action == "youtube.pause":
                     tool_name = "control_media"
                     tool_args = {"action": "pause"}

@@ -526,14 +526,18 @@ def play_youtube_video(query: Optional[str] = "") -> Dict[str, Any]:
     ).strip()
 
     words = clean_query.lower().split()
-    if not words or all(w in ["youtube", "chrome", "play", "open", "karo", "kholo", "chalao", "lagao", "search", "kar", "do", "bhai", "shivam", "ai", "प्ले", "युटुब", "यूट्यूब", "ओपन"] for w in words):
+    filler_words = {
+        "youtube", "chrome", "play", "open", "karo", "kholo", "chalao", "lagao", "search",
+        "kar", "do", "bhai", "bhaiya", "shivam", "ai", "jarvis", "jarvish", "please", "zara",
+        "ek", "baar", "khol", "chala", "sun", "suno", "dekho", "bhi", "to", "प्ले", "युटुब", "यूट्यूब", "ओपन"
+    }
+    if not words or all(w in filler_words for w in words):
         clean_query = ""
 
     if not clean_query:
         target_url = "https://www.youtube.com"
-        hindi_msg = "Ji Boss, khol diya."
+        hindi_msg = "Haan Shivam, YouTube open kar diya hai."
     else:
-        hindi_msg = "Ji Boss, chala diya."
         wants_short = any(w in raw_query.lower() for w in ["short", "shorts", "reel", "reels", "clip"])
         wants_latest = any(w in raw_query.lower() for w in ["latest", "new", "naya", "aaj ka", "aaj aaya", "recent", "aaj"])
 
@@ -561,7 +565,7 @@ def play_youtube_video(query: Optional[str] = "") -> Dict[str, Any]:
             search_url = f"https://www.youtube.com/results?search_query={encoded_query}&sp=EgIQAQ%253D%253D"
 
         target_url = search_url
-        hindi_msg = f"Ji Boss, {clean_query.title()} chala diya hai."
+        hindi_msg = f"Haan Shivam, {clean_query.title()} chala diya hai."
 
         # Attempt intelligent semantic extraction and ranking of genuine search candidates
         try:
@@ -572,7 +576,7 @@ def play_youtube_video(query: Optional[str] = "") -> Dict[str, Any]:
                 search_url,
                 headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
             )
-            html = urllib.request.urlopen(req, timeout=1.8).read().decode(errors="replace")
+            html = urllib.request.urlopen(req, timeout=1.2).read().decode(errors="replace")
             
             all_watch_ids = list(dict.fromkeys(re.findall(r'/watch\?v=([a-zA-Z0-9_-]{11})', html)))
             shorts_ids = list(dict.fromkeys(re.findall(r'/shorts/([a-zA-Z0-9_-]{11})', html)))

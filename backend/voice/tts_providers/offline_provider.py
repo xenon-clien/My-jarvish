@@ -27,17 +27,18 @@ def ensure_com():
 class OfflineTTSProvider(TTSProvider):
     """Offline Windows SAPI5 engine provider."""
 
-    def __init__(self, rate: int = 190, volume: float = 1.0):
+    def __init__(self, rate: int = 180, volume: float = 1.0, gender: str = "male"):
         self.rate = rate
         self.volume = volume
+        self.gender = gender.lower()
 
     def get_metadata(self) -> VoiceMetadata:
         return VoiceMetadata(
             provider_name="Windows SAPI5 (Offline)",
             voice_id="offline_sapi5",
-            display_name="Windows Offline Voice",
+            display_name=f"Windows Offline Voice ({self.gender.title()})",
             language="en-US/hi",
-            gender="female",
+            gender=self.gender,
             style="offline standard",
             is_free=True,
             is_offline=True,
@@ -60,10 +61,22 @@ class OfflineTTSProvider(TTSProvider):
 
             voices = engine.getProperty("voices")
             if voices:
-                for v in voices:
-                    if "zira" in v.name.lower() or "eva" in v.name.lower() or "kalpana" in v.name.lower():
-                        engine.setProperty("voice", v.id)
-                        break
+                selected_voice = None
+                if self.gender == "male":
+                    for v in voices:
+                        if any(k in v.name.lower() for k in ["david", "mark", "george", "male", "ravi", "hemant"]):
+                            selected_voice = v.id
+                            break
+                else:
+                    for v in voices:
+                        if any(k in v.name.lower() for k in ["zira", "eva", "kalpana", "female", "heera"]):
+                            selected_voice = v.id
+                            break
+
+                if selected_voice:
+                    engine.setProperty("voice", selected_voice)
+                elif voices:
+                    engine.setProperty("voice", voices[0].id)
 
             # Save to target file
             engine.save_to_file(text, output_path)

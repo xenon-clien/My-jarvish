@@ -128,7 +128,7 @@ class UniversalIntentRouter:
                 return [RoutedToolCall(
                     tool_name="play_youtube_video",
                     arguments={"query": query_str},
-                    immediate_response=f"Ji Boss, YouTube par {query_str} chala diya." if query_str else "Ji Boss, YouTube open kar diya.",
+                    immediate_response=f"Haan Shivam, YouTube par {query_str} chala diya hai." if query_str else "Haan Shivam, YouTube open kar diya hai.",
                     target_application="youtube",
                 )]
             if app == "chrome":

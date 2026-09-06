@@ -85,9 +85,8 @@ async def run_voice_loop():
     # Gesture loop disabled per user request (webcam OFF)
     _gesture_queue = None
 
-    # Initial greeting chime and speech with natural sweet Swara voice
+    # Initial chime (Silent until user speaks)
     audio_manager.play_complete_chime()
-    tts_manager.speak("नमस्ते शिवम!", block=False)
 
     mic_available = stt_manager.is_microphone_available()
     if not mic_available:

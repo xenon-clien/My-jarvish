@@ -23,7 +23,7 @@ class YouTubeAdapter:
             tool_name="youtube.open",
             arguments={"query": query},
             required_locks=[self.RESOURCE_LOCK, "browser"],
-            immediate_response=f"Ji Boss, YouTube par {query} chala diya." if query else "Ji Boss, YouTube open kar diya.",
+            immediate_response=f"Haan Shivam, YouTube par {query} chala diya hai." if query else "Haan Shivam, YouTube open kar diya hai.",
         )
         return task_manager.execute_task_sync(
             task=task,

@@ -54,7 +54,7 @@ class FastIntentEngine:
             return FastIntentMatch(
                 intent_name="silence",
                 is_direct_chat=True,
-                direct_chat_response="Ji Boss, shant ho gayi.",
+                direct_chat_response="Haan bhai, shant ho gaya.",
             )
 
         # -------------------------------------------------------------
@@ -123,42 +123,6 @@ class FastIntentEngine:
                 immediate_response=f"Ji Boss, {idx} number item chala diya.",
             )
 
-        # -------------------------------------------------------------
-        # 1. Conversational Hindi / Hinglish Greetings & Slangs
-        # -------------------------------------------------------------
-        if any(w in text for w in ["kya bolti public", "kya chal rela hai", "kya scene hai", "sab set hai", "aur bata bhai", "kya chal raha hai yaar"]):
-            return FastIntentMatch(
-                intent_name="greeting_slang",
-                is_direct_chat=True,
-                direct_chat_response="Ekdum mast Boss! Aap batao kya chal raha hai? 😊",
-            )
-        if text in ["kaise ho", "kya haal hai", "how are you", "kaisa chal raha hai", "sab theek", "aur batao", "kya haal chaal"]:
-            return FastIntentMatch(
-                intent_name="greeting_how_are_you",
-                is_direct_chat=True,
-                direct_chat_response="Main theek hu Boss, bataiye.",
-            )
-
-        if text in ["hello", "hi", "hey", "namaste", "hello jarvis", "hi jarvis", "hey jarvis", "pranam"]:
-            return FastIntentMatch(
-                intent_name="greeting_hello",
-                is_direct_chat=True,
-                direct_chat_response="Hello Boss, boliye.",
-            )
-
-        if text in ["who are you", "tum kaun ho", "aap kaun ho", "what are you", "introduce yourself"]:
-            return FastIntentMatch(
-                intent_name="identity",
-                is_direct_chat=True,
-                direct_chat_response="Main JARVIS hu, aapki AI assistant.",
-            )
-
-        if text in ["shukriya", "dhanyawad", "thank you", "thanks", "thanks jarvis", "shukriya jarvis"]:
-            return FastIntentMatch(
-                intent_name="thanks",
-                is_direct_chat=True,
-                direct_chat_response="Swagat hai Boss.",
-            )
 
         # -------------------------------------------------------------
         # 1.5 High Priority WhatsApp Calling, Messaging & Communication Suite

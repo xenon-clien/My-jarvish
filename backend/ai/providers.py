@@ -140,9 +140,9 @@ class GeminiProvider(AIProvider):
     def __init__(self, settings: Optional[Settings] = None):
         self.settings = settings or get_settings()
         self.api_key = self.settings.AI_API_KEY or self.settings.OPENROUTER_API_KEY
-        self.model = self.settings.AI_MODEL or "gemini-3.6-flash"
-        if "gemini" not in self.model:
-            self.model = "gemini-3.6-flash"
+        self.model = self.settings.AI_MODEL or "gemini-3.5-flash-lite"
+        if "gemini" not in self.model or self.model in ["gemini-3.6-flash", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]:
+            self.model = "gemini-3.5-flash-lite"
 
     async def generate_response(
         self,
@@ -212,7 +212,7 @@ class GeminiProvider(AIProvider):
             return await MockProvider(self.settings).generate_response(messages, tools_schema)
 
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
+            async with httpx.AsyncClient(timeout=15.0) as client:
                 resp = await client.post(url, json=payload)
                 if resp.status_code != 200:
                     if resp.status_code == 429:
