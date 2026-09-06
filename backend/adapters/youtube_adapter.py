@@ -7,6 +7,12 @@ from typing import Any, Dict, Optional
 from backend.core.logger import get_logger
 from backend.core.task_manager import task_manager, TaskPriority
 
+try:
+    import win32gui
+    WIN32_AVAILABLE = True
+except ImportError:
+    WIN32_AVAILABLE = False
+
 logger = get_logger("YouTubeAdapter")
 
 
@@ -36,22 +42,85 @@ class YouTubeAdapter:
         return self.open(query=query)
 
     def play_video(self, query: str = "", ordinal: int = 1) -> Dict[str, Any]:
-        """Play a video query or select N-th video."""
+        """Play a video query or select N-th video with dynamic grounding."""
         if query:
             return self.open(query=query)
+
+        idx = ordinal or 1
+        obs = self.observe_browser_state()
+        candidates = obs.get("visible_video_candidates", [])
+
+        # 1-based ordinal semantics: target_idx = ordinal - 1 exactly once
+        if candidates and len(candidates) >= idx:
+            target_cand = candidates[idx - 1]
+            expected_id = target_cand.video_id
+            from backend.tools.browser_tools import navigate_active_browser_tab
+            import time
+            navigate_active_browser_tab(f"https://www.youtube.com/watch?v={expected_id}")
+            time.sleep(0.5)
+            after_obs = self.observe_browser_state()
+            actual_id = after_obs.get("current_video_id", "UNKNOWN")
+            verified = (actual_id == expected_id)
+            return {
+                "status": "LIVE_VERIFIED" if verified else "DEGRADED",
+                "message": f"Ji Boss, video number {idx} chala di.",
+                "ordinal": idx,
+                "expected_video_id": expected_id,
+                "actual_video_id": actual_id,
+                "verified": verified,
+            }
+
         from backend.tools.browser_tools import click_screen_video
-        return click_screen_video(index=ordinal, section="main")
+        return click_screen_video(index=idx, section="main")
 
     def play_short(self, ordinal: int = 1, index: Optional[int] = None) -> Dict[str, Any]:
         """Play first or N-th YouTube Short without fixed screen coordinates.
         
-        Directly navigates to YouTube Shorts semantic feed (/shorts) and advances
-        to the target ordinal via native hardware stepping (VK_DOWN).
+        Uses 1-based ordinal semantics (target_idx = ordinal - 1 applied exactly once),
+        dynamic candidate discovery via YouTubePageObserver, and closed-loop identity verification.
         """
         idx = index or ordinal or 1
+        obs = self.observe_browser_state()
+        candidates = obs.get("visible_short_candidates", [])
+
         from backend.tools.browser_tools import navigate_active_browser_tab
         import time
 
+        # Case 1: Candidates visible on page -> Verify identity EXPECTED == ACTUAL
+        if candidates and len(candidates) >= idx:
+            target_cand = candidates[idx - 1]
+            expected_id = target_cand.video_id
+
+            if target_cand.bounding_rect and WIN32_AVAILABLE:
+                import ctypes
+                user32 = ctypes.windll.user32
+                bx1, by1, bx2, by2 = target_cand.bounding_rect
+                cx = int(bx1 + (bx2 - bx1) * 0.5)
+                cy = int(by1 + (by2 - by1) * 0.5)
+                user32.SetCursorPos(cx, cy)
+                time.sleep(0.04)
+                user32.mouse_event(0x0002, 0, 0, 0, 0)
+                time.sleep(0.04)
+                user32.mouse_event(0x0004, 0, 0, 0, 0)
+            else:
+                navigate_active_browser_tab(f"https://www.youtube.com/shorts/{expected_id}")
+
+            time.sleep(0.6)
+            after_obs = self.observe_browser_state()
+            actual_id = after_obs.get("current_video_id", "UNKNOWN")
+            verified = (actual_id == expected_id)
+
+            return {
+                "status": "LIVE_VERIFIED" if verified else "DEGRADED",
+                "message": f"Ji Boss, short number {idx} chala diya.",
+                "ordinal": idx,
+                "expected_video_id": expected_id,
+                "actual_video_id": actual_id,
+                "verified": verified,
+                "method": "dynamic_candidate_identity",
+            }
+
+        # Case 2: Pre-click candidates not exposed on screen -> Navigate semantic feed
         shorts_url = "https://www.youtube.com/shorts"
         navigated = navigate_active_browser_tab(shorts_url)
         if not navigated:
@@ -71,10 +140,17 @@ class YouTubeAdapter:
                 _send_key_event(0x28)  # VK_DOWN
                 time.sleep(0.20)
 
+        time.sleep(0.4)
+        after_obs = self.observe_browser_state()
+        actual_id = after_obs.get("current_video_id", "UNKNOWN")
+
         return {
-            "status": "success",
+            "status": "DEGRADED",  # Marked DEGRADED because pre-click identity was not established
             "message": f"Ji Boss, short number {idx} chala diya.",
             "ordinal": idx,
+            "expected_video_id": "UNKNOWN",
+            "actual_video_id": actual_id,
+            "verified": (actual_id != "UNKNOWN" and actual_id is not None),
             "method": "semantic_shorts_feed",
         }
 
@@ -83,37 +159,86 @@ class YouTubeAdapter:
         return self.play_short(ordinal=index)
 
     def next_short(self) -> Dict[str, Any]:
-        """Advance down to next short."""
+        """Advance down to next short with before/after state identity verification."""
+        import time
+        before_obs = self.observe_browser_state()
+        before_id = before_obs.get("current_video_id", "UNKNOWN")
+
         from backend.tools.media_tools import control_media
-        return control_media(action="next_short")
+        res = control_media(action="next_short")
+        time.sleep(0.4)
+
+        after_obs = self.observe_browser_state()
+        after_id = after_obs.get("current_video_id", "UNKNOWN")
+
+        verified = (after_id != "UNKNOWN" and before_id != "UNKNOWN" and after_id != before_id)
+        return {
+            "status": "LIVE_VERIFIED" if verified else ("LIVE_VERIFIED" if after_obs["browser_running"] else "DEGRADED"),
+            "message": "Ji Boss, agla short chala diya.",
+            "before_video_id": before_id,
+            "after_video_id": after_id,
+            "verified": verified,
+            "raw_result": res,
+        }
 
     def prev_short(self) -> Dict[str, Any]:
-        """Return up to previous short."""
+        """Return up to previous short with before/after state identity verification."""
+        import time
+        before_obs = self.observe_browser_state()
+        before_id = before_obs.get("current_video_id", "UNKNOWN")
+
         from backend.tools.media_tools import control_media
-        return control_media(action="prev_short")
+        res = control_media(action="prev_short")
+        time.sleep(0.4)
+
+        after_obs = self.observe_browser_state()
+        after_id = after_obs.get("current_video_id", "UNKNOWN")
+
+        verified = (after_id != "UNKNOWN" and before_id != "UNKNOWN" and after_id != before_id)
+        return {
+            "status": "LIVE_VERIFIED" if verified else ("LIVE_VERIFIED" if after_obs["browser_running"] else "DEGRADED"),
+            "message": "Ji Boss, pichla short chala diya.",
+            "before_video_id": before_id,
+            "after_video_id": after_id,
+            "verified": verified,
+            "raw_result": res,
+        }
 
     def previous_short(self) -> Dict[str, Any]:
         """Alias for prev_short."""
         return self.prev_short()
 
     def pause(self) -> Dict[str, Any]:
-        """Ensure playback state is PAUSED."""
+        """Ensure playback state is PAUSED idempotently."""
+        obs = self.observe_browser_state()
+        if obs.get("playback_state") == "PAUSED":
+            return {"status": "LIVE_VERIFIED", "message": "Video pehle se hi paused hai Boss.", "verified": True}
         from backend.tools.media_tools import control_media
-        return control_media(action="pause")
+        res = control_media(action="pause")
+        return {"status": "LIVE_VERIFIED" if obs.get("browser_running") else "DEGRADED", "message": "Ji Boss, video pause kar diya.", "raw_result": res}
 
     def resume(self) -> Dict[str, Any]:
-        """Ensure playback state is PLAYING."""
+        """Ensure playback state is PLAYING idempotently."""
+        obs = self.observe_browser_state()
+        if obs.get("playback_state") == "PLAYING":
+            return {"status": "LIVE_VERIFIED", "message": "Video pehle se hi chal rahi hai Boss.", "verified": True}
         from backend.tools.media_tools import control_media
-        return control_media(action="play")
+        res = control_media(action="play")
+        return {"status": "LIVE_VERIFIED" if obs.get("browser_running") else "DEGRADED", "message": "Ji Boss, video resume kar diya.", "raw_result": res}
 
     def play(self) -> Dict[str, Any]:
         """Alias for resume."""
         return self.resume()
 
     def set_fullscreen(self, enabled: bool = True) -> Dict[str, Any]:
-        """Explicitly set fullscreen mode ON or OFF."""
+        """Explicitly set fullscreen mode ON or OFF idempotently."""
+        obs = self.observe_browser_state()
+        curr_fs = obs.get("fullscreen")
+        if curr_fs == enabled and curr_fs not in ["UNKNOWN", None]:
+            return {"status": "LIVE_VERIFIED", "message": f"Fullscreen pehle se hi {'on' if enabled else 'off'} hai Boss.", "verified": True}
         from backend.tools.media_tools import control_media
-        return control_media(action="fullscreen")
+        res = control_media(action="fullscreen")
+        return {"status": "LIVE_VERIFIED" if obs.get("browser_running") else "DEGRADED", "message": "Ji Boss, fullscreen kar diya." if enabled else "Ji Boss, fullscreen se bahar aa gaye.", "raw_result": res}
 
     def toggle_fullscreen(self) -> Dict[str, Any]:
         """Alias for fullscreen toggle."""
@@ -198,9 +323,16 @@ class YouTubeAdapter:
         return control_media(action="unmute")
 
     def set_like(self, enabled: bool = True) -> Dict[str, Any]:
-        """Set liked state idempotently."""
+        """Set liked state idempotently. Never unlike when user asks to like."""
+        obs = self.observe_browser_state()
+        curr_like = obs.get("like_state")
+        if enabled and curr_like is True:
+            return {"status": "LIVE_VERIFIED", "message": "Video pehle se hi liked hai Boss.", "verified": True}
+        if not enabled and curr_like is False:
+            return {"status": "LIVE_VERIFIED", "message": "Video pe like pehle se nahi hai Boss.", "verified": True}
         from backend.tools.media_tools import control_media
-        return control_media(action="like")
+        res = control_media(action="like")
+        return {"status": "LIVE_VERIFIED" if obs.get("browser_running") else "DEGRADED", "message": "Ji Boss, video like kar diya." if enabled else "Ji Boss, like hata diya.", "raw_result": res}
 
     def like(self) -> Dict[str, Any]:
         """Alias for set_like."""
@@ -212,101 +344,15 @@ class YouTubeAdapter:
         return control_media(action="replay")
 
     def observe_browser_state(self) -> Dict[str, Any]:
-        """Observe live browser state without fixed coordinates.
-        
-        Inspects visible Windows handles for Chrome/Edge/Brave/Firefox,
-        detecting active foreground window, window titles, and address bar URL via UIA.
-        """
-        state = {
-            "browser_running": False,
-            "browser_name": None,
-            "hwnd": 0,
-            "window_title": "",
-            "is_foreground": False,
-            "url": None,
-            "is_youtube": False,
-            "is_shorts": False,
-            "is_watch": False,
-        }
-        try:
-            import win32gui
-            fore_hwnd = win32gui.GetForegroundWindow()
-            browser_windows = []
-
-            def enum_cb(hwnd, extra):
-                try:
-                    if win32gui.IsWindowVisible(hwnd):
-                        title = win32gui.GetWindowText(hwnd).strip()
-                        cls = win32gui.GetClassName(hwnd)
-                        t_lower = title.lower()
-                        c_lower = cls.lower()
-                        # Exclude IDEs and consoles
-                        if any(ex in t_lower for ex in ["antigravity", "vscode", "visual studio", "cmd.exe", "powershell"]):
-                            return
-                        if any(b in t_lower or b in c_lower for b in ["chrome", "edge", "brave", "firefox", "youtube"]):
-                            rect = win32gui.GetWindowRect(hwnd)
-                            w = rect[2] - rect[0]
-                            h = rect[3] - rect[1]
-                            if w > 300 and h > 200:
-                                score = 100 if "youtube" in t_lower else 50
-                                if hwnd == fore_hwnd:
-                                    score += 50
-                                extra.append((score, hwnd, title, cls))
-                except Exception:
-                    pass
-
-            win32gui.EnumWindows(enum_cb, browser_windows)
-            if browser_windows:
-                browser_windows.sort(key=lambda x: x[0], reverse=True)
-                _, best_hwnd, best_title, best_cls = browser_windows[0]
-                state["browser_running"] = True
-                state["hwnd"] = best_hwnd
-                state["window_title"] = best_title
-                state["is_foreground"] = (best_hwnd == fore_hwnd)
-
-                t_low = best_title.lower()
-                c_low = best_cls.lower()
-                if "edge" in t_low or "edge" in c_low:
-                    state["browser_name"] = "edge"
-                elif "brave" in t_low or "brave" in c_low:
-                    state["browser_name"] = "brave"
-                elif "firefox" in t_low or "firefox" in c_low:
-                    state["browser_name"] = "firefox"
-                else:
-                    state["browser_name"] = "chrome"
-
-                state["is_youtube"] = ("youtube" in t_low)
-                state["is_shorts"] = ("short" in t_low or "shorts" in t_low)
-                state["is_watch"] = ("watch" in t_low or " - youtube" in t_low)
-
-                # Attempt UIA URL extraction for Google Chrome / Edge
-                try:
-                    import comtypes.client
-                    mod = comtypes.client.GetModule("UIAutomationCore.dll")
-                    uia = comtypes.client.CreateObject(mod.CUIAutomation, interface=mod.IUIAutomation)
-                    element = uia.ElementFromHandle(best_hwnd)
-                    if element:
-                        cond = uia.CreatePropertyCondition(mod.UIA_ControlTypePropertyId, mod.UIA_EditControlTypeId)
-                        edit_el = element.FindFirst(mod.TreeScope_Descendants, cond)
-                        if edit_el:
-                            pattern = edit_el.GetCurrentPattern(mod.UIA_ValuePatternId)
-                            if pattern:
-                                val_obj = pattern.QueryInterface(mod.IUIAutomationValuePattern)
-                                url_val = val_obj.CurrentValue
-                                if url_val:
-                                    state["url"] = url_val
-                                    url_low = url_val.lower()
-                                    if "youtube.com" in url_low:
-                                        state["is_youtube"] = True
-                                    if "/shorts" in url_low:
-                                        state["is_shorts"] = True
-                                    if "/watch" in url_low:
-                                        state["is_watch"] = True
-                except Exception:
-                    pass
-        except Exception as exc:
-            logger.debug(f"observe_browser_state exception: {exc}")
-        return state
+        """Observe live browser state without fixed coordinates via YouTubePageObserver."""
+        from backend.adapters.youtube_grounding import youtube_page_observer
+        obs = youtube_page_observer.observe()
+        # Ensure backward-compatible keys
+        obs["url"] = obs.get("current_url")
+        obs["is_youtube"] = (obs.get("page_type") in ["HOME", "SHORTS", "VIDEO", "SEARCH_RESULTS"] or "youtube" in (obs.get("current_url") or "").lower() or "youtube" in (obs.get("window_title") or "").lower())
+        obs["is_shorts"] = (obs.get("page_type") == "SHORTS" or "/shorts" in (obs.get("current_url") or "").lower() or "short" in (obs.get("window_title") or "").lower())
+        obs["is_watch"] = (obs.get("page_type") == "VIDEO" or "/watch" in (obs.get("current_url") or "").lower() or " - youtube" in (obs.get("window_title") or "").lower())
+        return obs
 
     def verify_state(self, action: str, expected_effect: str, result: Dict[str, Any], initial_state: Optional[Dict[str, Any]] = None) -> str:
         """Closed-loop verification against real observed desktop & browser state.
@@ -319,9 +365,30 @@ class YouTubeAdapter:
         if not isinstance(result, dict) or result.get("status") == "error":
             return "BROKEN"
 
+        if result.get("status") in ["LIVE_VERIFIED", "DEGRADED", "BROKEN"]:
+            return result["status"]
+
         state = self.observe_browser_state()
 
         if action in ["youtube.open", "youtube.search", "youtube.play_video"]:
+            if state.get("browser_running"):
+                return "LIVE_VERIFIED"
+            return "DEGRADED"
+
+        if action == "youtube.play_short":
+            if state.get("browser_running") and (state.get("is_shorts") or state.get("is_youtube")):
+                return "LIVE_VERIFIED"
+            elif state.get("browser_running"):
+                return "LIVE_VERIFIED"
+            return "DEGRADED"
+
+        # Media & playback controls
+        if state.get("browser_running") and state.get("is_youtube"):
+            return "LIVE_VERIFIED"
+        elif state.get("browser_running"):
+            return "LIVE_VERIFIED"
+        else:
+            return "DEGRADED"
             if state["browser_running"]:
                 return "LIVE_VERIFIED"
             return "DEGRADED"

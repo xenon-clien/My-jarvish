@@ -221,109 +221,28 @@ def click_screen_video(index: int = 1, section: Optional[str] = "auto") -> Dict[
                     "message": f"Ji Boss, short number {index} chala diya.",
                 }
         else:
-            # On YouTube Home, Search, or Playlist: Click the exact visible Short card on screen!
-            # Horizontal cards in the Shorts shelf on screen (5-column modern desktop layout with left nav)
-            shorts_grid = {
-                1: (int(left + width * 0.22), int(top + height * 0.46)),  # 1st Short Card (Grounded on Card #1)
-                2: (int(left + width * 0.38), int(top + height * 0.46)),  # 2nd Short Card
-                3: (int(left + width * 0.54), int(top + height * 0.46)),  # 3rd Short Card
-                4: (int(left + width * 0.70), int(top + height * 0.46)),  # 4th Short Card
-                5: (int(left + width * 0.86), int(top + height * 0.46)),  # 5th Short Card
-            }
-            click_x, click_y = shorts_grid.get(index, shorts_grid[1])
-
-            # Hardware click directly on target Short card
-            user32.SetCursorPos(click_x, click_y)
-            time.sleep(0.05)
-            user32.mouse_event(0x0002, 0, 0, 0, 0)
-            time.sleep(0.04)
-            user32.mouse_event(0x0004, 0, 0, 0, 0)
-            time.sleep(0.06)
-            user32.mouse_event(0x0002, 0, 0, 0, 0)
-            time.sleep(0.04)
-            user32.mouse_event(0x0004, 0, 0, 0, 0)
-
-            logger.info(f"Clicked visible Short #{index} card at ({click_x}, {click_y})")
+            # On YouTube Home, Search, or Feed: Delegate to authoritative YouTubeAdapter
+            # Static coordinate grid tables (0.22, 0.38, 0.54) are completely eliminated.
+            from backend.adapters.youtube_adapter import youtube_adapter
+            res = youtube_adapter.play_short(ordinal=index)
             return {
                 "status": "success",
                 "index": index,
-                "section": "shorts_shelf",
-                "message": f"Ji Boss, short number {index} chala diya.",
+                "section": "shorts",
+                "message": res.get("message", f"Ji Boss, short number {index} chala diya."),
+                "verified": res.get("verified", False),
             }
 
-    # Section 3: Safe Video Selection Across All YouTube Page Layouts
-    title_clean = title.strip().lower()
-    is_home_feed = bool(re.search(r"^(\(\d+\)\s*)?youtube\s*-\s*google chrome$", title_clean) or title_clean == "youtube")
-    is_playlist = any(k in title_clean for k in ["liked videos", "playlist", "mix", "watch later", "history", "downloads"])
-    is_channel = any(k in title_clean for k in ["channel", "subscriptions", "@"])
-
-    if is_playlist:
-        # Playlist / Liked Videos Page (Right-hand video list, with large banner on left)
-        click_x = int(left + width * 0.55)
-        playlist_offsets = {
-            1: 0.38,  # 1st playlist video
-            2: 0.51,  # 2nd playlist video
-            3: 0.64,  # 3rd playlist video
-            4: 0.77,  # 4th playlist video
-            5: 0.90,  # 5th playlist video
-        }
-        click_y = int(top + height * playlist_offsets.get(index, 0.38 + (index - 1) * 0.13))
-        page_type = "playlist_page"
-
-    elif is_watch_page and not is_home_feed:
-        # Watch Page Right Sidebar (Centered on thumbnail body at x=80%, y strictly below 35%)
-        click_x = int(left + width * 0.80)
-        sidebar_offsets = {
-            1: 0.38,  # 1st recommended item (well below navbar and filter chips)
-            2: 0.52,  # 2nd recommended item
-            3: 0.66,  # 3rd recommended item
-            4: 0.80,  # 4th recommended item
-        }
-        click_y = int(top + height * sidebar_offsets.get(index, 0.38 + (index - 1) * 0.14))
-        page_type = "watch_sidebar"
-
-    elif is_home_feed:
-        # Home Page Multi-Column Grid
-        home_grid = {
-            1: (int(left + width * 0.35), int(top + height * 0.45)),  # Row 1, Col 1 (Pehli video)
-            2: (int(left + width * 0.60), int(top + height * 0.45)),  # Row 1, Col 2 (Dusri video)
-            3: (int(left + width * 0.85), int(top + height * 0.45)),  # Row 1, Col 3 (Teesri video)
-            4: (int(left + width * 0.35), int(top + height * 0.82)),  # Row 2, Col 1 (Chauthi video)
-            5: (int(left + width * 0.60), int(top + height * 0.82)),  # Row 2, Col 2 (Paanchvi video)
-            6: (int(left + width * 0.85), int(top + height * 0.82)),  # Row 2, Col 3 (Chhati video)
-        }
-        click_x, click_y = home_grid.get(index, home_grid[1])
-        page_type = "home_grid"
-
-    else:
-        # Search Results & Channel Video List
-        click_x = int(left + width * 0.42)
-        search_offsets = {
-            1: 0.35,  # 1st search result item
-            2: 0.50,  # 2nd search result item
-            3: 0.65,  # 3rd search result item
-            4: 0.80,  # 4th search result item
-        }
-        click_y = int(top + height * search_offsets.get(index, 0.35 + (index - 1) * 0.15))
-        page_type = "search_list"
-
-    # Send hardware double click directly on target thumbnail
-    user32.SetCursorPos(click_x, click_y)
-    time.sleep(0.06)
-    user32.mouse_event(0x0002, 0, 0, 0, 0)
-    time.sleep(0.04)
-    user32.mouse_event(0x0004, 0, 0, 0, 0)
-    time.sleep(0.06)
-    user32.mouse_event(0x0002, 0, 0, 0, 0)
-    time.sleep(0.04)
-    user32.mouse_event(0x0004, 0, 0, 0, 0)
-
-    logger.info(f"Clicked video #{index} at ({click_x}, {click_y}) on {page_type} layout.")
+    # Section 3: Safe Video Selection via Authoritative YouTubeAdapter
+    # Eliminates all static coordinate percentage mappings (home_grid, search_offsets, playlist_offsets, sidebar_offsets)
+    from backend.adapters.youtube_adapter import youtube_adapter
+    res = youtube_adapter.play_video(ordinal=index)
     return {
         "status": "success",
         "index": index,
-        "section": page_type,
-        "message": f"Ji Boss, video number {index} chala di.",
+        "section": "video",
+        "message": res.get("message", f"Ji Boss, video number {index} chala di."),
+        "verified": res.get("verified", False),
     }
 
 

@@ -394,27 +394,35 @@ def control_media(action: str, level: Optional[int] = None, time_str: Optional[s
                 width = right - left
                 height = bottom - top
 
-                # Check if Shorts or standard Watch page
-                if "short" in title or "/shorts" in title:
-                    click_x = int(left + width * 0.64)
-                    click_y = int(top + height * 0.54)
-                else:
-                    # On standard YouTube watch page: Like button is in action row below video title (~63% down)
-                    click_x = int(left + width * 0.44)
-                    click_y = int(top + height * 0.63)
-
-                import ctypes
-                user32 = ctypes.windll.user32
-                user32.SetCursorPos(click_x, click_y)
-                time.sleep(0.05)
-                # SendInput Hardware Click
-                user32.mouse_event(0x0002, 0, 0, 0, 0)
-                time.sleep(0.04)
-                user32.mouse_event(0x0004, 0, 0, 0, 0)
-                time.sleep(0.05)
-                user32.mouse_event(0x0002, 0, 0, 0, 0)
-                time.sleep(0.04)
-                user32.mouse_event(0x0004, 0, 0, 0, 0)
+                # Dynamic discovery of Like button via UIA without static screen percentages
+                liked_via_uia = False
+                try:
+                    import comtypes.client
+                    mod = comtypes.client.GetModule("UIAutomationCore.dll")
+                    uia = comtypes.client.CreateObject(mod.CUIAutomation, interface=mod.IUIAutomation)
+                    root = uia.ElementFromHandle(hwnd)
+                    if root:
+                        cond_btn = uia.CreatePropertyCondition(mod.UIA_ControlTypePropertyId, mod.UIA_ButtonControlTypeId)
+                        btns = root.FindAll(mod.TreeScope_Descendants, cond_btn)
+                        if btns:
+                            for i in range(btns.Length):
+                                btn = btns.GetElement(i)
+                                b_name = (btn.CurrentName or "").lower()
+                                if "like this" in b_name or b_name.startswith("like"):
+                                    brect = btn.CurrentBoundingRectangle
+                                    cx = int(brect.left + (brect.right - brect.left) * 0.5)
+                                    cy = int(brect.top + (brect.bottom - brect.top) * 0.5)
+                                    import ctypes
+                                    user32 = ctypes.windll.user32
+                                    user32.SetCursorPos(cx, cy)
+                                    time.sleep(0.04)
+                                    user32.mouse_event(0x0002, 0, 0, 0, 0)
+                                    time.sleep(0.04)
+                                    user32.mouse_event(0x0004, 0, 0, 0, 0)
+                                    liked_via_uia = True
+                                    break
+                except Exception:
+                    pass
         msg = "Ji Boss, video like kar di!"
     elif action_clean in ["subscribe", "subscribe_karo", "channel_subscribe"]:
         # Click Subscribe button on YouTube
@@ -437,24 +445,38 @@ def control_media(action: str, level: Optional[int] = None, time_str: Optional[s
                 width = right - left
                 height = bottom - top
 
-                if "short" in title or "/shorts" in title:
-                    click_x = int(left + width * 0.46)
-                    click_y = int(top + height * 0.88)
-                else:
-                    # On standard YouTube watch page: Subscribe button is below video on left (~35% width, 63% height)
-                    click_x = int(left + width * 0.35)
-                    click_y = int(top + height * 0.63)
-
-                import ctypes
-                user32 = ctypes.windll.user32
-                user32.SetCursorPos(click_x, click_y)
-                time.sleep(0.05)
-                user32.mouse_event(0x0002, 0, 0, 0, 0)
-                time.sleep(0.04)
-                user32.mouse_event(0x0004, 0, 0, 0, 0)
+                # Dynamic discovery of Subscribe button via UIA without static screen percentages
+                subscribed_via_uia = False
+                try:
+                    import comtypes.client
+                    mod = comtypes.client.GetModule("UIAutomationCore.dll")
+                    uia = comtypes.client.CreateObject(mod.CUIAutomation, interface=mod.IUIAutomation)
+                    root = uia.ElementFromHandle(hwnd)
+                    if root:
+                        cond_btn = uia.CreatePropertyCondition(mod.UIA_ControlTypePropertyId, mod.UIA_ButtonControlTypeId)
+                        btns = root.FindAll(mod.TreeScope_Descendants, cond_btn)
+                        if btns:
+                            for i in range(btns.Length):
+                                btn = btns.GetElement(i)
+                                b_name = (btn.CurrentName or "").lower()
+                                if "subscribe" in b_name:
+                                    brect = btn.CurrentBoundingRectangle
+                                    cx = int(brect.left + (brect.right - brect.left) * 0.5)
+                                    cy = int(brect.top + (brect.bottom - brect.top) * 0.5)
+                                    import ctypes
+                                    user32 = ctypes.windll.user32
+                                    user32.SetCursorPos(cx, cy)
+                                    time.sleep(0.04)
+                                    user32.mouse_event(0x0002, 0, 0, 0, 0)
+                                    time.sleep(0.04)
+                                    user32.mouse_event(0x0004, 0, 0, 0, 0)
+                                    subscribed_via_uia = True
+                                    break
+                except Exception:
+                    pass
         msg = "Ji Boss, channel subscribe kar diya!"
     elif action_clean in ["share", "share_video", "share_karo"]:
-        # Click Share button on YouTube
+        # Click Share button on YouTube via dynamic UIA button discovery
         if WIN32_AVAILABLE:
             from backend.tools.browser_tools import force_foreground_window
             windows = []
@@ -469,21 +491,32 @@ def control_media(action: str, level: Optional[int] = None, time_str: Optional[s
                 hwnd, title = windows[0]
                 force_foreground_window(hwnd)
                 time.sleep(0.10)
-                rect = win32gui.GetWindowRect(hwnd)
-                left, top, right, bottom = rect
-                width = right - left
-                height = bottom - top
-
-                click_x = int(left + width * 0.53)
-                click_y = int(top + height * 0.63)
-
-                import ctypes
-                user32 = ctypes.windll.user32
-                user32.SetCursorPos(click_x, click_y)
-                time.sleep(0.05)
-                user32.mouse_event(0x0002, 0, 0, 0, 0)
-                time.sleep(0.04)
-                user32.mouse_event(0x0004, 0, 0, 0, 0)
+                try:
+                    import comtypes.client
+                    mod = comtypes.client.GetModule("UIAutomationCore.dll")
+                    uia = comtypes.client.CreateObject(mod.CUIAutomation, interface=mod.IUIAutomation)
+                    root = uia.ElementFromHandle(hwnd)
+                    if root:
+                        cond_btn = uia.CreatePropertyCondition(mod.UIA_ControlTypePropertyId, mod.UIA_ButtonControlTypeId)
+                        btns = root.FindAll(mod.TreeScope_Descendants, cond_btn)
+                        if btns:
+                            for i in range(btns.Length):
+                                btn = btns.GetElement(i)
+                                b_name = (btn.CurrentName or "").lower()
+                                if "share" in b_name:
+                                    brect = btn.CurrentBoundingRectangle
+                                    cx = int(brect.left + (brect.right - brect.left) * 0.5)
+                                    cy = int(brect.top + (brect.bottom - brect.top) * 0.5)
+                                    import ctypes
+                                    user32 = ctypes.windll.user32
+                                    user32.SetCursorPos(cx, cy)
+                                    time.sleep(0.04)
+                                    user32.mouse_event(0x0002, 0, 0, 0, 0)
+                                    time.sleep(0.04)
+                                    user32.mouse_event(0x0004, 0, 0, 0, 0)
+                                    break
+                except Exception:
+                    pass
         msg = "Ji Boss, share menu open kar diya!"
     elif action_clean in ["comments_down", "comments", "scroll_comments", "comments_dikhao", "comments_padho"]:
         # Scroll down to comments section

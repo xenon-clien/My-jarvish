@@ -676,6 +676,19 @@ def open_application(app_name: str, arguments: Optional[str] = None) -> Dict[str
     """Safely launch an application from the allowlist."""
     app_entry = app_registry.resolve_app(app_name)
 
+    from backend.core.config import get_settings
+    settings = get_settings()
+    enabled_apps = [a.lower() for a in settings.PRODUCTION_ENABLED_APPS]
+
+    # If application is not in PRODUCTION_ENABLED_APPS allowlist (except browser supporting YouTube)
+    app_key = (app_entry.get("name", app_name) if app_entry else app_name).lower().strip()
+    if app_key not in enabled_apps and "chrome" not in app_key and "browser" not in app_key:
+        display_name = app_entry.get("name", app_name.title()) if app_entry else app_name.title()
+        return {
+            "status": "disabled",
+            "message": f"{display_name} automation is not enabled in the current production profile.",
+        }
+
     if not app_entry:
         registered_names = [a["name"] for a in app_registry.list_all()]
         raise PermissionError(

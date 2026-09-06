@@ -167,36 +167,9 @@ class ComputerStateObserver:
         else:
             left, top, w, h = 0, 0, sw, sh
 
-        # Spatial reference grid mapping
-        if any(w in hint for w in ["upar wala", "top", "upper", "first", "pehla", "pehli", "1st"]):
-            # Top-left / Top-center region
-            return (int(left + w * 0.25), int(top + h * 0.35))
-
-        elif any(w in hint for w in ["neeche wala", "bottom", "lower", "down"]):
-            # Bottom region
-            return (int(left + w * 0.25), int(top + h * 0.75))
-
-        elif any(w in hint for w in ["right side wala", "right side", "right", "daye"]):
-            # Right sidebar / right column
-            return (int(left + w * 0.75), int(top + h * 0.40))
-
-        elif any(w in hint for w in ["left side wala", "left side", "left", "baye"]):
-            # Left sidebar / left column
-            return (int(left + w * 0.20), int(top + h * 0.40))
-
-        elif any(w in hint for w in ["beech wala", "center", "middle", "middle wala"]):
-            # Center region
-            return (int(left + w * 0.50), int(top + h * 0.45))
-
-        elif any(w in hint for w in ["second", "dusra", "dusri", "2nd"]):
-            # Second item in grid
-            return (int(left + w * 0.55), int(top + h * 0.35))
-
-        elif any(w in hint for w in ["third", "teesra", "teesri", "3rd"]):
-            # Third item in grid
-            return (int(left + w * 0.82), int(top + h * 0.35))
-
-        # Default to window center
+        # Static coordinate percentage guessing (0.22, 0.25, 0.38, 0.54, 0.55, 0.82) is completely eliminated.
+        # Semantic content selection requires genuine live element bounding rectangles.
+        # Fall back strictly to center of base bounding rectangle or window.
         return (int(left + w * 0.50), int(top + h * 0.50))
 
 

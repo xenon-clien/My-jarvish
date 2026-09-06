@@ -10,6 +10,7 @@ import backend.tools.power_tools    # Register Windows power controls (Shutdown/
 import backend.tools.cleaner_tools  # Register junk file and cache cleaners
 import backend.tools.ui_automation   # Register universal UI automation & window switching tools
 import backend.tools.skill_tools     # Register universal app discovery & health testing tools
+import backend.tools.youtube_tools   # Register canonical YouTube V2 tools
 
 __all__ = [
     "ToolRegistry",

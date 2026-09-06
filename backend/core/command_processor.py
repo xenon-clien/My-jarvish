@@ -164,11 +164,47 @@ class CommandProcessor:
         return None
 
     def get_scoped_tools(self, domain: str, application: Optional[str]) -> List[str]:
-        """Return strictly isolated tool names for LLM/Gemini reasoning."""
+        """Return strictly isolated tool names for LLM (Astra / Gemini) reasoning."""
+        from backend.core.config import get_settings
+        settings = get_settings()
+
+        # In YouTube-only production mode, expose ONLY canonical youtube.* tools + essential infrastructure
+        if settings.PRODUCTION_ENABLED_APPS == ["youtube"] or "youtube" in settings.PRODUCTION_ENABLED_APPS:
+            canonical_yt_tools = [
+                "youtube.open", "youtube.search", "youtube.play_video", "youtube.play_short",
+                "youtube.next_short", "youtube.previous_short", "youtube.pause", "youtube.resume",
+                "youtube.set_fullscreen", "youtube.set_theater_mode", "youtube.set_miniplayer",
+                "youtube.set_captions", "youtube.set_playback_speed", "youtube.speed_up",
+                "youtube.speed_down", "youtube.seek_forward", "youtube.seek_backward",
+                "youtube.seek_timestamp", "youtube.set_volume", "youtube.volume_up",
+                "youtube.volume_down", "youtube.mute", "youtube.unmute", "youtube.set_like",
+                "youtube.replay",
+                # Underscore aliases for API formats requiring identifiers matching [a-zA-Z0-9_]
+                "youtube_open", "youtube_search", "youtube_play_video", "youtube_play_short",
+                "youtube_next_short", "youtube_previous_short", "youtube_pause", "youtube_resume",
+                "youtube_set_fullscreen", "youtube_set_theater_mode", "youtube_set_miniplayer",
+                "youtube_set_captions", "youtube_set_playback_speed", "youtube_speed_up",
+                "youtube_speed_down", "youtube_seek_forward", "youtube_seek_backward",
+                "youtube_seek_timestamp", "youtube_set_volume", "youtube_volume_up",
+                "youtube_volume_down", "youtube_mute", "youtube_unmute", "youtube_set_like",
+                "youtube_replay",
+            ]
+            essential_infra = [
+                "get_current_time", "get_system_status", "get_battery_status",
+                "get_storage_status", "get_network_status"
+            ]
+            return canonical_yt_tools + essential_infra
+
         scope_map = {
             "youtube": [
-                "click_screen_video", "play_youtube_video", "control_media",
-                "close_browser_tab", "open_website", "scroll_page", "switch_window"
+                "youtube.open", "youtube.search", "youtube.play_video", "youtube.play_short",
+                "youtube.next_short", "youtube.previous_short", "youtube.pause", "youtube.resume",
+                "youtube.set_fullscreen", "youtube.set_theater_mode", "youtube.set_miniplayer",
+                "youtube.set_captions", "youtube.set_playback_speed", "youtube.speed_up",
+                "youtube.speed_down", "youtube.seek_forward", "youtube.seek_backward",
+                "youtube.seek_timestamp", "youtube.set_volume", "youtube.volume_up",
+                "youtube.volume_down", "youtube.mute", "youtube.unmute", "youtube.set_like",
+                "youtube.replay",
             ],
             "spotify": [
                 "control_media", "search_spotify", "switch_window"
@@ -230,6 +266,38 @@ class CommandProcessor:
         # Update recent context
         self._recent_app_context = app
         self._recent_context_timestamp = time.time()
+
+        # 2b. Enforce Production Application Allowlist
+        from backend.core.config import get_settings
+        settings = get_settings()
+        enabled_apps = [a.lower() for a in settings.PRODUCTION_ENABLED_APPS]
+
+        target_disabled_app = None
+        if app and app != "system":
+            if app.lower() not in enabled_apps:
+                target_disabled_app = app
+        else:
+            from backend.tools.app_tools import app_registry
+            resolved_entry = app_registry.resolve_app(raw_text)
+            if resolved_entry:
+                entry_name = resolved_entry.get("name", "").lower()
+                if entry_name not in enabled_apps and entry_name != "chrome":
+                    if any(w in raw_text.lower() for w in ["open", "kholo", "launch", "chalao", "start", "close", "band", "bhej", "call"]):
+                        target_disabled_app = resolved_entry.get("name", entry_name)
+
+        if target_disabled_app:
+            display_name = target_disabled_app.title()
+            if target_disabled_app.lower() == "whatsapp":
+                display_name = "WhatsApp"
+            elif target_disabled_app.lower() in ["vscode", "vs code"]:
+                display_name = "VS Code"
+            elif target_disabled_app.lower() == "spotify":
+                display_name = "Spotify"
+            ctx.status = ExecutionStatus.VERIFIED_SUCCESS
+            ctx.action = f"{target_disabled_app.lower()}.disabled"
+            ctx.response_message = f"{display_name} automation is not enabled in the current production profile."
+            ctx.execution_time_ms = round((time.time() - start_t) * 1000, 1)
+            return ctx
 
         # 3. Check Compound Commands (Multi-Step Task Decomposition)
         import re

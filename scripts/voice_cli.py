@@ -49,16 +49,16 @@ SLEEP_WORDS = ["off", "go to sleep", "sleep jarvis", "sleep shivam", "standby", 
 def print_voice_banner(is_standby: bool = False):
     """Display futuristic Dual-AI Voice Mode banner."""
     banner = Text()
-    banner.append("🎙️ J.A.R.V.I.S. DUAL-AI ASSISTANT ONLINE 🎙️\n", style="bold cyan")
-    banner.append(f"👤 Master: {settings.USER_NAME}\n", style="bold white")
-    banner.append("🧠 Primary Brain:     Google Gemini 3.6 Flash (Active - Language & Planning)\n", style="bold green")
-    banner.append("🔬 Debug Specialist:  NVIDIA Nemotron 3.5 Lightning (Active - Diagnostics via OpenRouter)\n", style="bold magenta")
-    banner.append("👏 Clap-To-Wake:      ENABLED (Clap 2 times to wake / auto-launch)\n", style="bold yellow")
+    banner.append("🎙️ J.A.R.V.I.S. YOUTUBE PRODUCTION ASSISTANT ONLINE 🎙️\n", style="bold cyan")
+    banner.append(f"👤 Master:            {settings.USER_NAME}\n", style="bold white")
+    banner.append(f"🧠 Primary Brain:     OpenAI GPT-6 Astra ({settings.ASTRA_MODEL})\n", style="bold green")
+    banner.append(f"🛡️ Standby Fallback:  Google Gemini ({settings.AI_MODEL})\n", style="bold cyan")
+    banner.append("🎯 Production Target: YOUTUBE ONLY (Single-App Grounded Focus)\n", style="bold yellow")
     banner.append("⚡ Wake Words:        'On Jarvis', 'Hey Jarvis', 'Jarvis'\n", style="bold cyan")
     banner.append("🌙 Standby Words:     'Off', 'Sleep', 'Go to sleep'\n", style="italic dim")
-    banner.append("💻 Controls:          'Play first short', 'Chrome kholo', 'Volume up', 'Ispe click karo'", style="cyan")
+    banner.append("💻 YouTube Controls:  'Pehli short chalao', 'Next short', 'Pause', 'Fullscreen', 'Like karo'", style="cyan")
 
-    console.print(Panel(banner, border_style="bright_blue", title="⚡ JARVIS DUAL-AI SYSTEM ACTIVE ⚡"))
+    console.print(Panel(banner, border_style="bright_blue", title="⚡ JARVIS YOUTUBE-ONLY PRODUCTION SYSTEM ACTIVE ⚡"))
 
 
 async def run_voice_loop():

@@ -33,6 +33,9 @@ class Settings(BaseSettings):
     WAKE_WORD: str = "Jarvis"
     USER_NAME: str = "Shivam"
 
+    # Production Application Allowlist (Single-App Focus)
+    PRODUCTION_ENABLED_APPS: List[str] = ["youtube"]
+
     # AI Brain Provider Configuration
     AI_PRIMARY_PROVIDER: str = "astra"
     AI_FALLBACK_PROVIDER: str = "gemini"
