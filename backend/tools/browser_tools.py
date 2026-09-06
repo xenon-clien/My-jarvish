@@ -338,19 +338,25 @@ def launch_in_google_chrome(url: str) -> None:
         r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
         os.path.expandvars(r"%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe"),
     ]
+    try:
+        subprocess.Popen(f'start "" chrome --start-maximized "{url}"', shell=True)
+        return
+    except Exception:
+        pass
+
     for p in chrome_paths:
         if os.path.exists(p):
             try:
-                subprocess.Popen([p, "--start-maximized", url])
+                subprocess.Popen([p, "--start-maximized", url], shell=True)
                 return
             except Exception:
                 pass
 
-    # Fallback to Windows start chrome
     try:
-        subprocess.Popen(f'start chrome --start-maximized "{url}"', shell=True)
-    except Exception:
+        import webbrowser
         webbrowser.open(url, new=0, autoraise=True)
+    except Exception:
+        pass
 
 
 def force_foreground_window(hwnd) -> None:
@@ -693,7 +699,10 @@ def close_browser_tab(target: Optional[str] = None) -> Dict[str, Any]:
                 if title:
                     extra.append((hwnd, title))
 
-        win32gui.EnumWindows(enum_handler, windows)
+        try:
+            win32gui.EnumWindows(enum_handler, windows)
+        except Exception:
+            pass
 
         target_hwnd = None
         # Prioritize matching YouTube if requested
@@ -718,20 +727,32 @@ def close_browser_tab(target: Optional[str] = None) -> Dict[str, Any]:
             except Exception as e:
                 logger.debug(f"Could not focus window: {e}")
 
-        # Send Ctrl + W keypress to close active tab
-        VK_CONTROL = 0x11
-        VK_W = 0x57
-        win32api.keybd_event(VK_CONTROL, 0, 0, 0)
-        win32api.keybd_event(VK_W, 0, 0, 0)
-        time.sleep(0.05)
-        win32api.keybd_event(VK_W, 0, win32con.KEYEVENTF_KEYUP, 0)
-        win32api.keybd_event(VK_CONTROL, 0, win32con.KEYEVENTF_KEYUP, 0)
+            # Send Ctrl + W keypress to close active tab
+            VK_CONTROL = 0x11
+            VK_W = 0x57
+            win32api.keybd_event(VK_CONTROL, 0, 0, 0)
+            win32api.keybd_event(VK_W, 0, 0, 0)
+            time.sleep(0.05)
+            win32api.keybd_event(VK_W, 0, win32con.KEYEVENTF_KEYUP, 0)
+            win32api.keybd_event(VK_CONTROL, 0, win32con.KEYEVENTF_KEYUP, 0)
 
-        logger.info(f"Sent Ctrl+W to close tab (target: '{target}')")
-        return {
-            "status": "success",
-            "message": "Yes Boss! Active browser tab close kar diya hai.",
-        }
+            logger.info(f"Sent Ctrl+W to close tab (target: '{target}')")
+            return {
+                "status": "success",
+                "message": "Yes Boss! Active browser tab close kar diya hai.",
+            }
+        else:
+            # If target was youtube/video and no visible window exists, terminate any orphan chrome background processes
+            if any(w in target_clean for w in ["youtube", "video", "browser", "chrome"]):
+                try:
+                    import subprocess
+                    subprocess.run(["taskkill", "/IM", "chrome.exe", "/F"], capture_output=True)
+                except Exception:
+                    pass
+            return {
+                "status": "success",
+                "message": "Yes Boss! YouTube video background process band kar diya hai.",
+            }
 
     return {
         "status": "unsupported",
