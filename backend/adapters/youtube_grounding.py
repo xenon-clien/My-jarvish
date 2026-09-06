@@ -51,11 +51,41 @@ class YouTubePageObserver:
             return
         try:
             user32 = ctypes.windll.user32
+            user32.OpenDesktopW.restype = ctypes.c_void_p
+            user32.SetThreadDesktop.argtypes = [ctypes.c_void_p]
             hDesk = user32.OpenDesktopW("default", 0, False, 0x01FF)
             if hDesk:
                 user32.SetThreadDesktop(hDesk)
         except Exception:
             pass
+
+    def switch_to_youtube_tab(self, hwnd: int) -> bool:
+        """If Chrome/browser has an open YouTube tab in background, switch to it immediately."""
+        if not WIN32_AVAILABLE or not hwnd:
+            return False
+        self._ensure_desktop_access()
+        try:
+            mod = comtypes.client.GetModule("UIAutomationCore.dll")
+            uia = comtypes.client.CreateObject(mod.CUIAutomation, interface=mod.IUIAutomation)
+            elem = uia.ElementFromHandle(hwnd)
+            if not elem:
+                return False
+            cond = uia.CreatePropertyCondition(30003, 50019)  # TabItem ControlType
+            tabs = elem.FindAll(mod.TreeScope_Descendants, cond)
+            if not tabs:
+                return False
+            for i in range(tabs.Length):
+                t = tabs.GetElement(i)
+                name = (t.CurrentName or "").lower()
+                if "youtube" in name:
+                    pat = t.GetCurrentPattern(10010)  # SelectionItemPattern
+                    sel_pat = pat.QueryInterface(mod.IUIAutomationSelectionItemPattern)
+                    sel_pat.Select()
+                    logger.info(f"Switched directly to existing YouTube tab: '{t.CurrentName}'")
+                    return True
+        except Exception as exc:
+            logger.debug(f"switch_to_youtube_tab error: {exc}")
+        return False
 
     def get_browser_window(self) -> Optional[Tuple[int, str, str, Tuple[int, int, int, int]]]:
         """Discover the genuine foreground or active Chrome/Edge/Brave browser window.
@@ -78,7 +108,7 @@ class YouTubePageObserver:
                     c_low = cls.lower()
 
                     # Filter out IDEs, terminals, and assistant windows
-                    excluded = ["antigravity", "visual studio code", "vscode", "cmd.exe", "powershell", "cursor"]
+                    excluded = ["antigravity", "visual studio code", "vscode", "cmd.exe", "powershell", "cursor", "jarvis", "j.a.r.v.i.s."]
                     if any(ex in t_low for ex in excluded):
                         return True
 
@@ -95,10 +125,24 @@ class YouTubePageObserver:
                 pass
             return True
 
+        h_desk = None
         try:
-            win32gui.EnumWindows(enum_cb, candidates)
+            user32 = ctypes.windll.user32
+            user32.OpenDesktopW.restype = ctypes.c_void_p
+            h_desk = user32.OpenDesktopW("default", 0, False, 0x01FF)
         except Exception:
             pass
+
+        try:
+            if h_desk:
+                win32gui.EnumDesktopWindows(h_desk, enum_cb, candidates)
+            else:
+                win32gui.EnumWindows(enum_cb, candidates)
+        except Exception:
+            try:
+                win32gui.EnumWindows(enum_cb, candidates)
+            except Exception:
+                pass
 
         if not candidates:
             return None

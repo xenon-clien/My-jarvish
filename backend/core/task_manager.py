@@ -62,9 +62,20 @@ class Task(BaseModel):
 class ResourceLockManager:
     """Thread-safe resource locking manager to prevent multi-feature collisions."""
 
-    def __init__(self):
+    def __init__(self, lock_ttl_sec: float = 10.0):
         self._lock = threading.RLock()
         self._active_locks: Dict[str, str] = {}  # resource_name -> task_id
+        self._lock_timestamps: Dict[str, float] = {}  # resource_name -> acquisition timestamp
+        self._lock_ttl_sec = lock_ttl_sec
+
+    def _evict_stale_locks(self) -> None:
+        """Automatically evict locks held longer than TTL to prevent permanent deadlocks."""
+        now = time.time()
+        stale = [r for r, ts in self._lock_timestamps.items() if (now - ts) > self._lock_ttl_sec]
+        for r in stale:
+            holding_task = self._active_locks.pop(r, "UNKNOWN")
+            self._lock_timestamps.pop(r, None)
+            logger.warning(f"Evicted stale lock on '{r}' held by task {holding_task} (> {self._lock_ttl_sec}s)")
 
     def acquire(self, resources: List[str], task_id: str, timeout: float = 3.0) -> bool:
         """Attempt to acquire locks on all required resources."""
@@ -74,10 +85,13 @@ class ResourceLockManager:
         deadline = time.time() + timeout
         while time.time() < deadline:
             with self._lock:
+                self._evict_stale_locks()
                 available = all(r not in self._active_locks or self._active_locks[r] == task_id for r in resources)
                 if available:
+                    now = time.time()
                     for r in resources:
                         self._active_locks[r] = task_id
+                        self._lock_timestamps[r] = now
                     logger.debug(f"Task {task_id} acquired locks on: {resources}")
                     return True
             time.sleep(0.05)
@@ -91,6 +105,7 @@ class ResourceLockManager:
             for r in resources:
                 if self._active_locks.get(r) == task_id:
                     del self._active_locks[r]
+                    self._lock_timestamps.pop(r, None)
             logger.debug(f"Task {task_id} released locks on: {resources}")
 
     def release_all_for_task(self, task_id: str) -> None:
@@ -99,6 +114,7 @@ class ResourceLockManager:
             to_delete = [r for r, tid in self._active_locks.items() if tid == task_id]
             for r in to_delete:
                 del self._active_locks[r]
+                self._lock_timestamps.pop(r, None)
             if to_delete:
                 logger.debug(f"Released all locks for task {task_id}: {to_delete}")
 
@@ -107,11 +123,13 @@ class ResourceLockManager:
         with self._lock:
             cleared = list(self._active_locks.keys())
             self._active_locks.clear()
+            self._lock_timestamps.clear()
             logger.warning(f"Emergency: Force cleared all resource locks: {cleared}")
 
     def get_held_locks(self) -> Dict[str, str]:
         """Return snapshot of currently held locks."""
         with self._lock:
+            self._evict_stale_locks()
             return dict(self._active_locks)
 
 
@@ -171,7 +189,7 @@ class TaskManager:
 
         task.state = TaskState.RUNNING
         task.started_at = time.time()
-        logger.info(f"🚀 Executing Task {task.task_id} -> '{task.tool_name}' args={task.arguments}")
+        logger.info(f"[TASK] Executing Task {task.task_id} -> '{task.tool_name}' args={task.arguments}")
 
         try:
             # 1. Primary Execution Attempt
@@ -199,10 +217,10 @@ class TaskManager:
 
             task.state = TaskState.COMPLETED
             task.finished_at = time.time()
-            logger.info(f"✅ Task {task.task_id} completed successfully (verified={task.verified}).")
+            logger.info(f"[SUCCESS] Task {task.task_id} completed successfully (verified={task.verified}).")
 
         except Exception as exc:
-            logger.error(f"❌ Task {task.task_id} failed with exception: {exc}", exc_info=True)
+            logger.error(f"[FAILED] Task {task.task_id} failed with exception: {exc}", exc_info=True)
             task.state = TaskState.FAILED
             task.error = str(exc)
             task.finished_at = time.time()
@@ -228,7 +246,7 @@ class TaskManager:
             self._current_running_task_id = None
 
         self.lock_manager.force_release_all()
-        logger.warning("🛑 Emergency Stop executed: all tasks cancelled, all resource locks released.")
+        logger.warning("[EMERGENCY] Emergency Stop executed: all tasks cancelled, all resource locks released.")
         return {
             "status": "stopped",
             "cancelled_task_id": cancelled_id,

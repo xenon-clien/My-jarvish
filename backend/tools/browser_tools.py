@@ -256,21 +256,31 @@ def launch_in_google_chrome(url: str) -> None:
         r"C:\Program Files\Google\Chrome\Application\chrome.exe",
         r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
         os.path.expandvars(r"%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe"),
+        os.path.expandvars(r"%PROGRAMFILES%\Google\Chrome\Application\chrome.exe"),
     ]
+    # 1. Try launching verified Chrome executable directly
+    for p in chrome_paths:
+        if os.path.exists(p):
+            try:
+                subprocess.Popen([p, "--start-maximized", url])
+                return
+            except Exception:
+                pass
+            try:
+                import ctypes
+                ctypes.windll.shell32.ShellExecuteW(None, "open", p, f'--start-maximized "{url}"', None, 3)
+                return
+            except Exception:
+                pass
+
+    # 2. Fall back to Windows Shell start
     try:
         subprocess.Popen(f'start "" chrome --start-maximized "{url}"', shell=True)
         return
     except Exception:
         pass
 
-    for p in chrome_paths:
-        if os.path.exists(p):
-            try:
-                subprocess.Popen([p, "--start-maximized", url], shell=True)
-                return
-            except Exception:
-                pass
-
+    # 3. Default browser fallback
     try:
         import webbrowser
         webbrowser.open(url, new=0, autoraise=True)
@@ -284,34 +294,30 @@ def force_foreground_window(hwnd) -> None:
         return
     try:
         import ctypes
-        import win32process
         user32 = ctypes.windll.user32
 
-        # 1. Unminimize if minimized
+        # 1. Attach desktop
+        try:
+            user32.OpenDesktopW.restype = ctypes.c_void_p
+            user32.SetThreadDesktop.argtypes = [ctypes.c_void_p]
+            hDesk = user32.OpenDesktopW("default", 0, False, 0x01FF)
+            if hDesk:
+                user32.SetThreadDesktop(hDesk)
+        except Exception:
+            pass
+
+        # 2. Unminimize / restore if minimized
         if win32gui.IsIconic(hwnd):
             win32gui.ShowWindow(hwnd, win32con.SW_RESTORE)
         else:
             win32gui.ShowWindow(hwnd, win32con.SW_SHOW)
 
-        # 2. Attach thread input to bypass Windows Foreground Lock restriction
-        fore_hwnd = win32gui.GetForegroundWindow()
-        cur_thread = win32api.GetCurrentThreadId()
-        target_thread, _ = win32process.GetWindowThreadProcessId(hwnd)
-
-        if fore_hwnd != hwnd:
-            if cur_thread != target_thread:
-                user32.AttachThreadInput(cur_thread, target_thread, True)
-
-            # 3. Simulate Alt key down/up to grant foreground rights
-            user32.keybd_event(0x12, 0, 0, 0)  # VK_MENU (Alt)
-            user32.keybd_event(0x12, 0, 2, 0)  # VK_MENU UP
-            user32.AllowSetForegroundWindow(-1)
-            user32.SetForegroundWindow(hwnd)
-            user32.BringWindowToTop(hwnd)
-
-            if cur_thread != target_thread:
-                user32.AttachThreadInput(cur_thread, target_thread, False)
-
+        # 3. Bring window to top without dangerous AttachThreadInput queue deadlock
+        user32.keybd_event(0x12, 0, 0, 0)  # VK_MENU (Alt)
+        user32.keybd_event(0x12, 0, 2, 0)  # VK_MENU UP
+        user32.AllowSetForegroundWindow(-1)
+        user32.SetForegroundWindow(hwnd)
+        user32.BringWindowToTop(hwnd)
         time.sleep(0.06)
     except Exception as exc:
         logger.debug(f"force_foreground_window exception: {exc}")
@@ -328,7 +334,7 @@ def is_real_chrome_window(hwnd) -> bool:
         if not title:
             return False
         # Explicitly exclude Antigravity, VS Code, Chatbot, and terminal windows
-        for excluded in ["antigravity", "visual studio code", "vscode", "cursor", "chatbot", "gemini", "powershell", "cmd.exe"]:
+        for excluded in ["antigravity", "visual studio code", "vscode", "cursor", "chatbot", "gemini", "powershell", "cmd.exe", "jarvis", "j.a.r.v.i.s."]:
             if excluded in title:
                 return False
         # Must be Google Chrome / YouTube tab
@@ -344,6 +350,18 @@ def navigate_active_browser_tab(url: str) -> bool:
     if not WIN32_AVAILABLE:
         return False
     try:
+        import ctypes
+        user32 = ctypes.windll.user32
+        h_desk = None
+        try:
+            user32.OpenDesktopW.restype = ctypes.c_void_p
+            user32.SetThreadDesktop.argtypes = [ctypes.c_void_p]
+            h_desk = user32.OpenDesktopW("default", 0, False, 0x01FF)
+            if h_desk:
+                user32.SetThreadDesktop(h_desk)
+        except Exception:
+            pass
+
         windows = []
 
         def enum_handler(hwnd, extra):
@@ -353,23 +371,47 @@ def navigate_active_browser_tab(url: str) -> bool:
                     extra.append((hwnd, title))
             except Exception:
                 pass
+            return True
 
         try:
-            win32gui.EnumWindows(enum_handler, windows)
+            if h_desk:
+                win32gui.EnumDesktopWindows(h_desk, enum_handler, windows)
+            else:
+                win32gui.EnumWindows(enum_handler, windows)
         except Exception:
-            pass
+            try:
+                win32gui.EnumWindows(enum_handler, windows)
+            except Exception:
+                pass
 
         if not windows:
             return False
 
         hwnd, title = windows[0]
+
+        # First check if YouTube tab is already open in background in this Chrome window
+        if "youtube" in url.lower():
+            try:
+                from backend.adapters.youtube_grounding import youtube_page_observer
+                if youtube_page_observer.switch_to_youtube_tab(hwnd):
+                    force_foreground_window(hwnd)
+                    logger.info(f"Switched to existing YouTube tab in '{title}'")
+                    return True
+            except Exception:
+                pass
+
         force_foreground_window(hwnd)
         time.sleep(0.10)
 
-        import ctypes
+        # Direct navigation via Chrome command line if already running
+        chrome_exe = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+        if os.path.exists(chrome_exe):
+            subprocess.Popen([chrome_exe, url])
+            time.sleep(0.3)
+            return True
+
         import win32clipboard
 
-        user32 = ctypes.windll.user32
         VK_CONTROL = 0x11
         VK_L = 0x4C
         VK_V = 0x56
@@ -382,12 +424,16 @@ def navigate_active_browser_tab(url: str) -> bool:
         user32.keybd_event(VK_CONTROL, 0, 2, 0)
         time.sleep(0.08)
 
-        # 2. Put target URL on Windows clipboard
-        win32clipboard.OpenClipboard()
-        win32clipboard.EmptyClipboard()
-        win32clipboard.SetClipboardText(url, win32clipboard.CF_UNICODETEXT)
-        win32clipboard.CloseClipboard()
-        time.sleep(0.05)
+        # 2. Put target URL on Windows clipboard with retry
+        for _ in range(5):
+            try:
+                win32clipboard.OpenClipboard()
+                win32clipboard.EmptyClipboard()
+                win32clipboard.SetClipboardText(url, win32clipboard.CF_UNICODETEXT)
+                win32clipboard.CloseClipboard()
+                break
+            except Exception:
+                time.sleep(0.03)
 
         # 3. Ctrl + V to paste URL
         user32.keybd_event(VK_CONTROL, 0, 0, 0)
@@ -411,6 +457,18 @@ def focus_browser_window(keyword: str = "chrome") -> None:
     if not WIN32_AVAILABLE:
         return
     try:
+        import ctypes
+        user32 = ctypes.windll.user32
+        h_desk = None
+        try:
+            user32.OpenDesktopW.restype = ctypes.c_void_p
+            user32.SetThreadDesktop.argtypes = [ctypes.c_void_p]
+            h_desk = user32.OpenDesktopW("default", 0, False, 0x01FF)
+            if h_desk:
+                user32.SetThreadDesktop(h_desk)
+        except Exception:
+            pass
+
         time.sleep(0.1)
         windows = []
 
@@ -420,11 +478,18 @@ def focus_browser_window(keyword: str = "chrome") -> None:
                     extra.append(hwnd)
             except Exception:
                 pass
+            return True
 
         try:
-            win32gui.EnumWindows(enum_handler, windows)
+            if h_desk:
+                win32gui.EnumDesktopWindows(h_desk, enum_handler, windows)
+            else:
+                win32gui.EnumWindows(enum_handler, windows)
         except Exception:
-            pass
+            try:
+                win32gui.EnumWindows(enum_handler, windows)
+            except Exception:
+                pass
 
         if windows:
             force_foreground_window(windows[0])

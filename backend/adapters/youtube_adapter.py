@@ -5,7 +5,7 @@ with resource locking and closed-loop verification.
 """
 from typing import Any, Dict, Optional
 from backend.core.logger import get_logger
-from backend.core.task_manager import task_manager, TaskPriority
+from backend.core.task_manager import task_manager, TaskPriority, TaskState
 
 try:
     import win32gui
@@ -31,11 +31,14 @@ class YouTubeAdapter:
             required_locks=[self.RESOURCE_LOCK, "browser"],
             immediate_response=f"Haan Shivam, YouTube par {query} chala diya hai." if query else "Haan Shivam, YouTube open kar diya hai.",
         )
-        return task_manager.execute_task_sync(
+        task_res = task_manager.execute_task_sync(
             task=task,
             executor_fn=play_youtube_video,
             verifier_fn=self._verify_youtube_active,
-        ).result or {"status": "success", "message": task.immediate_response}
+        )
+        if task_res.state == TaskState.FAILED:
+            return {"status": "BROKEN", "verified": False, "message": f"YouTube open karne mein samasya aayi: {task_res.error}"}
+        return task_res.result or {"status": "success", "message": task.immediate_response}
 
     def search(self, query: str) -> Dict[str, Any]:
         """Search YouTube for a query string."""
