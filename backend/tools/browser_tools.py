@@ -384,8 +384,21 @@ def navigate_active_browser_tab(url: str) -> bool:
             except Exception:
                 pass
 
-        if not windows:
-            return False
+        # Identify best Chrome window
+        hwnd = None
+        title = ""
+        try:
+            from backend.adapters.youtube_grounding import youtube_page_observer
+            best_win = youtube_page_observer.get_browser_window()
+            if best_win:
+                hwnd, title, _, _ = best_win
+        except Exception:
+            pass
+
+        if not hwnd:
+            if not windows:
+                return False
+            hwnd, title = windows[0]
 
         # Check if the target is just the YouTube home page
         is_home_url = url.strip("/").lower() in [
@@ -407,7 +420,7 @@ def navigate_active_browser_tab(url: str) -> bool:
                 pass
 
         force_foreground_window(hwnd)
-        time.sleep(0.10)
+        time.sleep(0.12)
 
         # Direct navigation via address bar paste (Ctrl+L -> Ctrl+V -> Enter)
         # This is the most reliable in-place navigation in Google Chrome
@@ -445,8 +458,8 @@ def navigate_active_browser_tab(url: str) -> bool:
 
         # 4. Press Enter to navigate current tab
         user32.keybd_event(VK_RETURN, 0, 0, 0)
-        user32.keybd_event(VK_RETURN, 0, 2, 0)
-        logger.info(f"Navigated active browser tab in '{title}' to {url}")
+        safe_title = str(title or "").encode("ascii", "replace").decode("ascii")
+        logger.info(f"Navigated active browser tab in '{safe_title}' to {url}")
         return True
     except Exception as exc:
         logger.debug(f"Active tab in-place navigation fallback: {exc}")

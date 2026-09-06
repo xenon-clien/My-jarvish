@@ -80,8 +80,8 @@ class YouTubePageObserver:
                 if "youtube" in name:
                     pat = t.GetCurrentPattern(10010)  # SelectionItemPattern
                     sel_pat = pat.QueryInterface(mod.IUIAutomationSelectionItemPattern)
-                    sel_pat.Select()
-                    logger.info(f"Switched directly to existing YouTube tab: '{t.CurrentName}'")
+                    safe_name = str(t.CurrentName or "").encode("ascii", "replace").decode("ascii")
+                    logger.info(f"Switched directly to existing YouTube tab: '{safe_name}'")
                     return True
         except Exception as exc:
             logger.debug(f"switch_to_youtube_tab error: {exc}")

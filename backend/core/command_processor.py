@@ -85,7 +85,7 @@ class CommandProcessor:
 
         # 1. Explicit application in current command
         app_keywords = {
-            "youtube": ["youtube", "yt", "short", "shorts", "reel", "reels", "video", "channel", "subscriber", "subscribe"],
+            "youtube": ["youtube", "yt", "short", "shorts", "reel", "reels", "video", "channel", "subscriber", "subscribe", "scroll"],
             "spotify": ["spotify", "gaana", "song", "track", "playlist", "music"],
             "whatsapp": ["whatsapp", "wa", "message", "call", "status", "chat"],
             "chrome": ["chrome", "google chrome", "browser", "tab", "website", "url"],
@@ -100,7 +100,7 @@ class CommandProcessor:
         for app_id, kws in app_keywords.items():
             for kw in kws:
                 if kw in text_lower:
-                    if kw in ["short", "shorts", "reel", "reels", "video"] and app_id == "youtube":
+                    if kw in ["short", "shorts", "reel", "reels", "video", "scroll"] and app_id == "youtube":
                         return "media", "youtube"
                     if kw in ["song", "track"] and app_id == "spotify":
                         return "media", "spotify"
@@ -178,7 +178,7 @@ class CommandProcessor:
                 "youtube.speed_down", "youtube.seek_forward", "youtube.seek_backward",
                 "youtube.seek_timestamp", "youtube.set_volume", "youtube.volume_up",
                 "youtube.volume_down", "youtube.mute", "youtube.unmute", "youtube.set_like",
-                "youtube.replay",
+                "youtube.replay", "youtube.scroll",
                 # Underscore aliases for API formats requiring identifiers matching [a-zA-Z0-9_]
                 "youtube_open", "youtube_search", "youtube_play_video", "youtube_play_short",
                 "youtube_next_short", "youtube_previous_short", "youtube_pause", "youtube_resume",
@@ -187,7 +187,7 @@ class CommandProcessor:
                 "youtube_speed_down", "youtube_seek_forward", "youtube_seek_backward",
                 "youtube_seek_timestamp", "youtube_set_volume", "youtube_volume_up",
                 "youtube_volume_down", "youtube_mute", "youtube_unmute", "youtube_set_like",
-                "youtube_replay",
+                "youtube_replay", "youtube_scroll",
             ]
             essential_infra = [
                 "get_current_time", "get_system_status", "get_battery_status",
@@ -204,7 +204,7 @@ class CommandProcessor:
                 "youtube.speed_down", "youtube.seek_forward", "youtube.seek_backward",
                 "youtube.seek_timestamp", "youtube.set_volume", "youtube.volume_up",
                 "youtube.volume_down", "youtube.mute", "youtube.unmute", "youtube.set_like",
-                "youtube.replay",
+                "youtube.replay", "youtube.scroll",
             ],
             "spotify": [
                 "control_media", "search_spotify", "switch_window"

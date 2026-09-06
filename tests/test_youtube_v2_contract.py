@@ -147,3 +147,22 @@ async def test_v2_command_processor_youtube_routing():
     assert ctx2.action == "youtube.play_short"
     assert ctx2.status in [ExecutionStatus.VERIFIED_SUCCESS, ExecutionStatus.VERIFIED_FAILURE]
 
+
+@pytest.mark.asyncio
+async def test_v2_command_processor_scroll_and_video_ordinal():
+    """Verify CommandProcessor routes scroll commands and play first video cleanly."""
+    ctx_scroll_down = await command_processor.process_command("neeche scroll karo", source="test")
+    assert ctx_scroll_down.action == "youtube.scroll"
+    assert ctx_scroll_down.arguments.get("direction") == "down"
+    assert ctx_scroll_down.status == ExecutionStatus.VERIFIED_SUCCESS
+
+    ctx_scroll_up = await command_processor.process_command("upar scroll karo", source="test")
+    assert ctx_scroll_up.action == "youtube.scroll"
+    assert ctx_scroll_up.arguments.get("direction") == "up"
+    assert ctx_scroll_up.status == ExecutionStatus.VERIFIED_SUCCESS
+
+    res_parse = youtube_nlu.parse("play first video")
+    assert res_parse.canonical_action == "youtube.play_video"
+    assert res_parse.arguments.get("ordinal") == 1
+
+

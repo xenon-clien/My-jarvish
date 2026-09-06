@@ -45,25 +45,66 @@ class YouTubeAdapter:
         return self.open(query=query)
 
     def play_video(self, query: str = "", ordinal: int = 1) -> Dict[str, Any]:
-        """Play a video query or select N-th video with dynamic grounding."""
+        """Play a video query or select N-th video with dynamic grounding and physical actuation."""
         if query:
             return self.open(query=query)
 
         idx = ordinal or 1
         obs = self.observe_browser_state()
         candidates = obs.get("visible_video_candidates", [])
+        cur_id = obs.get("current_video_id")
+
+        # If on watch page or current_video_id exists, filter it out from candidates
+        # so ordinal 1 refers to the next / first recommended video on screen
+        if cur_id:
+            filtered = [c for c in candidates if c.video_id != cur_id]
+            if filtered:
+                candidates = filtered
+
+        from backend.tools.browser_tools import navigate_active_browser_tab, force_foreground_window
+        import time
 
         # 1-based ordinal semantics: target_idx = ordinal - 1 exactly once
         if candidates and len(candidates) >= idx:
             target_cand = candidates[idx - 1]
             expected_id = target_cand.video_id
-            from backend.tools.browser_tools import navigate_active_browser_tab
-            import time
-            navigate_active_browser_tab(f"https://www.youtube.com/watch?v={expected_id}")
+
+            # Actuation 1: Hardware mouse click on candidate centroid if bounding_rect is present
+            clicked = False
+            if target_cand.bounding_rect and WIN32_AVAILABLE:
+                try:
+                    hwnd = obs.get("hwnd")
+                    if hwnd:
+                        force_foreground_window(hwnd)
+                        time.sleep(0.06)
+                    import ctypes
+                    user32 = ctypes.windll.user32
+                    bx1, by1, bx2, by2 = target_cand.bounding_rect
+                    if bx2 > bx1 and by2 > by1:
+                        cx = int(bx1 + (bx2 - bx1) * 0.5)
+                        cy = int(by1 + (by2 - by1) * 0.5)
+                        user32.SetCursorPos(cx, cy)
+                        time.sleep(0.04)
+                        user32.mouse_event(0x0002, 0, 0, 0, 0)
+                        time.sleep(0.04)
+                        user32.mouse_event(0x0004, 0, 0, 0, 0)
+                        clicked = True
+                except Exception as e:
+                    logger.debug(f"Click video candidate failed: {e}")
+
             time.sleep(0.8)
             after_obs = self.observe_browser_state()
             actual_id = after_obs.get("current_video_id", "UNKNOWN")
-            verified = (actual_id == expected_id) or (after_obs.get("playback_state") == "PLAYING") or after_obs.get("is_watch", False)
+            verified = (actual_id == expected_id) or (after_obs.get("playback_state") == "PLAYING" and actual_id != cur_id)
+
+            # Actuation 2: If click didn't navigate or wasn't possible, use in-place Omnibox navigation
+            if not verified:
+                navigate_active_browser_tab(f"https://www.youtube.com/watch?v={expected_id}")
+                time.sleep(1.0)
+                after_obs = self.observe_browser_state()
+                actual_id = after_obs.get("current_video_id", "UNKNOWN")
+                verified = (actual_id == expected_id) or (after_obs.get("playback_state") == "PLAYING" and actual_id != cur_id)
+
             return {
                 "status": "LIVE_VERIFIED" if verified else "DEGRADED",
                 "message": f"Ji Boss, video number {idx} chala di.",
@@ -73,9 +114,29 @@ class YouTubeAdapter:
                 "verified": verified,
             }
 
-        # If candidates not exposed, navigate to YouTube home feed
-        from backend.tools.browser_tools import navigate_active_browser_tab
+        # Candidates not exposed (e.g. on Shorts page, blank tab, or initial load)
+        # Navigate to YouTube home feed, discover visible candidates, and actuate
         navigate_active_browser_tab("https://www.youtube.com")
+        time.sleep(1.5)
+        after_obs = self.observe_browser_state()
+        new_candidates = after_obs.get("visible_video_candidates", [])
+        if new_candidates and len(new_candidates) >= idx:
+            target_cand = new_candidates[idx - 1]
+            expected_id = target_cand.video_id
+            navigate_active_browser_tab(f"https://www.youtube.com/watch?v={expected_id}")
+            time.sleep(1.0)
+            final_obs = self.observe_browser_state()
+            actual_id = final_obs.get("current_video_id", "UNKNOWN")
+            verified = (actual_id == expected_id) or (final_obs.get("playback_state") == "PLAYING")
+            return {
+                "status": "LIVE_VERIFIED" if verified else "DEGRADED",
+                "message": f"Ji Boss, video number {idx} chala di.",
+                "ordinal": idx,
+                "expected_video_id": expected_id,
+                "actual_video_id": actual_id,
+                "verified": verified,
+            }
+
         return {
             "status": "DEGRADED",
             "message": f"Ji Boss, video number {idx} load ho rahi hai.",
@@ -353,6 +414,21 @@ class YouTubeAdapter:
         from backend.tools.media_tools import control_media
         return control_media(action="replay")
 
+    def scroll(self, direction: str = "down", amount: int = 500) -> Dict[str, Any]:
+        """Scroll YouTube page up or down smoothly. In Shorts mode, transitions between shorts."""
+        obs = self.observe_browser_state()
+        is_down = direction.lower() in ["down", "niche", "bottom", "neeche"]
+
+        # If currently in Shorts mode, scrolling transitions to next/prev short
+        if obs.get("page_type") == "SHORTS":
+            if is_down:
+                return self.next_short()
+            else:
+                return self.prev_short()
+
+        from backend.tools.browser_tools import scroll_page
+        return scroll_page(direction=direction, amount=amount)
+
     def observe_browser_state(self) -> Dict[str, Any]:
         """Observe live browser state without fixed coordinates via YouTubePageObserver."""
         from backend.adapters.youtube_grounding import youtube_page_observer
@@ -385,6 +461,11 @@ class YouTubeAdapter:
                 return "LIVE_VERIFIED"
             return "DEGRADED"
 
+        if action in ["youtube.scroll", "scroll_page"]:
+            if state.get("browser_running"):
+                return "LIVE_VERIFIED"
+            return "DEGRADED"
+
         if action == "youtube.play_short":
             if state.get("browser_running") and (state.get("is_shorts") or state.get("is_youtube")):
                 return "LIVE_VERIFIED"
@@ -396,24 +477,6 @@ class YouTubeAdapter:
         if state.get("browser_running") and state.get("is_youtube"):
             return "LIVE_VERIFIED"
         elif state.get("browser_running"):
-            return "LIVE_VERIFIED"
-        else:
-            return "DEGRADED"
-            if state["browser_running"]:
-                return "LIVE_VERIFIED"
-            return "DEGRADED"
-
-        if action == "youtube.play_short":
-            if state["browser_running"] and (state["is_shorts"] or state["is_youtube"]):
-                return "LIVE_VERIFIED"
-            elif state["browser_running"]:
-                return "LIVE_VERIFIED"
-            return "DEGRADED"
-
-        # Media & playback controls
-        if state["browser_running"] and state["is_youtube"]:
-            return "LIVE_VERIFIED"
-        elif state["browser_running"]:
             return "LIVE_VERIFIED"
         else:
             return "DEGRADED"
@@ -467,6 +530,14 @@ class YouTubeAdapter:
                 raw_result = self.prev_short()
                 expected_effect = "NAVIGATED_PREV_SHORT"
                 response_msg = "Ji Boss, pichla short chala diya."
+
+            elif canonical_action in ["youtube.scroll", "scroll_page"]:
+                dir_val = args.get("direction", "down")
+                amt_val = args.get("amount", 500)
+                raw_result = self.scroll(direction=dir_val, amount=amt_val)
+                expected_effect = "PAGE_SCROLLED"
+                is_down = dir_val.lower() in ["down", "niche", "bottom", "neeche"]
+                response_msg = f"Ji Boss, {'neeche' if is_down else 'upar'} scroll kar diya."
 
             elif canonical_action == "youtube.pause":
                 raw_result = self.pause()

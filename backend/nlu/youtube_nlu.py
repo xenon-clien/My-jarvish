@@ -227,7 +227,7 @@ class YouTubeSemanticEngine:
         ordinal = cls.extract_ordinal(corrected_text)
 
         # ── 1. Next Short vs Ordinal 2 ──────────────────────────────────────
-        if re.search(r"\b(?:next\s+short|agla\s+short|agli\s+short|niche\s+scroll|scroll\s+down|aage\s+wali\s+short|iske\s+baad\s+wali\s+short)\b", corrected_text):
+        if re.search(r"\b(?:next\s+short|agla\s+short|agli\s+short|short\s+niche\s+scroll|aage\s+wali\s+short|iske\s+baad\s+wali\s+short)\b", corrected_text):
             return YouTubeSemanticResult(
                 canonical_action="youtube.next_short",
                 content_type="short",
@@ -259,7 +259,7 @@ class YouTubeSemanticEngine:
                 )
 
         # ── 2. Previous Short / Relative Navigation ─────────────────────────
-        if re.search(r"\b(?:previous\s+short|prev\s+short|pichla\s+short|pichli\s+short|pichhla\s+short|upar\s+scroll|scroll\s+up|peeche\s+wali\s+short)\b", corrected_text):
+        if re.search(r"\b(?:previous\s+short|prev\s+short|pichla\s+short|pichli\s+short|pichhla\s+short|short\s+upar\s+scroll|peeche\s+wali\s+short)\b", corrected_text):
             return YouTubeSemanticResult(
                 canonical_action="youtube.previous_short",
                 content_type="short",
@@ -280,6 +280,28 @@ class YouTubeSemanticEngine:
                     raw_text=raw_text,
                     normalized_text=corrected_text
                 )
+
+        # ── 2b. Universal YouTube Page / Feed Scrolling ──────────────────────
+        if re.search(r"\b(?:scroll\s+(?:up|upar)|upar\s+scroll|page\s+(?:up|upar)|thoda\s+upar|upar\s+karo|^page\s*up$)\b", corrected_text):
+            return YouTubeSemanticResult(
+                canonical_action="youtube.scroll",
+                arguments={"direction": "up", "amount": 500},
+                direction="up",
+                desired_state="PAGE_SCROLLED",
+                confidence=0.98,
+                raw_text=raw_text,
+                normalized_text=corrected_text
+            )
+        if re.search(r"\b(?:scroll\s+(?:down|neeche|niche)|neeche\s+scroll|niche\s+scroll|page\s+(?:down|neeche|niche)|thoda\s+(?:neeche|niche)|neeche\s+karo|niche\s+karo|scroll\s+karo|scroll\s+kar\s+do|scroll\s+kardo|thoda\s+scroll|aur\s+scroll|^scroll$)\b", corrected_text):
+            return YouTubeSemanticResult(
+                canonical_action="youtube.scroll",
+                arguments={"direction": "down", "amount": 500},
+                direction="down",
+                desired_state="PAGE_SCROLLED",
+                confidence=0.98,
+                raw_text=raw_text,
+                normalized_text=corrected_text
+            )
 
         # ── 3. Play Short (Optional ordinal defaults to 1) ───────────────────
         if content_type == "short" and ordinal is not None:
