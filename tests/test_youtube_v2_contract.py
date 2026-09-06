@@ -2,7 +2,7 @@
 import pytest
 from backend.nlu.youtube_nlu import youtube_nlu
 from backend.adapters.youtube_adapter import youtube_adapter
-from backend.core.command_processor import command_processor
+from backend.core.command_processor import command_processor, ExecutionStatus
 
 
 def test_v2_contract_all_intents_slot_extraction():
@@ -73,3 +73,77 @@ def test_negations_and_self_corrections():
     res_corr = youtube_nlu.parse("second nahi first short chalao")
     assert res_corr.canonical_action == "youtube.play_short"
     assert res_corr.ordinal == 1
+
+
+def test_v2_adapter_observe_browser_state():
+    """Verify observe_browser_state returns expected structure without crashing."""
+    state = youtube_adapter.observe_browser_state()
+    assert isinstance(state, dict)
+    required_keys = ["browser_running", "browser_name", "hwnd", "window_title", "is_foreground", "url", "is_youtube", "is_shorts", "is_watch"]
+    for k in required_keys:
+        assert k in state, f"Missing key '{k}' in observed state"
+
+
+def test_v2_adapter_verify_state():
+    """Verify closed-loop state verifier logic."""
+    # When result is error
+    assert youtube_adapter.verify_state("youtube.pause", "PAUSED", {"status": "error"}) == "BROKEN"
+
+    # Status must be one of the three contract states
+    status = youtube_adapter.verify_state("youtube.pause", "PAUSED", {"status": "success"})
+    assert status in ["LIVE_VERIFIED", "DEGRADED", "BROKEN"]
+
+
+def test_v2_adapter_execute_canonical_all_intents():
+    """Verify execute_canonical covers all 25 canonical actions and returns structured payload."""
+    test_intents = [
+        ("youtube.open", {"query": ""}, "NAVIGATED_HOME"),
+        ("youtube.search", {"query": "carryminati"}, "SEARCH_RESULTS_DISPLAYED"),
+        ("youtube.play_video", {"query": "carryminati", "ordinal": 1}, "VIDEO_PLAYING"),
+        ("youtube.play_short", {"ordinal": 1}, "SHORT_PLAYING"),
+        ("youtube.next_short", {}, "NAVIGATED_NEXT_SHORT"),
+        ("youtube.previous_short", {}, "NAVIGATED_PREV_SHORT"),
+        ("youtube.pause", {}, "PAUSED"),
+        ("youtube.resume", {}, "PLAYING"),
+        ("youtube.set_fullscreen", {"enabled": True}, "FULLSCREEN_STATE_SET"),
+        ("youtube.set_theater_mode", {"enabled": True}, "THEATER_MODE_SET"),
+        ("youtube.set_miniplayer", {"enabled": True}, "MINIPLAYER_STATE_SET"),
+        ("youtube.set_captions", {"enabled": True}, "CAPTIONS_STATE_SET"),
+        ("youtube.set_playback_speed", {"rate": 1.25}, "SPEED_SET"),
+        ("youtube.speed_up", {"step": 0.25}, "SPEED_INCREASED"),
+        ("youtube.speed_down", {"step": 0.25}, "SPEED_DECREASED"),
+        ("youtube.seek_forward", {"seconds": 10}, "SEEKED_FORWARD"),
+        ("youtube.seek_backward", {"seconds": 10}, "SEEKED_BACKWARD"),
+        ("youtube.seek_timestamp", {"seconds": 150, "raw_timestamp": "02:30"}, "SEEKED_TO_TIMESTAMP"),
+        ("youtube.set_volume", {"level": 60}, "VOLUME_LEVEL_SET"),
+        ("youtube.volume_up", {"step": 10}, "VOLUME_INCREASED"),
+        ("youtube.volume_down", {"step": 10}, "VOLUME_DECREASED"),
+        ("youtube.mute", {}, "MUTED"),
+        ("youtube.unmute", {}, "UNMUTED"),
+        ("youtube.set_like", {"enabled": True}, "LIKED_STATE_SET"),
+        ("youtube.replay", {}, "REPLAYED"),
+    ]
+
+    for action, args, exp_effect in test_intents:
+        # Mock sub-operations or test structure
+        res = youtube_adapter.execute_canonical(action, args)
+        assert isinstance(res, dict)
+        assert res["canonical_action"] == action
+        assert res["expected_effect"] == exp_effect
+        assert res["status"] in ["LIVE_VERIFIED", "DEGRADED", "BROKEN"]
+        assert "message" in res
+        assert "observed_state" in res
+
+
+@pytest.mark.asyncio
+async def test_v2_command_processor_youtube_routing():
+    """Verify CommandProcessor routes YouTube commands through YouTubeAdapter."""
+    ctx = await command_processor.process_command("YouTube par CarryMinati search karo", source="test")
+    assert ctx.action == "youtube.search"
+    assert ctx.status in [ExecutionStatus.VERIFIED_SUCCESS, ExecutionStatus.VERIFIED_FAILURE]
+    assert "carryminati" in ctx.response_message.lower() or "youtube" in ctx.response_message.lower()
+
+    ctx2 = await command_processor.process_command("short chalao", source="test")
+    assert ctx2.action == "youtube.play_short"
+    assert ctx2.status in [ExecutionStatus.VERIFIED_SUCCESS, ExecutionStatus.VERIFIED_FAILURE]
+

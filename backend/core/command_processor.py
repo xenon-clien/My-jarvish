@@ -271,136 +271,26 @@ class CommandProcessor:
                 return ctx
 
             if yt_res.canonical_action != "youtube.unknown" and yt_res.confidence >= 0.85:
-                # Map canonical YouTube action to grounded tool
-                tool_name = "control_media"
-                tool_args = {}
-                imm_resp = "Ji Boss, ho gaya."
-
-                if yt_res.canonical_action == "youtube.play_short":
-                    tool_name = "click_screen_video"
-                    ord_val = yt_res.ordinal or 1
-                    tool_args = {"index": ord_val, "section": "shorts"}
-                    imm_resp = f"Ji Boss, short number {ord_val} chala diya."
-                elif yt_res.canonical_action == "youtube.next_short":
-                    tool_name = "control_media"
-                    tool_args = {"action": "next_short"}
-                    imm_resp = "Ji Boss, agla short chala diya."
-                elif yt_res.canonical_action == "youtube.previous_short":
-                    tool_name = "control_media"
-                    tool_args = {"action": "prev_short"}
-                    imm_resp = "Ji Boss, pichla short chala diya."
-                elif yt_res.canonical_action in ["youtube.open", "youtube.search", "youtube.play_video"]:
-                    if yt_res.query:
-                        tool_name = "play_youtube_video"
-                        tool_args = {"query": yt_res.query}
-                        imm_resp = f"Ji Boss, YouTube par {yt_res.query} chala diya."
-                    elif yt_res.ordinal and yt_res.ordinal > 1:
-                        tool_name = "click_screen_video"
-                        tool_args = {"index": yt_res.ordinal, "section": "main"}
-                        imm_resp = f"Ji Boss, video number {yt_res.ordinal} chala diya."
-                    else:
-                        tool_name = "play_youtube_video"
-                        tool_args = {"query": ""}
-                        imm_resp = "Haan Shivam, YouTube open kar diya hai."
-                elif yt_res.canonical_action == "youtube.pause":
-                    tool_name = "control_media"
-                    tool_args = {"action": "pause"}
-                    imm_resp = "Ji Boss, video pause kar diya."
-                elif yt_res.canonical_action == "youtube.resume":
-                    tool_name = "control_media"
-                    tool_args = {"action": "play"}
-                    imm_resp = "Ji Boss, video play kar diya."
-                elif yt_res.canonical_action in ["youtube.fullscreen", "youtube.set_fullscreen"]:
-                    tool_name = "control_media"
-                    tool_args = {"action": "fullscreen"}
-                    imm_resp = "Ji Boss, fullscreen kar diya." if yt_res.arguments.get("enabled", True) else "Ji Boss, fullscreen se bahar aa gaye."
-                elif yt_res.canonical_action == "youtube.set_theater_mode":
-                    tool_name = "control_media"
-                    tool_args = {"action": "theater"}
-                    imm_resp = "Ji Boss, theater mode on kar diya." if yt_res.arguments.get("enabled", True) else "Ji Boss, theater mode band kar diya."
-                elif yt_res.canonical_action == "youtube.set_miniplayer":
-                    tool_name = "control_media"
-                    tool_args = {"action": "miniplayer"}
-                    imm_resp = "Ji Boss, miniplayer on kar diya." if yt_res.arguments.get("enabled", True) else "Ji Boss, miniplayer band kar diya."
-                elif yt_res.canonical_action in ["youtube.captions", "youtube.set_captions"]:
-                    tool_name = "control_media"
-                    tool_args = {"action": "captions"}
-                    imm_resp = "Ji Boss, subtitles chalu kar diye." if yt_res.arguments.get("enabled", True) else "Ji Boss, subtitles band kar diye."
-                elif yt_res.canonical_action == "youtube.set_playback_speed":
-                    tool_name = "control_media"
-                    rate = yt_res.arguments.get("rate", 1.0)
-                    tool_args = {"action": "speed_up" if rate > 1.0 else "speed_down"}
-                    imm_resp = f"Ji Boss, playback speed {rate}x kar di."
-                elif yt_res.canonical_action == "youtube.seek_timestamp":
-                    tool_name = "control_media"
-                    secs = yt_res.arguments.get("seconds", 0)
-                    raw_ts = yt_res.arguments.get("raw_timestamp", "")
-                    tool_args = {"action": "seek_timestamp", "level": secs, "time_str": raw_ts}
-                    imm_resp = f"Ji Boss, video {raw_ts or str(secs)+'s'} par le gaye."
-                elif yt_res.canonical_action == "youtube.seek_forward":
-                    tool_name = "control_media"
-                    tool_args = {"action": "seek_forward", "level": yt_res.arguments.get("seconds", 10)}
-                    imm_resp = f"Ji Boss, {yt_res.arguments.get('seconds', 10)} seconds aage kar diya."
-                elif yt_res.canonical_action == "youtube.seek_backward":
-                    tool_name = "control_media"
-                    tool_args = {"action": "seek_backward", "level": yt_res.arguments.get("seconds", 10)}
-                    imm_resp = f"Ji Boss, {yt_res.arguments.get('seconds', 10)} seconds peeche kar diya."
-                elif yt_res.canonical_action == "youtube.set_volume":
-                    tool_name = "control_media"
-                    v_level = yt_res.arguments.get("level", 50)
-                    tool_args = {"action": "set_volume", "level": v_level}
-                    imm_resp = f"Ji Boss, volume {v_level}% kar diya."
-                elif yt_res.canonical_action == "youtube.volume_up":
-                    tool_name = "control_media"
-                    tool_args = {"action": "volume_up"}
-                    imm_resp = "Ji Boss, volume badha diya."
-                elif yt_res.canonical_action == "youtube.volume_down":
-                    tool_name = "control_media"
-                    tool_args = {"action": "volume_down"}
-                    imm_resp = "Ji Boss, volume kam kar diya."
-                elif yt_res.canonical_action == "youtube.mute":
-                    tool_name = "control_media"
-                    tool_args = {"action": "mute"}
-                    imm_resp = "Ji Boss, mute kar diya."
-                elif yt_res.canonical_action == "youtube.unmute":
-                    tool_name = "control_media"
-                    tool_args = {"action": "unmute"}
-                    imm_resp = "Ji Boss, unmute kar diya."
-                elif yt_res.canonical_action in ["youtube.like", "youtube.set_like"]:
-                    tool_name = "control_media"
-                    tool_args = {"action": "like"}
-                    imm_resp = "Ji Boss, video like kar diya." if yt_res.arguments.get("enabled", True) else "Ji Boss, like hata diya."
-                elif yt_res.canonical_action == "youtube.replay":
-                    tool_name = "control_media"
-                    tool_args = {"action": "replay"}
-                    imm_resp = "Ji Boss, video shuru se chala diya."
-                elif yt_res.canonical_action == "youtube.speed_up":
-                    tool_name = "control_media"
-                    tool_args = {"action": "speed_up"}
-                    imm_resp = "Ji Boss, playback speed badha di."
-                elif yt_res.canonical_action == "youtube.speed_down":
-                    tool_name = "control_media"
-                    tool_args = {"action": "speed_down"}
-                    imm_resp = "Ji Boss, playback speed kam kar di."
-
-                # Execute YouTube tool deterministically
-                ctx.action = tool_name
-                ctx.arguments = tool_args
-                lock_resource = "youtube"
-                acquired = resource_lock_manager.acquire([lock_resource], ctx.command_id, timeout=2.5)
-                try:
-                    from backend.tools.registry import default_registry
-                    tool_res = await default_registry.execute(tool_name, **tool_args)
-                    if tool_res.success:
-                        ctx.status = ExecutionStatus.VERIFIED_SUCCESS
-                        ctx.verified = True
-                        ctx.response_message = imm_resp
-                    else:
-                        ctx.status = ExecutionStatus.VERIFIED_FAILURE
-                        ctx.response_message = f"Error: {tool_res.error}"
-                finally:
-                    if acquired:
-                        resource_lock_manager.release([lock_resource], ctx.command_id)
+                ctx.action = yt_res.canonical_action
+                ctx.arguments = yt_res.arguments
+                from backend.adapters.youtube_adapter import youtube_adapter
+                adapter_res = youtube_adapter.execute_canonical(
+                    canonical_action=yt_res.canonical_action,
+                    arguments=yt_res.arguments
+                )
+                v_status = adapter_res.get("status", "BROKEN")
+                if v_status == "LIVE_VERIFIED":
+                    ctx.status = ExecutionStatus.VERIFIED_SUCCESS
+                    ctx.verified = True
+                    ctx.response_message = adapter_res.get("message", "Ji Boss, ho gaya.")
+                elif v_status == "DEGRADED":
+                    ctx.status = ExecutionStatus.VERIFIED_SUCCESS
+                    ctx.verified = False
+                    ctx.response_message = adapter_res.get("message", "Ji Boss, ho gaya.")
+                else:
+                    ctx.status = ExecutionStatus.VERIFIED_FAILURE
+                    ctx.verified = False
+                    ctx.response_message = adapter_res.get("message", "YouTube action fail ho gaya.")
                 ctx.execution_time_ms = round((time.time() - start_t) * 1000, 1)
                 return ctx
 
