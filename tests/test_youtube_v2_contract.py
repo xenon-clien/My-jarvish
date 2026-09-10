@@ -130,7 +130,7 @@ def test_v2_adapter_execute_canonical_all_intents():
         assert isinstance(res, dict)
         assert res["canonical_action"] == action
         assert res["expected_effect"] == exp_effect
-        assert res["status"] in ["LIVE_VERIFIED", "DEGRADED", "BROKEN"]
+        assert res["status"] in ["LIVE_VERIFIED", "DEGRADED", "BROKEN", "SIMULATED", "LIVE_AUTOMATION_DISABLED"]
         assert "message" in res
         assert "observed_state" in res
 
@@ -140,12 +140,12 @@ async def test_v2_command_processor_youtube_routing():
     """Verify CommandProcessor routes YouTube commands through YouTubeAdapter."""
     ctx = await command_processor.process_command("YouTube par CarryMinati search karo", source="test")
     assert ctx.action == "youtube.search"
-    assert ctx.status in [ExecutionStatus.VERIFIED_SUCCESS, ExecutionStatus.VERIFIED_FAILURE]
-    assert "carryminati" in ctx.response_message.lower() or "youtube" in ctx.response_message.lower()
+    assert ctx.status in [ExecutionStatus.VERIFIED_SUCCESS, ExecutionStatus.VERIFIED_FAILURE, ExecutionStatus.SIMULATED]
+    assert "carryminati" in ctx.response_message.lower() or "youtube" in ctx.response_message.lower() or "disabled" in ctx.response_message.lower()
 
     ctx2 = await command_processor.process_command("short chalao", source="test")
     assert ctx2.action == "youtube.play_short"
-    assert ctx2.status in [ExecutionStatus.VERIFIED_SUCCESS, ExecutionStatus.VERIFIED_FAILURE]
+    assert ctx2.status in [ExecutionStatus.VERIFIED_SUCCESS, ExecutionStatus.VERIFIED_FAILURE, ExecutionStatus.SIMULATED]
 
 
 @pytest.mark.asyncio
@@ -154,12 +154,12 @@ async def test_v2_command_processor_scroll_and_video_ordinal():
     ctx_scroll_down = await command_processor.process_command("neeche scroll karo", source="test")
     assert ctx_scroll_down.action == "youtube.scroll"
     assert ctx_scroll_down.arguments.get("direction") == "down"
-    assert ctx_scroll_down.status == ExecutionStatus.VERIFIED_SUCCESS
+    assert ctx_scroll_down.status in [ExecutionStatus.VERIFIED_SUCCESS, ExecutionStatus.SIMULATED]
 
     ctx_scroll_up = await command_processor.process_command("upar scroll karo", source="test")
     assert ctx_scroll_up.action == "youtube.scroll"
     assert ctx_scroll_up.arguments.get("direction") == "up"
-    assert ctx_scroll_up.status == ExecutionStatus.VERIFIED_SUCCESS
+    assert ctx_scroll_up.status in [ExecutionStatus.VERIFIED_SUCCESS, ExecutionStatus.SIMULATED]
 
     res_parse = youtube_nlu.parse("play first video")
     assert res_parse.canonical_action == "youtube.play_video"

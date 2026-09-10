@@ -276,10 +276,11 @@ def control_media(action: str, level: Optional[int] = None, time_str: Optional[s
         if action_clean not in valid_actions and not any(action_clean.startswith(k) for k in valid_actions):
             raise ValueError(f"Unknown media action: '{action}'. Available: play_pause, next, previous, seek_forward, seek_backward, seek_timestamp, speed_up, speed_down, fullscreen, theater, miniplayer, captions, next_short, prev_short, like, subscribe, share, comments_down, comments_up, volume_up, volume_down, set_volume, mute.")
         return {
-            "status": "success",
+            "status": "SIMULATED",
             "action": action_clean,
             "message": valid_actions.get(action_clean, f"Simulated {action_clean}"),
             "simulated": True,
+            "verified": False,
         }
 
     _focus_media_window()

@@ -85,8 +85,9 @@ def test_4_youtube_play_short_no_hardware_when_live_disabled(call_tracker):
     from backend.adapters.youtube_adapter import youtube_adapter
     res = youtube_adapter.play_short(ordinal=1)
 
-    assert res["status"] in ["LIVE_VERIFIED", "DEGRADED"]
+    assert res["status"] in ["SIMULATED", "LIVE_AUTOMATION_DISABLED"]
     assert res.get("simulated") is True or res.get("method") == "semantic_shorts_identity"
+    assert res.get("verified") is False
     assert call_tracker.set_cursor_pos_calls == 0
     assert call_tracker.mouse_event_calls == 0
     assert call_tracker.keybd_event_calls == 0
@@ -100,8 +101,9 @@ def test_5_youtube_play_video_no_hardware_when_live_disabled(call_tracker):
     from backend.adapters.youtube_adapter import youtube_adapter
     res = youtube_adapter.play_video(ordinal=1)
 
-    assert res["status"] == "LIVE_VERIFIED"
+    assert res["status"] in ["SIMULATED", "LIVE_AUTOMATION_DISABLED"]
     assert res.get("simulated") is True
+    assert res.get("verified") is False
     assert call_tracker.set_cursor_pos_calls == 0
     assert call_tracker.mouse_event_calls == 0
 

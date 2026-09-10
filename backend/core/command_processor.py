@@ -32,6 +32,8 @@ class ExecutionStatus(str, Enum):
     CANCELLED = "CANCELLED"
     UNSUPPORTED = "UNSUPPORTED"
     DEGRADED = "DEGRADED"
+    SIMULATED = "SIMULATED"
+    LIVE_AUTOMATION_DISABLED = "LIVE_AUTOMATION_DISABLED"
 
 
 class CommandContext(BaseModel):
@@ -373,9 +375,13 @@ class CommandProcessor:
                     ctx.verified = True
                     ctx.response_message = adapter_res.get("message", "Ji Boss, ho gaya.")
                 elif v_status == "DEGRADED":
-                    ctx.status = ExecutionStatus.VERIFIED_SUCCESS
+                    ctx.status = ExecutionStatus.DEGRADED
                     ctx.verified = False
-                    ctx.response_message = adapter_res.get("message", "Ji Boss, ho gaya.")
+                    ctx.response_message = adapter_res.get("message", "YouTube launch kiya hai, lekin main confirm nahi kar pa raha ki page open hua.")
+                elif v_status in ["SIMULATED", "LIVE_AUTOMATION_DISABLED"]:
+                    ctx.status = ExecutionStatus.SIMULATED
+                    ctx.verified = False
+                    ctx.response_message = adapter_res.get("message", "Development safe mode active hai; live automation perform nahi kiya gaya.")
                 else:
                     ctx.status = ExecutionStatus.VERIFIED_FAILURE
                     ctx.verified = False

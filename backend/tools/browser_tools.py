@@ -83,11 +83,12 @@ def click_screen_video(index: int = 1, section: Optional[str] = "auto") -> Dict[
     """Click on the video or right-side recommended video thumbnail on the active Chrome screen."""
     if not is_physical_automation_allowed():
         return {
-            "status": "success",
+            "status": "SIMULATED",
             "index": index,
             "section": section,
-            "message": f"Ji Boss, video number {index} chala diya.",
+            "message": f"Simulation: video number {index} (physical automation disabled).",
             "simulated": True,
+            "verified": False,
         }
 
     if not WIN32_AVAILABLE:
@@ -440,6 +441,10 @@ def navigate_active_browser_tab(url: str) -> bool:
             except Exception:
                 pass
 
+        if not is_physical_automation_allowed():
+            logger.debug("Physical keyboard automation disabled: skipping address-bar typing navigation.")
+            return False
+
         force_foreground_window(hwnd)
         time.sleep(0.12)
 
@@ -662,11 +667,12 @@ def play_youtube_video(query: Optional[str] = "") -> Dict[str, Any]:
             logger.debug(f"Direct video semantic ranking fallback: {exc}")
     if not is_live_browser_automation_allowed():
         return {
-            "status": "success",
+            "status": "LIVE_AUTOMATION_DISABLED",
             "query": clean_query,
             "url": target_url,
-            "message": hindi_msg,
+            "message": "Live browser automation is disabled in development safe mode.",
             "simulated": True,
+            "verified": False,
         }
 
     try:
@@ -720,9 +726,10 @@ def close_browser_tab(target: Optional[str] = None) -> Dict[str, Any]:
 
     if not is_physical_automation_allowed():
         return {
-            "status": "success",
-            "message": "Yes Boss! Active browser tab close kar diya hai.",
+            "status": "SIMULATED",
+            "message": "Simulation: close tab (physical automation disabled).",
             "simulated": True,
+            "verified": False,
         }
 
     if WIN32_AVAILABLE:
@@ -1003,10 +1010,11 @@ def scroll_page(direction: str = "down", amount: int = 500) -> Dict[str, Any]:
     if not is_physical_automation_allowed():
         is_down = direction.lower() in ["down", "niche", "bottom", "neeche"]
         return {
-            "status": "success",
+            "status": "SIMULATED",
             "direction": direction,
-            "message": f"Ji Boss, {'neeche' if is_down else 'upar'} scroll kar diya.",
+            "message": f"Simulation: scroll {'neeche' if is_down else 'upar'} (physical automation disabled).",
             "simulated": True,
+            "verified": False,
         }
 
     if not WIN32_AVAILABLE:

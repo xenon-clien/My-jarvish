@@ -7,6 +7,9 @@ def test_media_control_actions(monkeypatch):
     """Test media control actions execution."""
     sent_keys = []
     from backend.tools import media_tools
+    monkeypatch.setattr(media_tools, "is_physical_automation_allowed", lambda: True)
+    monkeypatch.setattr(media_tools, "_focus_media_window", lambda: None)
+    monkeypatch.setattr(media_tools, "_click_video_player_center", lambda: None)
     monkeypatch.setattr(media_tools, "_send_key_event", lambda vk: sent_keys.append(vk))
 
     # Play / Pause

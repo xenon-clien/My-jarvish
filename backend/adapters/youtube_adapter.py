@@ -28,23 +28,105 @@ class YouTubeAdapter:
     RESOURCE_LOCK = "youtube"
 
     def open(self, query: str = "") -> Dict[str, Any]:
-        """Open YouTube Home or search for a video query."""
-        from backend.tools.browser_tools import play_youtube_video
-        task = task_manager.create_task(
-            command=f"YouTube {query}" if query else "YouTube open",
-            tool_name="youtube.open",
-            arguments={"query": query},
-            required_locks=[self.RESOURCE_LOCK, "browser"],
-            immediate_response=f"Haan Shivam, YouTube par {query} chala diya hai." if query else "Haan Shivam, YouTube open kar diya hai.",
-        )
-        task_res = task_manager.execute_task_sync(
-            task=task,
-            executor_fn=play_youtube_video,
-            verifier_fn=self._verify_youtube_active,
-        )
-        if task_res.state == TaskState.FAILED:
-            return {"status": "BROKEN", "verified": False, "message": f"YouTube open karne mein samasya aayi: {task_res.error}"}
-        return task_res.result or {"status": "success", "message": task.immediate_response}
+        """Open YouTube Home or search for a video query with closed-loop state verification."""
+        from backend.core.safety import is_live_browser_automation_allowed
+        from backend.tools.browser_tools import launch_in_google_chrome, navigate_active_browser_tab
+        import urllib.parse
+        import time
+
+        # Non-interactive development & test isolation
+        if not is_live_browser_automation_allowed():
+            logger.info("youtube.open: live browser automation is disabled in safe mode.")
+            return {
+                "status": "LIVE_AUTOMATION_DISABLED",
+                "verified": False,
+                "simulated": True,
+                "query": query,
+                "url": f"https://www.youtube.com/results?search_query={urllib.parse.quote_plus(query)}" if query else "https://www.youtube.com/",
+                "message": "Live browser automation is disabled in development safe mode.",
+            }
+
+        target_url = f"https://www.youtube.com/results?search_query={urllib.parse.quote_plus(query)}" if query else "https://www.youtube.com/"
+
+        # 1. Actuation: Try semantic tab switch/navigation first, else launch Chrome process
+        actuation_success = False
+        launch_error = None
+
+        try:
+            obs = self.observe_browser_state()
+            hwnd = obs.get("hwnd")
+
+            # Try semantic browser control if Chrome/Edge is already running
+            if obs.get("browser_running") and hwnd:
+                from backend.adapters.youtube_grounding import youtube_page_observer
+                if not query and youtube_page_observer.switch_to_youtube_tab(hwnd):
+                    actuation_success = True
+                else:
+                    nav = navigate_active_browser_tab(target_url)
+                    if nav:
+                        actuation_success = True
+
+            # If no existing session handled it, launch Google Chrome process with URL
+            if not actuation_success:
+                launch_in_google_chrome(target_url)
+                actuation_success = True
+
+        except Exception as exc:
+            logger.error(f"Failed to actuate YouTube open: {exc}")
+            launch_error = str(exc)
+            actuation_success = False
+
+        if not actuation_success:
+            return {
+                "status": "BROKEN",
+                "verified": False,
+                "error": launch_error,
+                "message": "YouTube open nahi ho paya.",
+            }
+
+        # 2. Observe & Verify (Bounded polling up to ~5 seconds)
+        poll_deadline = time.time() + 5.0
+        confirmed = False
+        last_state: Dict[str, Any] = {}
+
+        while time.time() < poll_deadline:
+            last_state = self.observe_browser_state()
+            cur_url = (last_state.get("current_url") or "").lower()
+            cur_title = (last_state.get("window_title") or "").lower()
+            if last_state.get("browser_running") and (
+                last_state.get("is_youtube") or
+                "youtube.com" in cur_url or
+                "youtube" in cur_title
+            ):
+                confirmed = True
+                break
+            time.sleep(0.3)
+
+        # 3. Formulate verified outcome
+        if confirmed:
+            return {
+                "status": "LIVE_VERIFIED",
+                "verified": True,
+                "url": target_url,
+                "observed_state": last_state,
+                "message": f"Haan Shivam, YouTube par {query} search kar diya hai." if query else "Haan Shivam, YouTube open kar diya hai.",
+            }
+        elif last_state.get("browser_running"):
+            return {
+                "status": "DEGRADED",
+                "verified": False,
+                "url": target_url,
+                "observed_state": last_state,
+                "message": "YouTube launch kiya hai, lekin main confirm nahi kar pa raha ki page open hua.",
+            }
+        else:
+            return {
+                "status": "BROKEN",
+                "verified": False,
+                "url": target_url,
+                "observed_state": last_state,
+                "message": "YouTube open nahi ho paya.",
+            }
 
     def search(self, query: str) -> Dict[str, Any]:
         """Search YouTube for a query string."""
@@ -71,15 +153,15 @@ class YouTubeAdapter:
         import time
 
         # Non-interactive development & test isolation
-        if not is_live_browser_automation_allowed():
-            target_id = candidates[idx - 1].video_id if (candidates and len(candidates) >= idx) else (obs.get("current_video_id") if obs.get("current_video_id") != "UNKNOWN" else f"VID_SIM_{idx}")
+        if not is_live_browser_automation_allowed() and not (candidates and len(candidates) >= idx):
+            target_id = obs.get("current_video_id") if obs.get("current_video_id") != "UNKNOWN" else f"VID_SIM_{idx}"
             return {
-                "status": "LIVE_VERIFIED",
-                "message": f"Ji Boss, video number {idx} chala di.",
+                "status": "SIMULATED",
+                "message": f"Simulation: video number {idx} (live automation disabled).",
                 "ordinal": idx,
                 "expected_video_id": target_id,
                 "actual_video_id": target_id,
-                "verified": True,
+                "verified": False,
                 "simulated": True,
             }
 
@@ -94,6 +176,17 @@ class YouTubeAdapter:
             after_obs = self.observe_browser_state()
             actual_id = after_obs.get("current_video_id", "UNKNOWN")
             verified = (actual_id == expected_id) or (after_obs.get("playback_state") == "PLAYING" and actual_id != cur_id)
+
+            if not is_live_browser_automation_allowed() and not verified:
+                return {
+                    "status": "SIMULATED",
+                    "message": f"Simulation: video number {idx} (live automation disabled).",
+                    "ordinal": idx,
+                    "expected_video_id": expected_id,
+                    "actual_video_id": actual_id,
+                    "verified": False,
+                    "simulated": True,
+                }
 
             return {
                 "status": "LIVE_VERIFIED" if verified else "DEGRADED",
@@ -194,15 +287,15 @@ class YouTubeAdapter:
         candidates = obs.get("visible_short_candidates", [])
 
         # Non-interactive development & test isolation
-        if not is_live_browser_automation_allowed():
-            target_id = candidates[idx - 1].video_id if (candidates and len(candidates) >= idx) else f"SHORT_SIM_{idx}"
+        if not is_live_browser_automation_allowed() and not (candidates and len(candidates) >= idx):
+            target_id = f"SHORT_SIM_{idx}"
             return {
-                "status": "LIVE_VERIFIED",
-                "message": f"Ji Boss, short number {idx} chala diya.",
+                "status": "SIMULATED",
+                "message": f"Simulation: short number {idx} (live automation disabled).",
                 "ordinal": idx,
                 "expected_video_id": target_id,
                 "actual_video_id": target_id,
-                "verified": True,
+                "verified": False,
                 "method": "semantic_shorts_identity",
                 "simulated": True,
             }
@@ -220,6 +313,18 @@ class YouTubeAdapter:
             after_obs = self.observe_browser_state()
             actual_id = after_obs.get("current_video_id", "UNKNOWN")
             verified = (actual_id == expected_id)
+
+            if not is_live_browser_automation_allowed() and not verified:
+                return {
+                    "status": "SIMULATED",
+                    "message": f"Simulation: short number {idx} (live automation disabled).",
+                    "ordinal": idx,
+                    "expected_video_id": expected_id,
+                    "actual_video_id": actual_id,
+                    "verified": False,
+                    "method": "semantic_shorts_identity",
+                    "simulated": True,
+                }
 
             return {
                 "status": "LIVE_VERIFIED" if verified else "DEGRADED",
@@ -271,19 +376,6 @@ class YouTubeAdapter:
 
     def next_short(self) -> Dict[str, Any]:
         """Advance down to next short with before/after state identity verification."""
-        if not is_live_browser_automation_allowed():
-            before_obs = self.observe_browser_state()
-            before_id = before_obs.get("current_video_id", "ID_1")
-            after_id = "ID_2" if before_id != "ID_2" else "ID_3"
-            return {
-                "status": "LIVE_VERIFIED",
-                "message": "Ji Boss, agla short chala diya.",
-                "before_video_id": before_id,
-                "after_video_id": after_id,
-                "verified": True,
-                "simulated": True,
-            }
-
         import time
         before_obs = self.observe_browser_state()
         before_id = before_obs.get("current_video_id", "UNKNOWN")
@@ -296,8 +388,19 @@ class YouTubeAdapter:
         after_id = after_obs.get("current_video_id", "UNKNOWN")
 
         verified = (after_id != "UNKNOWN" and before_id != "UNKNOWN" and after_id != before_id)
+
+        if not is_live_browser_automation_allowed() and not verified:
+            return {
+                "status": "SIMULATED",
+                "message": "Simulation: next short (live automation disabled).",
+                "before_video_id": before_id,
+                "after_video_id": after_id,
+                "verified": False,
+                "simulated": True,
+            }
+
         return {
-            "status": "LIVE_VERIFIED" if verified else ("LIVE_VERIFIED" if after_obs["browser_running"] else "DEGRADED"),
+            "status": "LIVE_VERIFIED" if verified else ("LIVE_VERIFIED" if after_obs.get("browser_running") else "DEGRADED"),
             "message": "Ji Boss, agla short chala diya.",
             "before_video_id": before_id,
             "after_video_id": after_id,
@@ -307,19 +410,6 @@ class YouTubeAdapter:
 
     def prev_short(self) -> Dict[str, Any]:
         """Return up to previous short with before/after state identity verification."""
-        if not is_live_browser_automation_allowed():
-            before_obs = self.observe_browser_state()
-            before_id = before_obs.get("current_video_id", "ID_2")
-            after_id = "ID_1" if before_id != "ID_1" else "ID_0"
-            return {
-                "status": "LIVE_VERIFIED",
-                "message": "Ji Boss, pichla short chala diya.",
-                "before_video_id": before_id,
-                "after_video_id": after_id,
-                "verified": True,
-                "simulated": True,
-            }
-
         import time
         before_obs = self.observe_browser_state()
         before_id = before_obs.get("current_video_id", "UNKNOWN")
@@ -332,8 +422,19 @@ class YouTubeAdapter:
         after_id = after_obs.get("current_video_id", "UNKNOWN")
 
         verified = (after_id != "UNKNOWN" and before_id != "UNKNOWN" and after_id != before_id)
+
+        if not is_live_browser_automation_allowed() and not verified:
+            return {
+                "status": "SIMULATED",
+                "message": "Simulation: previous short (live automation disabled).",
+                "before_video_id": before_id,
+                "after_video_id": after_id,
+                "verified": False,
+                "simulated": True,
+            }
+
         return {
-            "status": "LIVE_VERIFIED" if verified else ("LIVE_VERIFIED" if after_obs["browser_running"] else "DEGRADED"),
+            "status": "LIVE_VERIFIED" if verified else ("LIVE_VERIFIED" if after_obs.get("browser_running") else "DEGRADED"),
             "message": "Ji Boss, pichla short chala diya.",
             "before_video_id": before_id,
             "after_video_id": after_id,
@@ -494,10 +595,11 @@ class YouTubeAdapter:
 
         if not is_physical_automation_allowed():
             return {
-                "status": "success",
+                "status": "SIMULATED",
                 "direction": "down" if is_down else "up",
-                "message": f"Ji Boss, {'neeche' if is_down else 'upar'} scroll kar diya.",
+                "message": f"Simulation: scroll {'neeche' if is_down else 'upar'} (physical automation disabled).",
                 "simulated": True,
+                "verified": False,
             }
 
         from backend.tools.browser_tools import scroll_page
@@ -526,34 +628,30 @@ class YouTubeAdapter:
             return "BROKEN"
 
         if result.get("simulated"):
-            return "LIVE_VERIFIED"
+            return "SIMULATED"
 
-        if result.get("status") in ["LIVE_VERIFIED", "DEGRADED", "BROKEN"]:
+        if result.get("status") in ["LIVE_VERIFIED", "DEGRADED", "BROKEN", "SIMULATED", "LIVE_AUTOMATION_DISABLED"]:
             return result["status"]
 
         state = self.observe_browser_state()
 
         if action in ["youtube.open", "youtube.search", "youtube.play_video"]:
-            if state.get("browser_running"):
+            if state.get("browser_running") and state.get("is_youtube"):
                 return "LIVE_VERIFIED"
             return "DEGRADED"
 
         if action in ["youtube.scroll", "scroll_page"]:
-            if state.get("browser_running"):
+            if state.get("browser_running") and state.get("is_youtube"):
                 return "LIVE_VERIFIED"
             return "DEGRADED"
 
         if action == "youtube.play_short":
             if state.get("browser_running") and (state.get("is_shorts") or state.get("is_youtube")):
                 return "LIVE_VERIFIED"
-            elif state.get("browser_running"):
-                return "LIVE_VERIFIED"
             return "DEGRADED"
 
         # Media & playback controls
         if state.get("browser_running") and state.get("is_youtube"):
-            return "LIVE_VERIFIED"
-        elif state.get("browser_running"):
             return "LIVE_VERIFIED"
         else:
             return "DEGRADED"
@@ -572,7 +670,7 @@ class YouTubeAdapter:
                 q = args.get("query", "")
                 raw_result = self.open(query=q)
                 expected_effect = "NAVIGATED_HOME"
-                response_msg = f"Haan Shivam, YouTube par {q} chala diya hai." if q else "Haan Shivam, YouTube open kar diya hai."
+                response_msg = raw_result.get("message") or (f"Haan Shivam, YouTube par {q} chala diya hai." if q else "Haan Shivam, YouTube open kar diya hai.")
 
             elif canonical_action == "youtube.search":
                 q = args.get("query", "")
@@ -755,26 +853,56 @@ class YouTubeAdapter:
         status = self.verify_state(canonical_action, expected_effect, raw_result, initial_state)
         observed_state = self.observe_browser_state()
 
+        if status == "LIVE_VERIFIED":
+            verified = True
+            msg = raw_result.get("message") or response_msg
+        elif status == "DEGRADED":
+            verified = False
+            msg = raw_result.get("message") if (raw_result.get("status") == "DEGRADED") else "Action execute kiya hai, lekin main confirm nahi kar pa raha ki screen par reflect hua."
+        elif status in ["SIMULATED", "LIVE_AUTOMATION_DISABLED"]:
+            verified = False
+            msg = raw_result.get("message") or "Development safe mode active hai; live automation perform nahi kiya gaya."
+        else:
+            verified = False
+            msg = raw_result.get("message") if (raw_result.get("status") == "BROKEN") else "Action execute nahi ho paya."
+
         return {
             "canonical_action": canonical_action,
             "arguments": args,
             "status": status,
-            "verified": (status == "LIVE_VERIFIED"),
+            "verified": verified,
             "expected_effect": expected_effect,
             "observed_state": observed_state,
-            "message": response_msg,
+            "message": msg,
             "raw_result": raw_result,
         }
 
-    def _verify_youtube_active(self, task: Any, result: Any) -> bool:
-        """Verify that YouTube or Chrome is active in foreground."""
+    def _verify_youtube_active(self, task: Any = None, result: Any = None) -> bool:
+        """Verify that YouTube is actively open and running in the browser."""
         try:
-            import win32gui
-            hwnd = win32gui.GetForegroundWindow()
-            title = win32gui.GetWindowText(hwnd).lower()
-            return "youtube" in title or "chrome" in title or "edge" in title or "browser" in title
-        except Exception:
-            return True
+            obs = self.observe_browser_state()
+            if not obs.get("browser_running"):
+                return False
+
+            # Check 1: observer reports is_youtube
+            if obs.get("is_youtube"):
+                return True
+
+            # Check 2: active URL belongs to youtube.com
+            cur_url = (obs.get("current_url") or "").lower()
+            if "youtube.com" in cur_url:
+                return True
+
+            # Check 3: window title specifically confirms YouTube (not generic Chrome/Edge)
+            title = (obs.get("window_title") or "").lower()
+            if "youtube" in title:
+                return True
+
+            # Generic Chrome exists is NOT enough
+            return False
+        except Exception as exc:
+            logger.debug(f"_verify_youtube_active exception: {exc}")
+            return False
 
 
 # Global Singleton YouTube Adapter

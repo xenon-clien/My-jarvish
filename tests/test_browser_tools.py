@@ -13,6 +13,8 @@ from backend.tools.browser_tools import (
 def test_play_youtube_video(monkeypatch):
     """Test YouTube direct video playback and URL resolution."""
     opened_urls = []
+    monkeypatch.setattr("backend.tools.browser_tools.is_live_browser_automation_allowed", lambda: True)
+    monkeypatch.setattr("backend.tools.browser_tools.launch_in_google_chrome", lambda url: opened_urls.append(url))
     monkeypatch.setattr("webbrowser.open", lambda url, new=0, autoraise=True: opened_urls.append(url))
     monkeypatch.setattr("subprocess.Popen", lambda cmd, shell=True: opened_urls.append(cmd))
 
@@ -29,8 +31,8 @@ def test_play_youtube_video(monkeypatch):
 def test_close_browser_tab():
     """Test sending close tab shortcut command."""
     res = close_browser_tab(target="youtube")
-    assert res["status"] in ["success", "unsupported"]
-    assert "Boss" in res["message"] or "Tab" in res["message"] or "tab" in res["message"]
+    assert res["status"] in ["success", "unsupported", "SIMULATED"]
+    assert "Boss" in res["message"] or "Tab" in res["message"] or "tab" in res["message"] or "Simulation" in res["message"]
 
 
 def test_search_web(monkeypatch):
@@ -82,5 +84,5 @@ def test_click_screen_video():
     """Test click screen video tool execution."""
     from backend.tools.browser_tools import click_screen_video
     res = click_screen_video(index=1)
-    assert res["status"] in ["success", "unsupported"]
-    assert "Boss" in res["message"] or "requires" in res["message"]
+    assert res["status"] in ["success", "unsupported", "SIMULATED"]
+    assert "Boss" in res["message"] or "requires" in res["message"] or "Simulation" in res["message"]
