@@ -155,6 +155,9 @@ class YouTubeSemanticEngine:
     def resolve_self_correction(cls, text: str) -> str:
         """Resolve self-corrections (e.g. 'second nahi first short' -> 'first short')."""
         norm = cls.normalize_text(text)
+        # Skip conversational questions asking 'why' or 'how'
+        if re.search(r"\b(?:kyu|kyun|ku|why|kaise|kya|kese)\b", norm):
+            return norm
         m = re.search(r"(?:.+?)\s+(?:nahi|not|nhi)\s*,?\s*(.+)", norm)
         if m:
             return m.group(1).strip()
@@ -183,17 +186,39 @@ class YouTubeSemanticEngine:
         """Parse timestamp utterances like '2 minute 30 second', '1:35', 'teen minute' into (raw_str, total_sec)."""
         norm = cls.normalize_text(text)
         
-        m_code = re.search(r"\b(\d+):(\d+)\b", norm)
+        # 1. Digital notation: HH:MM:SS or MM:SS
+        m_code = re.search(r"\b(?:(\d+):)?(\d{1,2}):(\d{2})\b", norm)
         if m_code:
-            mins, secs = int(m_code.group(1)), int(m_code.group(2))
-            total_sec = mins * 60 + secs
-            return (f"{mins:02d}:{secs:02d}", total_sec)
+            h = int(m_code.group(1) or 0)
+            mins = int(m_code.group(2))
+            secs = int(m_code.group(3))
+            total_sec = h * 3600 + mins * 60 + secs
+            label = f"{h:02d}:{mins:02d}:{secs:02d}" if h else f"{mins:02d}:{secs:02d}"
+            return (label, total_sec)
 
+        # 2. Hindi/English compound duration: e.g. "2 minute 30 second", "1 hr 20 mins"
         m_ms = re.search(r"\b(\d+)\s*(?:minute|min)\s*(?:aur\s*)?(\d+)\s*(?:second|sec)?\b", norm)
         if m_ms:
             mins, secs = int(m_ms.group(1)), int(m_ms.group(2) or 0)
             total_sec = mins * 60 + secs
             return (f"{mins:02d}:{secs:02d}", total_sec)
+
+        total = 0
+        found = False
+        hm = re.search(r"(\d+(?:\.\d+)?)\s*(?:hour|hours|hr|ghanta|घंटा)", norm)
+        mm = re.search(r"(\d+(?:\.\d+)?)\s*(?:minute|minutes|min|mins|मिनट)", norm)
+        sm = re.search(r"(\d+(?:\.\d+)?)\s*(?:second|seconds|sec|secs|सेकंड)", norm)
+        if hm:
+            total += int(float(hm.group(1)) * 3600)
+            found = True
+        if mm:
+            total += int(float(mm.group(1)) * 60)
+            found = True
+        if sm:
+            total += int(float(sm.group(1)))
+            found = True
+        if found and total > 0:
+            return (f"{total}s", total)
 
         m_single = re.search(r"\b(?:(\d+)|([a-z]+))\s*(?:minute|min)\s*(?:pe|par|jump|seek|jao)\b", norm)
         if m_single:
@@ -474,21 +499,7 @@ class YouTubeSemanticEngine:
                 normalized_text=corrected_text
             )
 
-        # ── 9. Timestamp Seeking (Normalized seconds) ────────────────────────
-        ts_data = cls.extract_timestamp(corrected_text)
-        if ts_data:
-            ts_str, total_sec = ts_data
-            return YouTubeSemanticResult(
-                canonical_action="youtube.seek_timestamp",
-                arguments={"seconds": total_sec, "raw_timestamp": ts_str},
-                seconds=total_sec,
-                desired_state="SEEKED_TO_TIMESTAMP",
-                confidence=0.97,
-                raw_text=raw_text,
-                normalized_text=corrected_text
-            )
-
-        # ── 10. Relative Seek Forward / Backward ────────────────────────────
+        # ── 9. Relative Seek Forward / Backward ────────────────────────────
         if re.search(r"\b(?:aage|forward|skip)\b", corrected_text) and not re.search(r"\b(?:short|video)\b", corrected_text):
             secs = cls.extract_time_seconds(corrected_text)
             return YouTubeSemanticResult(
@@ -510,6 +521,20 @@ class YouTubeSemanticEngine:
                 direction="backward",
                 desired_state="SEEKED_BACKWARD",
                 confidence=0.96,
+                raw_text=raw_text,
+                normalized_text=corrected_text
+            )
+
+        # ── 10. Timestamp Seeking (Normalized seconds) ────────────────────────
+        ts_data = cls.extract_timestamp(corrected_text)
+        if ts_data:
+            ts_str, total_sec = ts_data
+            return YouTubeSemanticResult(
+                canonical_action="youtube.seek_timestamp",
+                arguments={"seconds": total_sec, "raw_timestamp": ts_str},
+                seconds=total_sec,
+                desired_state="SEEKED_TO_TIMESTAMP",
+                confidence=0.97,
                 raw_text=raw_text,
                 normalized_text=corrected_text
             )
@@ -610,11 +635,22 @@ class YouTubeSemanticEngine:
                 normalized_text=corrected_text
             )
 
-        # ── 15. Search & Play Video Entity ──────────────────────────────────
+        # ── 15. Plain YouTube Open ──────────────────────────────────────────
+        if re.search(r"\b(?:youtube|utube)\b", corrected_text) and re.search(r"\b(?:kholo|khol|open|launch|start|chalu)\b", corrected_text):
+            return YouTubeSemanticResult(
+                canonical_action="youtube.open",
+                arguments={},
+                desired_state="NAVIGATED_HOME",
+                confidence=0.98,
+                raw_text=raw_text,
+                normalized_text=corrected_text
+            )
+
+        # ── 16. Search on YouTube ───────────────────────────────────────────
         cleaned_query = corrected_text
         for filler_pat in cls.FILLERS:
             cleaned_query = re.sub(filler_pat, " ", cleaned_query, flags=re.IGNORECASE)
-        cleaned_query = re.sub(r"\b(?:youtube|search|dhundo|dhoondo|khojo|find|chalao|play|laga|kholo|open)\b", " ", cleaned_query, flags=re.IGNORECASE)
+        cleaned_query = re.sub(r"\b(?:youtube|search|dhundo|dhoondo|khojo|find|dikhao|chalao|play|laga|kholo|open|bajao)\b", " ", cleaned_query, flags=re.IGNORECASE)
         cleaned_query = " ".join(cleaned_query.split()).strip()
 
         if re.search(r"\b(?:search|dhundo|dhoondo|khojo|find|dikhao)\b", corrected_text) and cleaned_query:
@@ -628,7 +664,22 @@ class YouTubeSemanticEngine:
                 normalized_text=corrected_text
             )
 
-        if cleaned_query and len(cleaned_query) >= 2:
+        # ── 17. Conversational / Diagnostic Inquiries (Do NOT play videos) ───
+        if re.search(r"\b(?:kyu|kyun|ku|why|kaise|how|kya|problem|issue|dikkat|kharab|freeze|atak|chalta|chal\s+raha|chal\s+rahi|sun|suno|kuch|nahi|nhi)\b", corrected_text):
+            return YouTubeSemanticResult(
+                canonical_action="youtube.unknown",
+                confidence=0.0,
+                raw_text=raw_text,
+                normalized_text=corrected_text
+            )
+
+        # ── 18. Play Video by Search Entity ─────────────────────────────────
+        # Must have an explicit play verb (chalao, play, laga, bajao, start)
+        # OR explicit media noun (video, gaana, song, track) with query
+        has_play_verb = bool(re.search(r"\b(?:chalao|chala|laga|lagao|play|bajao|start|sunao)\b", corrected_text))
+        has_media_noun = bool(re.search(r"\b(?:video|gaana|gaane|song|songs|track|music|vlog|trailer|movie|film)\b", corrected_text))
+
+        if (has_play_verb or has_media_noun) and cleaned_query and len(cleaned_query) >= 2:
             return YouTubeSemanticResult(
                 canonical_action="youtube.play_video",
                 arguments={"query": cleaned_query, "ordinal": ordinal or 1},
@@ -641,8 +692,8 @@ class YouTubeSemanticEngine:
                 normalized_text=corrected_text
             )
 
-        # ── 16. Plain YouTube Open ──────────────────────────────────────────
-        if re.search(r"\b(?:youtube|kholo|open)\b", corrected_text):
+        # ── 19. Plain YouTube Mention ───────────────────────────────────────
+        if re.search(r"\b(?:youtube|utube)\b", corrected_text):
             return YouTubeSemanticResult(
                 canonical_action="youtube.open",
                 arguments={},
@@ -654,7 +705,7 @@ class YouTubeSemanticEngine:
 
         return YouTubeSemanticResult(
             canonical_action="youtube.unknown",
-            confidence=0.30,
+            confidence=0.0,
             raw_text=raw_text,
             normalized_text=corrected_text
         )

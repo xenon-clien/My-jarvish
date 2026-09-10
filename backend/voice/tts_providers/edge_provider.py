@@ -13,11 +13,19 @@ from backend.voice.tts_providers.normalizer import normalize_hindi_tts_text
 
 logger = get_logger("EdgeTTSProvider")
 
-try:
-    import edge_tts
-    EDGE_TTS_AVAILABLE = True
-except ImportError:
-    EDGE_TTS_AVAILABLE = False
+import importlib.util
+
+_EDGE_TTS_AVAILABLE: Optional[bool] = None
+
+
+def _is_edge_tts_installed() -> bool:
+    global _EDGE_TTS_AVAILABLE
+    if _EDGE_TTS_AVAILABLE is None:
+        _EDGE_TTS_AVAILABLE = importlib.util.find_spec("edge_tts") is not None
+    return _EDGE_TTS_AVAILABLE
+
+
+EDGE_TTS_AVAILABLE = _is_edge_tts_installed()
 
 
 class EdgeTTSProvider(TTSProvider):
@@ -71,6 +79,7 @@ class EdgeTTSProvider(TTSProvider):
         for attempt_idx, params in enumerate(attempts):
             try:
                 def _run_save():
+                    import edge_tts
                     worker_loop = asyncio.new_event_loop()
                     asyncio.set_event_loop(worker_loop)
                     try:

@@ -1,0 +1,9 @@
+.env
+__pycache__/
+.pytest_cache/
+*.pyc
+logs/*.log
+logs/*.jsonl
+data/provider_state.json
+*.mp3
+*.wav

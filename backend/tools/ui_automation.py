@@ -19,6 +19,12 @@ from backend.core.logger import get_logger
 from backend.core.permissions import PermissionLevel, ToolCategory
 from backend.tools.registry import tool
 from backend.ai.state_observer import state_observer
+from backend.core.safety import (
+    is_dev_safe_mode,
+    is_physical_automation_allowed,
+    is_foreground_stealing_allowed,
+    safe_blocked_result,
+)
 
 logger = get_logger("UIAutomation")
 
@@ -71,6 +77,8 @@ class ManageWindowArgs(BaseModel):
 
 def force_foreground_window(hwnd: int) -> bool:
     """Force bring target HWND window to foreground with thread attachment and zero UIPI restriction."""
+    if not is_foreground_stealing_allowed():
+        return False
     if not WIN32_AVAILABLE or not hwnd:
         return False
     try:
@@ -258,6 +266,9 @@ def switch_window(target_app: str) -> Dict[str, Any]:
 )
 def click_element(target: str, app: Optional[str] = None) -> Dict[str, Any]:
     """Universal UI element clicker with spatial and contextual grounding."""
+    if not is_physical_automation_allowed():
+        return safe_blocked_result("click_element")
+
     # 1. If an app was specified, ensure it is focused first
     if app:
         switch_window(app)
@@ -311,6 +322,9 @@ def click_element(target: str, app: Optional[str] = None) -> Dict[str, Any]:
 )
 def scroll_screen(direction: str = "down", amount: int = 4) -> Dict[str, Any]:
     """Scroll the active window up or down using Windows mouse wheel events."""
+    if not is_physical_automation_allowed():
+        return safe_blocked_result("scroll_screen")
+
     try:
         user32 = ctypes.windll.user32
         if WIN32_AVAILABLE:

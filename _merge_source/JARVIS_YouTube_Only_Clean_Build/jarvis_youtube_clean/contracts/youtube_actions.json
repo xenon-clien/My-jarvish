@@ -1,0 +1,12 @@
+{
+  "contract_version": "2.0-clean",
+  "application": "youtube",
+  "ordinal_semantics": "one_based",
+  "actions": [
+    "open", "search", "play_video", "play_short", "next_short", "previous_short",
+    "pause", "resume", "set_fullscreen", "set_theater_mode", "set_miniplayer",
+    "set_captions", "set_playback_speed", "speed_up", "speed_down",
+    "seek_forward", "seek_backward", "seek_timestamp", "set_volume",
+    "volume_up", "volume_down", "mute", "unmute", "set_like", "replay"
+  ]
+}

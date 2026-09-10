@@ -28,6 +28,12 @@ except ImportError:
     WIN32_AVAILABLE = False
 
 from backend.core.logger import get_logger
+from backend.core.safety import (
+    is_dev_safe_mode,
+    is_physical_automation_allowed,
+    is_foreground_stealing_allowed,
+    safe_blocked_result,
+)
 from backend.skills.models import ActionResult, FallbackTier
 
 logger = get_logger("UniversalActionEngine")
@@ -72,6 +78,8 @@ class UniversalActionEngine:
     @staticmethod
     def send_hardware_click(x: int, y: int, double_click: bool = False, right_click: bool = False) -> None:
         """Inject direct OS-level hardware mouse click using Windows SendInput API."""
+        if not is_physical_automation_allowed():
+            return
         if not WIN32_AVAILABLE:
             return
         user32.SetCursorPos(int(x), int(y))
@@ -96,6 +104,8 @@ class UniversalActionEngine:
     @staticmethod
     def send_hardware_wheel(delta: int, x: Optional[int] = None, y: Optional[int] = None) -> None:
         """Send hardware mouse wheel scroll event."""
+        if not is_physical_automation_allowed():
+            return
         if not WIN32_AVAILABLE:
             return
         if x is not None and y is not None:
@@ -106,6 +116,8 @@ class UniversalActionEngine:
     @staticmethod
     def send_key_press(vk_code: int, ctrl: bool = False, shift: bool = False, alt: bool = False) -> None:
         """Send virtual key event with optional modifiers."""
+        if not is_physical_automation_allowed():
+            return
         if not WIN32_AVAILABLE:
             return
         if ctrl:
@@ -133,6 +145,8 @@ class UniversalActionEngine:
     @staticmethod
     def focus_window_by_hwnd(hwnd: int) -> bool:
         """Forcefully bring window to foreground with thread input attachment."""
+        if not is_foreground_stealing_allowed():
+            return False
         if not WIN32_AVAILABLE or not hwnd:
             return False
         try:

@@ -85,7 +85,7 @@ class CommandProcessor:
 
         # 1. Explicit application in current command
         app_keywords = {
-            "youtube": ["youtube", "yt", "short", "shorts", "reel", "reels", "video", "channel", "subscriber", "subscribe", "scroll"],
+            "youtube": ["youtube", "yt", "short", "shorts", "reel", "reels", "video", "channel", "subscriber", "subscribe", "scroll", "neeche", "niche", "upar", "down", "up", "page down", "page up"],
             "spotify": ["spotify", "gaana", "song", "track", "playlist", "music"],
             "whatsapp": ["whatsapp", "wa", "message", "call", "status", "chat"],
             "chrome": ["chrome", "google chrome", "browser", "tab", "website", "url"],
@@ -100,7 +100,7 @@ class CommandProcessor:
         for app_id, kws in app_keywords.items():
             for kw in kws:
                 if kw in text_lower:
-                    if kw in ["short", "shorts", "reel", "reels", "video", "scroll"] and app_id == "youtube":
+                    if kw in ["short", "shorts", "reel", "reels", "video", "scroll", "neeche", "niche", "upar", "down", "up", "page down", "page up"] and app_id == "youtube":
                         return "media", "youtube"
                     if kw in ["song", "track"] and app_id == "spotify":
                         return "media", "spotify"
@@ -248,6 +248,26 @@ class CommandProcessor:
             ctx.response_message = "Kuch sunai nahi diya boss."
             return ctx
 
+        # Emergency Stop / Abort Commands
+        clean_low = raw_text.strip().lower()
+        if clean_low in ["/stop", "/emergency-stop", "stop all", "emergency stop", "jarvis stop", "jarvish stop"]:
+            from backend.core.emergency_stop import emergency_stop_manager
+            stop_res = emergency_stop_manager.trigger_stop(reason=f"Command: {raw_text}")
+            ctx.status = ExecutionStatus.VERIFIED_SUCCESS
+            ctx.action = "system.emergency_stop"
+            ctx.response_message = stop_res["message"]
+            ctx.execution_time_ms = round((time.time() - start_t) * 1000, 1)
+            return ctx
+
+        if clean_low in ["/resume", "/start", "/reset-stop"]:
+            from backend.core.emergency_stop import emergency_stop_manager
+            reset_res = emergency_stop_manager.reset_stop()
+            ctx.status = ExecutionStatus.VERIFIED_SUCCESS
+            ctx.action = "system.reset_stop"
+            ctx.response_message = reset_res["message"]
+            ctx.execution_time_ms = round((time.time() - start_t) * 1000, 1)
+            return ctx
+
         # 1. Translate & Normalize
         canonical_text, lang = UniversalLanguageTranslator.translate_to_canonical(raw_text)
         normalized_text, _ = LanguageNormalizer.normalize(canonical_text)
@@ -329,8 +349,8 @@ class CommandProcessor:
         from backend.nlu.semantic_engine import SemanticIntentEngine
         from backend.nlu.router import UniversalIntentRouter
 
-        # If YouTube application or media domain, parse via YouTube Universal NLU
-        if app == "youtube" or domain == "media":
+        # If YouTube application, media domain, or YouTube production mode, parse via YouTube Universal NLU
+        if app == "youtube" or domain == "media" or settings.PRODUCTION_ENABLED_APPS == ["youtube"] or "youtube" in settings.PRODUCTION_ENABLED_APPS:
             yt_res = youtube_nlu.parse(raw_text)
             if yt_res.is_negated:
                 ctx.status = ExecutionStatus.VERIFIED_SUCCESS

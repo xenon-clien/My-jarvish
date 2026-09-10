@@ -3,7 +3,6 @@
 Guarantees 100% offline failsafe speech synthesis without any internet connection.
 """
 import os
-import pyttsx3
 from backend.core.logger import get_logger
 from backend.voice.tts_providers.base import TTSProvider, VoiceMetadata
 
@@ -55,6 +54,7 @@ class OfflineTTSProvider(TTSProvider):
 
         ensure_com()
         try:
+            import pyttsx3
             engine = pyttsx3.init()
             engine.setProperty("rate", int(self.rate * speed_multiplier))
             engine.setProperty("volume", self.volume)

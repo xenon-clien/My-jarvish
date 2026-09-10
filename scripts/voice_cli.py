@@ -75,12 +75,8 @@ async def run_voice_loop():
 
     agent = JarvisAgent()
 
-    # Start AutoSubmit watcher — auto-clicks Submit/Proceed buttons in Antigravity
-    try:
-        from backend.tools.autosubmit_watcher import start_autosubmit_watcher
-        start_autosubmit_watcher()
-    except Exception as _e:
-        logger.debug(f"AutoSubmit watcher could not start: {_e}")
+    # AutoSubmit watcher disabled to prevent background mouse freezing / cursor hijacking
+    # (Mouse is reserved 100% for user physical interaction and explicit JARVIS tools)
 
     # Gesture loop disabled per user request (webcam OFF)
     _gesture_queue = None

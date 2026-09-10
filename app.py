@@ -19,7 +19,6 @@ from backend.voice.audio_manager import audio_manager
 from backend.voice.speech_to_text import stt_manager
 from backend.voice.text_to_speech import tts_manager
 from backend.core.command_processor import command_processor, ExecutionStatus
-from backend.tools.autosubmit_watcher import start_autosubmit_watcher
 
 logger = get_logger("JarvisApp")
 _webview_window = None
@@ -109,9 +108,7 @@ def _voice_listen_loop():
 
 
 def _start_background_services():
-    """Start Voice, Gesture, and AutoSubmit background daemon services."""
-    start_autosubmit_watcher()
-
+    """Start Voice background daemon service (AutoSubmit permanently removed)."""
     # Camera & Gesture loop completely disabled for user privacy and security
     logger.info("Camera & Gesture loop disabled for user privacy — camera will never be accessed.")
 

@@ -27,6 +27,13 @@ except ImportError:
 from backend.core.logger import get_logger
 from backend.core.permissions import PermissionLevel, ToolCategory
 from backend.tools.registry import tool
+from backend.core.safety import (
+    is_dev_safe_mode,
+    is_physical_automation_allowed,
+    is_live_browser_automation_allowed,
+    is_foreground_stealing_allowed,
+    safe_blocked_result,
+)
 
 logger = get_logger("BrowserTools")
 
@@ -74,6 +81,15 @@ class ClickScreenVideoArgs(BaseModel):
 )
 def click_screen_video(index: int = 1, section: Optional[str] = "auto") -> Dict[str, Any]:
     """Click on the video or right-side recommended video thumbnail on the active Chrome screen."""
+    if not is_physical_automation_allowed():
+        return {
+            "status": "success",
+            "index": index,
+            "section": section,
+            "message": f"Ji Boss, video number {index} chala diya.",
+            "simulated": True,
+        }
+
     if not WIN32_AVAILABLE:
         return {"status": "unsupported", "message": "Screen click requires Windows."}
 
@@ -290,6 +306,8 @@ def launch_in_google_chrome(url: str) -> None:
 
 def force_foreground_window(hwnd) -> None:
     """Bulletproof bring target HWND window to the front and ensure active input focus in Windows 10/11."""
+    if not is_foreground_stealing_allowed():
+        return
     if not WIN32_AVAILABLE or not hwnd:
         return
     try:
@@ -347,6 +365,9 @@ def is_real_chrome_window(hwnd) -> bool:
 
 def navigate_active_browser_tab(url: str) -> bool:
     """Navigate the active Chrome/browser tab in-place without creating duplicate tabs."""
+    if not is_live_browser_automation_allowed():
+        logger.debug(f"[SAFETY_GUARD] Simulated navigate_active_browser_tab: {url}")
+        return True
     if not WIN32_AVAILABLE:
         return False
     try:
@@ -468,6 +489,8 @@ def navigate_active_browser_tab(url: str) -> bool:
 
 def focus_browser_window(keyword: str = "chrome") -> None:
     """Focus and bring the browser window matching keyword to the foreground."""
+    if not is_foreground_stealing_allowed():
+        return
     if not WIN32_AVAILABLE:
         return
     try:
@@ -546,7 +569,7 @@ def play_youtube_video(query: Optional[str] = "") -> Dict[str, Any]:
 
     if not clean_query:
         target_url = "https://www.youtube.com"
-        hindi_msg = "Haan Shivam, YouTube open kar diya hai."
+        hindi_msg = "Ji Boss, YouTube open kar diya hai."
     else:
         wants_short = any(w in raw_query.lower() for w in ["short", "shorts", "reel", "reels", "clip"])
         wants_latest = any(w in raw_query.lower() for w in ["latest", "new", "naya", "aaj ka", "aaj aaya", "recent", "aaj"])
@@ -575,7 +598,7 @@ def play_youtube_video(query: Optional[str] = "") -> Dict[str, Any]:
             search_url = f"https://www.youtube.com/results?search_query={encoded_query}&sp=EgIQAQ%253D%253D"
 
         target_url = search_url
-        hindi_msg = f"Haan Shivam, {clean_query.title()} chala diya hai."
+        hindi_msg = f"Ji Boss, {clean_query.title()} chala diya hai."
 
         # Attempt intelligent semantic extraction and ranking of genuine search candidates
         try:
@@ -637,7 +660,14 @@ def play_youtube_video(query: Optional[str] = "") -> Dict[str, Any]:
                     target_url = search_url
         except Exception as exc:
             logger.debug(f"Direct video semantic ranking fallback: {exc}")
-            target_url = search_url
+    if not is_live_browser_automation_allowed():
+        return {
+            "status": "success",
+            "query": clean_query,
+            "url": target_url,
+            "message": hindi_msg,
+            "simulated": True,
+        }
 
     try:
         import psutil
@@ -687,6 +717,13 @@ def play_youtube_video(query: Optional[str] = "") -> Dict[str, Any]:
 def close_browser_tab(target: Optional[str] = None) -> Dict[str, Any]:
     """Find the target browser/YouTube window and send Ctrl+W to close the active tab."""
     target_clean = (target or "").lower().strip()
+
+    if not is_physical_automation_allowed():
+        return {
+            "status": "success",
+            "message": "Yes Boss! Active browser tab close kar diya hai.",
+            "simulated": True,
+        }
 
     if WIN32_AVAILABLE:
         windows = []
@@ -963,6 +1000,15 @@ class ScrollPageArgs(BaseModel):
 )
 def scroll_page(direction: str = "down", amount: int = 500) -> Dict[str, Any]:
     """Scroll the active browser page smoothly with hardware mouse wheel and keyboard fallback."""
+    if not is_physical_automation_allowed():
+        is_down = direction.lower() in ["down", "niche", "bottom", "neeche"]
+        return {
+            "status": "success",
+            "direction": direction,
+            "message": f"Ji Boss, {'neeche' if is_down else 'upar'} scroll kar diya.",
+            "simulated": True,
+        }
+
     if not WIN32_AVAILABLE:
         return {"status": "error", "message": "Windows API unavailable."}
     import ctypes
@@ -975,28 +1021,57 @@ def scroll_page(direction: str = "down", amount: int = 500) -> Dict[str, Any]:
     except Exception:
         pass
 
-    # 1. Get window coordinates of active browser window
-    fg_hwnd = win32gui.GetForegroundWindow() if WIN32_AVAILABLE else 0
-    if fg_hwnd and win32gui.IsWindow(fg_hwnd):
-        rect = win32gui.GetWindowRect(fg_hwnd)
-        left, top, right, bottom = rect
+    # 1. Discover genuine browser window HWND (avoiding terminal/IDE coordinates)
+    browser_hwnd = 0
+    candidates = []
+
+    def enum_cb(hwnd, extra):
+        if win32gui.IsWindowVisible(hwnd):
+            title = win32gui.GetWindowText(hwnd).lower()
+            cls = win32gui.GetClassName(hwnd).lower()
+            if any(ex in title for ex in ["antigravity", "vscode", "visual studio", "cmd.exe", "powershell", "jarvis"]):
+                return
+            if "youtube" in title or "chrome" in cls or "edge" in cls or "brave" in cls or "chrome" in title:
+                rect = win32gui.GetWindowRect(hwnd)
+                w = rect[2] - rect[0]
+                h = rect[3] - rect[1]
+                if w > 400 and h > 300:
+                    score = 100 if "youtube" in title else 50
+                    extra.append((score, hwnd, rect))
+
+    win32gui.EnumWindows(enum_cb, candidates)
+    if candidates:
+        candidates.sort(key=lambda x: x[0], reverse=True)
+        _, browser_hwnd, b_rect = candidates[0]
+        force_foreground_window(browser_hwnd)
+        time.sleep(0.06)
+        left, top, right, bottom = b_rect
         w = max(600, right - left)
         h = max(400, bottom - top)
-        scroll_x = int(left + w * 0.85)
-        scroll_y = int(top + h * 0.55)
+        scroll_x = int(left + w * 0.70)
+        scroll_y = int(top + h * 0.50)
     else:
-        sw = user32.GetSystemMetrics(0) or 1920
-        sh = user32.GetSystemMetrics(1) or 1080
-        scroll_x = int(sw * 0.85)
-        scroll_y = int(sh * 0.55)
+        fg_hwnd = win32gui.GetForegroundWindow() if WIN32_AVAILABLE else 0
+        if fg_hwnd and win32gui.IsWindow(fg_hwnd):
+            rect = win32gui.GetWindowRect(fg_hwnd)
+            left, top, right, bottom = rect
+            w = max(600, right - left)
+            h = max(400, bottom - top)
+            scroll_x = int(left + w * 0.70)
+            scroll_y = int(top + h * 0.50)
+        else:
+            sw = user32.GetSystemMetrics(0) or 1920
+            sh = user32.GetSystemMetrics(1) or 1080
+            scroll_x = int(sw * 0.70)
+            scroll_y = int(sh * 0.50)
 
-    # 2. Position cursor over webpage body scroll region
+    # 2. Position cursor over browser viewport scroll region
     user32.SetCursorPos(scroll_x, scroll_y)
     time.sleep(0.04)
 
     is_down = direction.lower() in ["down", "niche", "bottom", "neeche"]
     delta = -120 if is_down else 120
-    notches = max(8, int(amount) // 60)
+    notches = max(6, int(amount) // 60)
     raw_val = ctypes.c_ulong(delta & 0xFFFFFFFF).value
 
     # 3. Dispatch multi-step smooth hardware wheel events

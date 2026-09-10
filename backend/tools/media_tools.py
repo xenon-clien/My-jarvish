@@ -18,6 +18,12 @@ except ImportError:
 from backend.core.logger import get_logger
 from backend.core.permissions import PermissionLevel, ToolCategory
 from backend.tools.registry import tool
+from backend.core.safety import (
+    is_dev_safe_mode,
+    is_physical_automation_allowed,
+    is_foreground_stealing_allowed,
+    safe_blocked_result,
+)
 
 logger = get_logger("MediaTools")
 
@@ -32,6 +38,8 @@ VK_VOLUME_UP = 0xAF         # 175
 
 def _send_key_event(vk_code: int) -> None:
     """Send hardware key down and up event with accurate Windows hardware scan code."""
+    if not is_physical_automation_allowed():
+        return
     if not WIN32_AVAILABLE:
         return
     import ctypes
@@ -44,6 +52,8 @@ def _send_key_event(vk_code: int) -> None:
 
 def _click_video_player_center() -> None:
     """Simulate a physical hardware left mouse click at the center of the active YouTube video."""
+    if not is_physical_automation_allowed():
+        return
     if not WIN32_AVAILABLE:
         return
     import ctypes
@@ -164,6 +174,8 @@ def _seek_youtube_url_bar(time_param: str) -> bool:
 
 def _focus_media_window() -> bool:
     """Find the real visible Google Chrome/Edge/YouTube browser window and bring it to the foreground."""
+    if not is_foreground_stealing_allowed() or not is_physical_automation_allowed():
+        return False
     if not WIN32_AVAILABLE:
         return False
     try:
@@ -218,6 +230,58 @@ def _focus_media_window() -> bool:
 def control_media(action: str, level: Optional[int] = None, time_str: Optional[str] = None) -> Dict[str, Any]:
     """Execute Windows system media command with guaranteed active browser window focus."""
     action_clean = action.lower().strip().replace(" ", "_")
+
+    if not is_physical_automation_allowed():
+        valid_actions = {
+            "play": "Video Play/Pause toggle kar diya.",
+            "pause": "Video Play/Pause toggle kar diya.",
+            "play_pause": "Video Play/Pause toggle kar diya.",
+            "toggle": "Video Play/Pause toggle kar diya.",
+            "resume": "Video Play/Pause toggle kar diya.",
+            "roko": "Video Play/Pause toggle kar diya.",
+            "chalao": "Video Play/Pause toggle kar diya.",
+            "next": "next track chala diya",
+            "next_track": "next track chala diya",
+            "skip": "next track chala diya",
+            "agla_song": "next track chala diya",
+            "previous": "previous track chala diya",
+            "prev": "previous track chala diya",
+            "volume_up": "Volume badha diya.",
+            "volume_down": "Volume kam kar diya.",
+            "set_volume": "Volume set kar diya.",
+            "mute": "Audio mute kar diya.",
+            "unmute": "Audio unmute kar diya.",
+            "speed_up": "Speed badha di.",
+            "speed_down": "Speed kam kar di.",
+            "fullscreen": "Fullscreen toggle kar diya.",
+            "theater": "Theater mode toggle kar diya.",
+            "theater_mode": "Theater mode toggle kar diya.",
+            "theatre": "Theater mode toggle kar diya.",
+            "miniplayer": "Miniplayer toggle kar diya.",
+            "mini_player": "Miniplayer toggle kar diya.",
+            "chhota_player": "Miniplayer toggle kar diya.",
+            "captions": "Captions toggle kar diye.",
+            "next_short": "Agla short chala diya.",
+            "prev_short": "Pichla short chala diya.",
+            "like": "Video like kar di.",
+            "subscribe": "Channel subscribe kar diya.",
+            "share": "Share menu open kar diya.",
+            "comments_down": "Comments section par scroll kar diya.",
+            "comments_up": "Wapas video par scroll kar diya.",
+            "replay": "Replay kar diya.",
+            "seek_forward": "Seek forward kar diya.",
+            "seek_backward": "Seek backward kar diya.",
+            "seek_timestamp": "Seek timestamp kar diya.",
+        }
+        if action_clean not in valid_actions and not any(action_clean.startswith(k) for k in valid_actions):
+            raise ValueError(f"Unknown media action: '{action}'. Available: play_pause, next, previous, seek_forward, seek_backward, seek_timestamp, speed_up, speed_down, fullscreen, theater, miniplayer, captions, next_short, prev_short, like, subscribe, share, comments_down, comments_up, volume_up, volume_down, set_volume, mute.")
+        return {
+            "status": "success",
+            "action": action_clean,
+            "message": valid_actions.get(action_clean, f"Simulated {action_clean}"),
+            "simulated": True,
+        }
+
     _focus_media_window()
     time.sleep(0.04)
 

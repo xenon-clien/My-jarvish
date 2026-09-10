@@ -182,7 +182,7 @@ class YouTubePageObserver:
             logger.debug(f"get_active_url UIA inspection error: {exc}")
         return None
 
-    def observe(self) -> Dict[str, Any]:
+    def observe(self, discover_candidates: bool = False) -> Dict[str, Any]:
         """Full observation of live YouTube browser state with truthful values or UNKNOWN."""
         self._ensure_desktop_access()
 
@@ -289,9 +289,10 @@ class YouTubePageObserver:
         except Exception:
             state["fullscreen"] = "UNKNOWN"
 
-        # 4. Discover dynamic candidates
-        state["visible_short_candidates"] = self.discover_short_candidates(hwnd, rect)
-        state["visible_video_candidates"] = self.discover_video_candidates(hwnd, rect)
+        # 4. Discover dynamic candidates (only when requested, avoiding Chrome UIA thread freeze)
+        if discover_candidates:
+            state["visible_short_candidates"] = self.discover_short_candidates(hwnd, rect)
+            state["visible_video_candidates"] = self.discover_video_candidates(hwnd, rect)
 
         return state
 
@@ -324,7 +325,16 @@ class YouTubePageObserver:
                         except Exception:
                             pass
 
-                        match = re.search(r"/shorts/([a-zA-Z0-9_-]{11})", f"{name} {href}")
+                        try:
+                            leg_p = el.GetCurrentPattern(10018)  # UIA_LegacyIAccessiblePatternId
+                            if leg_p and not href:
+                                leg_obj = leg_p.QueryInterface(mod.IUIAutomationLegacyIAccessiblePattern)
+                                href = leg_obj.CurrentValue or leg_obj.CurrentDescription or ""
+                        except Exception:
+                            pass
+
+                        help_text = getattr(el, "CurrentHelpText", "") or ""
+                        match = re.search(r"/shorts/([a-zA-Z0-9_-]{11})", f"{name} {href} {help_text}")
                         if match:
                             vid_id = match.group(1)
                             if vid_id not in seen_ids:
@@ -373,13 +383,25 @@ class YouTubePageObserver:
                         except Exception:
                             pass
 
-                        match = re.search(r"[?&]v=([a-zA-Z0-9_-]{11})", f"{name} {href}")
+                        try:
+                            leg_p = el.GetCurrentPattern(10018)  # UIA_LegacyIAccessiblePatternId
+                            if leg_p and not href:
+                                leg_obj = leg_p.QueryInterface(mod.IUIAutomationLegacyIAccessiblePattern)
+                                href = leg_obj.CurrentValue or leg_obj.CurrentDescription or ""
+                        except Exception:
+                            pass
+
+                        help_text = getattr(el, "CurrentHelpText", "") or ""
+                        match = re.search(r"[?&]v=([a-zA-Z0-9_-]{11})", f"{name} {href} {help_text}")
+                        brect = el.CurrentBoundingRectangle
+                        rect_tuple = (brect.left, brect.top, brect.right, brect.bottom)
+                        bw = brect.right - brect.left
+                        bh = brect.bottom - brect.top
+
                         if match:
                             vid_id = match.group(1)
                             if vid_id not in seen_ids:
                                 seen_ids.add(vid_id)
-                                brect = el.CurrentBoundingRectangle
-                                rect_tuple = (brect.left, brect.top, brect.right, brect.bottom)
                                 candidates.append(YouTubeCandidate(
                                     candidate_type="video",
                                     video_id=vid_id,
@@ -389,6 +411,22 @@ class YouTubePageObserver:
                                     bounding_rect=rect_tuple,
                                     visual_order=len(candidates) + 1,
                                 ))
+                        elif bw > 100 and bh > 14 and brect.top > (window_rect[1] + 70):
+                            # Video card link where ID is not exposed in accessibility attributes
+                            nav_skip = ["home", "explore", "subscriptions", "library", "history", "shorts", "settings", "search", "terms", "privacy"]
+                            if len(name) > 3 and not any(nav in name.lower() for nav in nav_skip):
+                                fake_id = f"cand_{len(candidates) + 1}"
+                                if fake_id not in seen_ids:
+                                    seen_ids.add(fake_id)
+                                    candidates.append(YouTubeCandidate(
+                                        candidate_type="video",
+                                        video_id=fake_id,
+                                        title=name,
+                                        canonical_url=f"https://www.youtube.com/results?search_query={name}",
+                                        href="#",
+                                        bounding_rect=rect_tuple,
+                                        visual_order=len(candidates) + 1,
+                                    ))
         except Exception as exc:
             logger.debug(f"UIA video candidate discovery exception: {exc}")
 
