@@ -12,6 +12,11 @@ def test_media_control_actions(monkeypatch):
     monkeypatch.setattr(media_tools, "_click_video_player_center", lambda: None)
     monkeypatch.setattr(media_tools, "_send_key_event", lambda vk: sent_keys.append(vk))
 
+    # Mock pycaw so tests do not mute the host system audio sessions
+    from unittest.mock import MagicMock
+    monkeypatch.setattr("pycaw.pycaw.AudioUtilities.GetAllSessions", lambda: [])
+    monkeypatch.setattr("pycaw.pycaw.AudioUtilities.GetSpeakers", lambda: MagicMock())
+
     # Play / Pause
     res_play = control_media("play_pause")
     assert res_play["status"] == "success"
