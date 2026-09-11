@@ -77,6 +77,39 @@ class YouTubePerception:
             omnibox_url=omnibox_url,
         )
 
+        # 4. Fallback to UIA candidate discovery if CDP was not attached or returned no cards
+        if snapshot.youtube.is_youtube and not snapshot.youtube.visible_videos and not snapshot.youtube.visible_shorts:
+            try:
+                import re
+                from backend.adapters.youtube_grounding import youtube_page_observer
+                from backend.perception.perception_types import VisibleVideoItem
+                uia_obs = youtube_page_observer.observe(discover_candidates=True)
+                raw_cands = uia_obs.get("visible_video_candidates", [])
+                if raw_cands:
+                    mapped_vids = []
+                    seen_titles = set()
+                    for idx, c in enumerate(raw_cands, start=1):
+                        t = getattr(c, "title", str(c))
+                        t = re.sub(r"\.\s*New content available\.?$", "", t, flags=re.IGNORECASE).strip()
+                        if not t or t in seen_titles:
+                            continue
+                        seen_titles.add(t)
+                        vid_id = getattr(c, "video_id", f"c_{idx}")
+                        mapped_vids.append(VisibleVideoItem(
+                            ordinal=len(mapped_vids) + 1,
+                            video_id=vid_id,
+                            title=t,
+                            url=getattr(c, "canonical_url", "https://www.youtube.com"),
+                            is_short=False,
+                            source="UIA",
+                        ))
+                    if mapped_vids:
+                        snapshot.youtube.visible_videos = mapped_vids
+                        if "UIA" not in snapshot.sources:
+                            snapshot.sources.append("UIA")
+            except Exception as e:
+                logger.debug(f"UIA candidate discovery fallback error: {e}")
+
         self._cached_snapshot = snapshot
         self._last_snapshot_time = now
         return snapshot
@@ -95,32 +128,34 @@ class YouTubePerception:
         lines = []
         # Page classification
         if pt == PageType.SEARCH_RESULTS.value:
-            lines.append(f"Current page: YouTube Search Results")
+            lines.append("Current page: YouTube Search Results")
             if yt.search_query != "UNKNOWN":
                 lines.append(f"Search: '{yt.search_query}'")
         elif pt == PageType.VIDEO.value:
-            lines.append(f"Current page: YouTube Video Watch Page")
+            lines.append("Current page: YouTube Video Watch Page")
             if yt.current_video.title != "UNKNOWN":
                 lines.append(f"Playing: '{yt.current_video.title}' (ID: {yt.current_video.video_id})")
         elif pt == PageType.SHORTS.value:
-            lines.append(f"Current page: YouTube Shorts")
+            lines.append("Current page: YouTube Shorts")
             if yt.current_video.video_id != "UNKNOWN":
                 lines.append(f"Active Short ID: {yt.current_video.video_id}")
         elif pt == PageType.HOME.value:
-            lines.append(f"Current page: YouTube Home Feed")
-        elif not snap.browser.connected and not yt.is_youtube:
+            lines.append("Current page: YouTube Home Feed")
+        elif not snap.browser.connected and not yt.is_youtube and not snap.browser.hwnd:
             return "YouTube browser open nahi hai ya connect nahi ho pa raha."
         else:
             lines.append(f"Current page: YouTube ({pt})")
 
         # Visible videos listing
+        count = min(len(yt.visible_videos), max_items) if yt.visible_videos else 0
         if yt.visible_videos:
-            lines.append(f"\nVisible standard videos (Top {min(len(yt.visible_videos), max_items)}):")
-            for item in yt.visible_videos[:max_items]:
+            lines.append(f"\nVisible standard videos (Top {count}):")
+            for item in yt.visible_videos[:count]:
                 lines.append(f"{item.ordinal}. {item.title}\n   ID: {item.video_id}")
         elif yt.visible_shorts:
-            lines.append(f"\nVisible Shorts (Top {min(len(yt.visible_shorts), max_items)}):")
-            for item in yt.visible_shorts[:max_items]:
+            short_count = min(len(yt.visible_shorts), max_items)
+            lines.append(f"\nVisible Shorts (Top {short_count}):")
+            for item in yt.visible_shorts[:short_count]:
                 lines.append(f"{item.ordinal}. {item.title}\n   ID: {item.video_id}")
         else:
             if pt != PageType.VIDEO.value:

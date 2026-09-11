@@ -943,7 +943,8 @@ class YouTubeAdapter:
                 response_msg = f"Haan Shivam, YouTube par {q} search kar diya hai."
 
             elif canonical_action == "youtube.observe":
-                raw_result = self.observe()
+                max_items = args.get("max_items", 5)
+                raw_result = self.observe(max_items=max_items)
                 expected_effect = "PAGE_OBSERVED"
                 response_msg = raw_result.get("summary") or "Page observed."
 

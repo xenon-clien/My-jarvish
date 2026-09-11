@@ -646,11 +646,26 @@ class YouTubeSemanticEngine:
                 normalized_text=corrected_text
             )
 
-        # ── 15b. Perception Diagnostics ("screen pe kya dikh raha hai", "first 5 videos batao", etc.) ──
-        if re.search(r"\b(?:kya\s+dikh\s+raha\s+hai|kya\s+dikha\s+raha\s+hai|videos?\s+batao|results?\s+batao|kaunsa\s+page\s+open\s+hai|kaunsa\s+page\s+hai|kaunsi\s+video\s+chal\s+rahi\s+hai|kaunsa\s+gaana\s+chal\s+raha\s+hai|kya\s+chal\s+raha\s+hai|kya\s+play\s+ho\s+raha\s+hai|kaunse?\s+videos?\s+dikh\s+rahe?\s+hain?|screen\s+batao|youtube\s+pe\s+kya\s+hai|screen\s+pe\s+kya\s+hai)\b", corrected_text):
+        # ── 15b. Perception Diagnostics ("screen pe kya dikh raha hai", "abhi youtube pe kon do videos dikh rahi hai", etc.) ──
+        has_inquiry = bool(re.search(r"\b(?:kya|kaun|kon|kaunsa|konsa|kaunsi|konsi|kaunse|konse|koun|kounsi|batao|dikhao|dikh|list|name|naam)\b", corrected_text))
+        has_visible_verb = bool(re.search(r"\b(?:dikh\s+rah[aie]|dikh\s+rahe|dikha\s+rah[aie]|dikhta|dikhti|chal\s+rah[aie]|chal\s+rahe|open\s+hai|chal\s+raha|play\s+ho\s+rah[aie])\b", corrected_text))
+        has_media_target = bool(re.search(r"\b(?:video|videos|short|shorts|gaana|screen|page|feed|result|results)\b", corrected_text))
+
+        is_diagnostic = (has_inquiry and has_visible_verb) or (has_inquiry and has_media_target and "batao" in corrected_text) or bool(re.search(r"\b(?:screen\s+pe\s+kya|kya\s+chal\s+raha|kya\s+play\s+ho\s+raha|youtube\s+pe\s+kya)\b", corrected_text))
+
+        if is_diagnostic:
+            diag_count = 5
+            count_match = re.search(r"\b(?:(\d+)|ek|do|teen|char|chaar|paanch|chhe|saat|aath|nau|das)\s+(?:video|videos|short|shorts|card|cards)\b", corrected_text)
+            if count_match:
+                raw_c = count_match.group(1) or count_match.group(0).split()[0]
+                if raw_c.isdigit():
+                    diag_count = int(raw_c)
+                elif raw_c in cls.HINDI_NUMBERS:
+                    diag_count = int(cls.HINDI_NUMBERS[raw_c])
+
             return YouTubeSemanticResult(
                 canonical_action="youtube.observe",
-                arguments={"max_items": 5},
+                arguments={"max_items": diag_count},
                 confidence=0.98,
                 raw_text=raw_text,
                 normalized_text=corrected_text
@@ -737,7 +752,7 @@ class YouTubeSemanticEngine:
             )
 
         # ── 20. Plain YouTube Mention ───────────────────────────────────────
-        if re.search(r"\b(?:youtube|utube)\b", corrected_text):
+        if re.search(r"^\s*(?:youtube|utube|yt)\s*$", corrected_text):
             return YouTubeSemanticResult(
                 canonical_action="youtube.open",
                 arguments={},

@@ -57,7 +57,7 @@ class WindowObserver:
         def enum_handler(hwnd, extra):
             try:
                 if not win32gui.IsWindowVisible(hwnd):
-                    return
+                    return True
                 title = win32gui.GetWindowText(hwnd).strip()
                 cls = win32gui.GetClassName(hwnd).strip()
                 t_low = title.lower()
@@ -65,7 +65,7 @@ class WindowObserver:
 
                 # Filter out IDEs, terminals, and non-browsers
                 if any(ex in t_low for ex in ["antigravity", "visual studio code", "vscode", "cmd.exe", "powershell", "jarvis", "j.a.r.v.i.s."]):
-                    return
+                    return True
 
                 # Target genuine browsers
                 if "chrome" in c_low or "chrome" in t_low or "edge" in c_low or "edge" in t_low or "brave" in c_low:
@@ -79,9 +79,21 @@ class WindowObserver:
                         extra.append((score, hwnd, title, cls, rect))
             except Exception:
                 pass
+            return True
+
+        h_desk = None
+        try:
+            user32 = ctypes.windll.user32
+            user32.OpenDesktopW.restype = ctypes.c_void_p
+            h_desk = user32.OpenDesktopW("default", 0, False, 0x01FF)
+        except Exception:
+            pass
 
         try:
-            win32gui.EnumWindows(enum_handler, candidates)
+            if h_desk:
+                win32gui.EnumDesktopWindows(h_desk, enum_handler, candidates)
+            else:
+                win32gui.EnumWindows(enum_handler, candidates)
         except Exception:
             pass
 
