@@ -823,11 +823,11 @@ class YouTubeAdapter:
             obs["is_watch"] = (obs.get("page_type") == "VIDEO" or "/watch" in (obs.get("current_url") or "").lower() or " - youtube" in (obs.get("window_title") or "").lower())
             return obs
 
-    def observe(self, max_items: int = 5) -> Dict[str, Any]:
+    def observe(self, max_items: int = 5, target: Optional[str] = None) -> Dict[str, Any]:
         """Perception inquiry method returning structured and human-readable perception data."""
         from backend.perception.youtube_perception import youtube_perception
-        summary = youtube_perception.format_diagnostic_summary(max_items=max_items)
-        spoken_msg = youtube_perception.format_voice_summary(max_items=max_items)
+        summary = youtube_perception.format_diagnostic_summary(max_items=max_items, target=target)
+        spoken_msg = youtube_perception.format_voice_summary(max_items=max_items, target=target)
         snap = youtube_perception.observe(force_refresh=True)
         is_yt = snap.browser.connected or snap.youtube.is_youtube
         return {
@@ -945,9 +945,10 @@ class YouTubeAdapter:
 
             elif canonical_action == "youtube.observe":
                 max_items = args.get("max_items", 5)
-                raw_result = self.observe(max_items=max_items)
+                target = args.get("target")
+                raw_result = self.observe(max_items=max_items, target=target)
                 expected_effect = "PAGE_OBSERVED"
-                response_msg = raw_result.get("summary") or "Page observed."
+                response_msg = raw_result.get("message") or raw_result.get("summary") or "Page observed."
 
             elif canonical_action in ["youtube.play_video", "youtube.play_first_video"]:
                 q = args.get("query", "")

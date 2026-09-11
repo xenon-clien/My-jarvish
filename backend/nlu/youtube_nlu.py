@@ -647,6 +647,15 @@ class YouTubeSemanticEngine:
             )
 
         # ── 15b. Perception Diagnostics ("screen pe kya dikh raha hai", "abhi youtube pe kon do videos dikh rahi hai", etc.) ──
+        if re.search(r"^\s*(?:shorts?)\s*$", corrected_text):
+            return YouTubeSemanticResult(
+                canonical_action="youtube.observe",
+                arguments={"target": "shorts", "max_items": 5},
+                confidence=0.98,
+                raw_text=raw_text,
+                normalized_text=corrected_text
+            )
+
         has_imperative_action = bool(re.search(r"\b(?:play\s+karo|chalao|lagao|bajao|search\s+karo|dhundo|dhoondo|khojo|pause\s+karo|roko|band\s+karo|kholo)\b", corrected_text))
         has_inquiry = bool(re.search(r"\b(?:kya|kaun|kon|kaunsa|konsa|kaunsi|konsi|kaunse|konse|koun|kounsi|batao|dikhao|dikh|list|name|naam|which|what|show|tell)\b", corrected_text))
         has_visible_verb = bool(re.search(r"\b(?:dikh\s+rah[aie]|dikh\s+rahe|dikha\s+rah[aie]|dikhta|dikhti|chal\s+rah[aie]|chal\s+rahe|open\s+hai|chal\s+raha|play\s+ho\s+rah[aie]|hain|hai|visible|showing)\b", corrected_text))
@@ -672,9 +681,15 @@ class YouTubeSemanticEngine:
                         diag_count = int(cls.HINDI_NUMBERS[tok])
                         break
 
+            diag_args = {"max_items": diag_count}
+            if re.search(r"\b(?:short|shorts)\b", corrected_text):
+                diag_args["target"] = "shorts"
+            elif re.search(r"\b(?:video|videos)\b", corrected_text):
+                diag_args["target"] = "videos"
+
             return YouTubeSemanticResult(
                 canonical_action="youtube.observe",
-                arguments={"max_items": diag_count},
+                arguments=diag_args,
                 confidence=0.98,
                 raw_text=raw_text,
                 normalized_text=corrected_text

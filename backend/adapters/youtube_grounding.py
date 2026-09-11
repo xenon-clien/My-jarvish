@@ -314,9 +314,20 @@ class YouTubePageObserver:
                 elements = root.FindAll(mod.TreeScope_Descendants, cond_link)
                 if elements:
                     seen_ids = set()
+                    duration_regex = r"\s+\d+\s+(?:hours?|hour|minutes?|minute|seconds?|second)(?:,\s*\d+\s*(?:minutes?|minute|seconds?|second))?\.?$"
+                    collected: List[Tuple[int, int, str, str, Tuple[int, int, int, int]]] = []
+
                     for i in range(elements.Length):
                         el = elements.GetElement(i)
-                        name = el.CurrentName or ""
+                        name = (el.CurrentName or "").strip()
+                        brect = el.CurrentBoundingRectangle
+
+                        # Viewport checks
+                        if brect.left < (window_rect[0] + 190):
+                            continue
+                        if brect.top < (window_rect[1] + 55) or brect.top > (window_rect[3] - 50):
+                            continue
+
                         href = ""
                         try:
                             val_p = el.GetCurrentPattern(mod.UIA_ValuePatternId)
@@ -334,29 +345,35 @@ class YouTubePageObserver:
                             pass
 
                         help_text = getattr(el, "CurrentHelpText", "") or ""
-                        match = re.search(r"/shorts/([a-zA-Z0-9_-]{11})", f"{name} {href} {help_text}")
+                        all_text = f"{name} {href} {help_text}"
+                        match = re.search(r"/shorts/([a-zA-Z0-9_-]{11})", all_text)
                         if match:
                             vid_id = match.group(1)
                             if vid_id not in seen_ids:
                                 seen_ids.add(vid_id)
-                                brect = el.CurrentBoundingRectangle
+                                clean_name = re.sub(r"\.\s*New content available\.?$", "", name, flags=re.IGNORECASE).strip()
+                                clean_name = re.sub(duration_regex, "", clean_name, flags=re.IGNORECASE).strip()
                                 rect_tuple = (brect.left, brect.top, brect.right, brect.bottom)
-                                candidates.append(YouTubeCandidate(
-                                    candidate_type="short",
-                                    video_id=vid_id,
-                                    title=name,
-                                    canonical_url=f"https://www.youtube.com/shorts/{vid_id}",
-                                    href=f"/shorts/{vid_id}",
-                                    bounding_rect=rect_tuple,
-                                    visual_order=len(candidates) + 1,
-                                ))
+                                collected.append((brect.top, brect.left, vid_id, clean_name, rect_tuple))
+
+                    collected.sort(key=lambda x: (x[0] // 60, x[1]))
+                    for order, (t_pos, l_pos, vid_id, clean_name, rect_tuple) in enumerate(collected, 1):
+                        candidates.append(YouTubeCandidate(
+                            candidate_type="short",
+                            video_id=vid_id,
+                            title=clean_name,
+                            canonical_url=f"https://www.youtube.com/shorts/{vid_id}",
+                            href=f"/shorts/{vid_id}",
+                            bounding_rect=rect_tuple,
+                            visual_order=order,
+                        ))
         except Exception as exc:
             logger.debug(f"UIA candidate discovery exception: {exc}")
 
         return candidates
 
     def discover_video_candidates(self, hwnd: int, window_rect: Tuple[int, int, int, int]) -> List[YouTubeCandidate]:
-        """Discover live visible standard video candidates dynamically on page, excluding navigation sidebars."""
+        """Discover live visible standard video candidates dynamically on page, excluding navigation sidebars and Shorts."""
         candidates: List[YouTubeCandidate] = []
         if not WIN32_AVAILABLE or not hwnd:
             return candidates
@@ -406,17 +423,13 @@ class YouTubePageObserver:
                         if brect.left < (window_rect[0] + 190):
                             continue
                         # 2. Must be within the visible browser viewport vertically
-                        if brect.top < (window_rect[1] + 80) or brect.top > (window_rect[3] - 50):
+                        if brect.top < (window_rect[1] + 55) or brect.top > (window_rect[3] - 50):
                             continue
                         # 3. Must have dimensions of a real video card link (not small channel/view chips)
-                        if bw < 180 or bh < 18:
+                        if bw < 150 or bh < 16:
                             continue
 
-                        if clean_name in seen_titles:
-                            continue
-                        seen_titles.add(clean_name)
-
-                        # Check for video ID in attributes
+                        # Check for video ID and URLs in attributes
                         href = ""
                         try:
                             val_p = el.GetCurrentPattern(mod.UIA_ValuePatternId)
@@ -434,6 +447,16 @@ class YouTubePageObserver:
                             pass
 
                         help_text = getattr(el, "CurrentHelpText", "") or ""
+                        all_text = f"{name} {href} {help_text}".lower()
+
+                        # EXCLUDE SHORTS FROM STANDARD VIDEO DISCOVERY
+                        if "/shorts/" in all_text:
+                            continue
+
+                        if clean_name in seen_titles:
+                            continue
+                        seen_titles.add(clean_name)
+
                         match = re.search(r"[?&]v=([a-zA-Z0-9_-]{11})", f"{name} {href} {help_text}")
                         vid_id = match.group(1) if match else f"cand_{len(collected) + 1}"
                         if vid_id in seen_ids:

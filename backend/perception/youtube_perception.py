@@ -107,6 +107,31 @@ class YouTubePerception:
                         snapshot.youtube.visible_videos = mapped_vids
                         if "UIA" not in snapshot.sources:
                             snapshot.sources.append("UIA")
+
+                # Also populate visible Shorts from UIA
+                raw_shorts = uia_obs.get("visible_short_candidates", [])
+                if raw_shorts:
+                    mapped_shorts = []
+                    seen_short_ids = set()
+                    for idx, s in enumerate(raw_shorts, start=1):
+                        s_id = getattr(s, "video_id", f"s_{idx}")
+                        if s_id in seen_short_ids:
+                            continue
+                        seen_short_ids.add(s_id)
+                        s_title = getattr(s, "title", f"Short {idx}")
+                        s_title = re.sub(r"\.\s*New content available\.?$", "", s_title, flags=re.IGNORECASE).strip()
+                        mapped_shorts.append(VisibleVideoItem(
+                            ordinal=len(mapped_shorts) + 1,
+                            video_id=s_id,
+                            title=s_title,
+                            url=getattr(s, "canonical_url", f"https://www.youtube.com/shorts/{s_id}"),
+                            is_short=True,
+                            source="UIA",
+                        ))
+                    if mapped_shorts:
+                        snapshot.youtube.visible_shorts = mapped_shorts
+                        if "UIA" not in snapshot.sources:
+                            snapshot.sources.append("UIA")
             except Exception as e:
                 logger.debug(f"UIA candidate discovery fallback error: {e}")
 
@@ -119,7 +144,7 @@ class YouTubePerception:
         self._cached_snapshot = None
         self._last_snapshot_time = 0.0
 
-    def format_diagnostic_summary(self, max_items: int = 5) -> str:
+    def format_diagnostic_summary(self, max_items: int = 5, target: Optional[str] = None) -> str:
         """Produce a human-readable diagnostic report for voice and UI."""
         snap = self.observe(force_refresh=True)
         yt = snap.youtube
@@ -148,16 +173,16 @@ class YouTubePerception:
 
         # Visible videos listing
         count = min(len(yt.visible_videos), max_items) if yt.visible_videos else 0
-        if yt.visible_videos:
+        if target != "shorts" and yt.visible_videos:
             lines.append(f"\nVisible standard videos (Top {count}):")
             for item in yt.visible_videos[:count]:
                 lines.append(f"{item.ordinal}. {item.title}\n   ID: {item.video_id}")
-        elif yt.visible_shorts:
+        if target != "videos" and yt.visible_shorts:
             short_count = min(len(yt.visible_shorts), max_items)
             lines.append(f"\nVisible Shorts (Top {short_count}):")
             for item in yt.visible_shorts[:short_count]:
                 lines.append(f"{item.ordinal}. {item.title}\n   ID: {item.video_id}")
-        else:
+        elif not yt.visible_videos and not yt.visible_shorts:
             if pt != PageType.VIDEO.value:
                 lines.append("\nNo standard video cards visible in current view.")
 
@@ -168,7 +193,7 @@ class YouTubePerception:
 
         return "\n".join(lines)
 
-    def format_voice_summary(self, max_items: int = 5) -> str:
+    def format_voice_summary(self, max_items: int = 5, target: Optional[str] = None) -> str:
         """Format a natural, human-friendly Hindi/English voice response for Shivam without technical IDs."""
         snap = self.observe()
         yt = snap.youtube
@@ -182,30 +207,65 @@ class YouTubePerception:
         count = min(len(vids), max_items) if vids else 0
 
         ordinals_hi = ["pehli", "doosri", "teesri", "chauthi", "paanchvi", "chhatthi", "saatvi", "aathvi", "nauvi", "dasvi"]
+        ordinals_hi_masc = ["pehla", "doosra", "teesra", "chautha", "paanchva", "chhattha", "saatva", "aathva", "nauva", "dasva"]
 
         if pt == PageType.VIDEO.value:
             if yt.current_video.title != "UNKNOWN":
                 return f"Shivam, abhi ye video chal rahi hai: '{yt.current_video.title}'."
             return "Shivam, YouTube par video chal rahi hai."
 
+        # Case A: User explicitly asked about Shorts
+        if target == "shorts":
+            if shorts:
+                scount = min(len(shorts), max_items)
+                items_text = []
+                for i, item in enumerate(shorts[:scount]):
+                    ord_word = ordinals_hi_masc[i] if i < len(ordinals_hi_masc) else f"number {i+1}"
+                    items_text.append(f"{ord_word} '{item.title}'")
+                if len(items_text) == 1:
+                    return f"Shivam, screen par abhi {items_text[0]} Short dikh raha hai."
+                elif len(items_text) == 2:
+                    return f"Shivam, screen par abhi do Shorts dikh rahe hain: {items_text[0]}, aur {items_text[1]}."
+                else:
+                    formatted_list = ", ".join(items_text[:-1]) + f", aur {items_text[-1]}"
+                    return f"Shivam, screen par abhi ye {scount} Shorts dikh rahe hain: {formatted_list}."
+            return "Shivam, screen par abhi koi Shorts visible nahi hain."
+
+        # Case B: User explicitly asked about Videos
+        if target == "videos":
+            if vids and count > 0:
+                items_text = []
+                for i, item in enumerate(vids[:count]):
+                    ord_word = ordinals_hi[i] if i < len(ordinals_hi) else f"number {i+1}"
+                    items_text.append(f"{ord_word} '{item.title}'")
+                if len(items_text) == 1:
+                    return f"Shivam, screen par abhi {items_text[0]} dikh rahi hai."
+                elif len(items_text) == 2:
+                    return f"Shivam, YouTube par abhi do videos dikh rahi hain: {items_text[0]}, aur {items_text[1]}."
+                else:
+                    formatted_list = ", ".join(items_text[:-1]) + f", aur {items_text[-1]}"
+                    return f"Shivam, screen par ye {count} videos dikh rahi hain: {formatted_list}."
+            return "Shivam, screen par abhi koi standard video cards dikh nahi rahe."
+
+        # Case C: General Inquiry (screen pe kya dikh raha hai)
         if vids and count > 0:
             items_text = []
             for i, item in enumerate(vids[:count]):
                 ord_word = ordinals_hi[i] if i < len(ordinals_hi) else f"number {i+1}"
                 items_text.append(f"{ord_word} '{item.title}'")
-            if len(items_text) == 1:
-                return f"Shivam, screen par abhi {items_text[0]} dikh rahi hai."
-            elif len(items_text) == 2:
-                return f"Shivam, YouTube par abhi do videos dikh rahi hain: {items_text[0]}, aur {items_text[1]}."
-            else:
-                formatted_list = ", ".join(items_text[:-1]) + f", aur {items_text[-1]}"
-                return f"Shivam, screen par ye {count} videos dikh rahi hain: {formatted_list}."
+            formatted_vids = ", ".join(items_text[:-1]) + f", aur {items_text[-1]}" if len(items_text) > 1 else items_text[0]
+            base_msg = f"Shivam, screen par ye {count} videos dikh rahi hain: {formatted_vids}."
+            if shorts:
+                scount = min(len(shorts), 2)
+                s_titles = [f"'{s.title}'" for s in shorts[:scount]]
+                base_msg += f" Sath hi {', '.join(s_titles)} jaise Shorts bhi dikh rahe hain."
+            return base_msg
 
         if shorts:
             scount = min(len(shorts), max_items)
             items_text = []
             for i, item in enumerate(shorts[:scount]):
-                ord_word = ordinals_hi[i] if i < len(ordinals_hi) else f"number {i+1}"
+                ord_word = ordinals_hi_masc[i] if i < len(ordinals_hi_masc) else f"number {i+1}"
                 items_text.append(f"{ord_word} '{item.title}'")
             formatted_list = ", ".join(items_text[:-1]) + f", aur {items_text[-1]}" if len(items_text) > 1 else items_text[0]
             return f"Shivam, screen par ye Shorts dikh rahe hain: {formatted_list}."
