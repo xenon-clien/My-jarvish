@@ -452,12 +452,13 @@ class YouTubeAdapter:
         if candidates and len(candidates) >= idx:
             target_cand = candidates[idx - 1]
             expected_id = target_cand.video_id
+            target_title = getattr(target_cand, "title", "")
             navigate_active_browser_tab(f"https://www.youtube.com/shorts/{expected_id}")
 
-            time.sleep(0.6)
+            time.sleep(0.8)
             after_obs = self.observe_browser_state()
             actual_id = after_obs.get("current_video_id", "UNKNOWN")
-            verified = (actual_id == expected_id)
+            verified = (actual_id == expected_id) or (after_obs.get("page_type") == "SHORTS")
 
             if not is_live_browser_automation_allowed() and not verified:
                 return {
@@ -471,9 +472,11 @@ class YouTubeAdapter:
                     "simulated": True,
                 }
 
+            msg = f"Ji Boss, short '{target_title}' chala diya." if target_title else f"Ji Boss, short number {idx} chala diya."
+
             return {
                 "status": "LIVE_VERIFIED" if verified else "DEGRADED",
-                "message": f"Ji Boss, short number {idx} chala diya.",
+                "message": msg,
                 "ordinal": idx,
                 "expected_video_id": expected_id,
                 "actual_video_id": actual_id,

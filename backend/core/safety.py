@@ -7,7 +7,15 @@ and isolates testing and development environments from the real desktop.
 
 import os
 import sys
+from pathlib import Path
 from typing import Any, Dict, Optional
+from dotenv import load_dotenv
+
+# Ensure .env is loaded into os.environ for runtime safety configuration
+env_path = Path(__file__).resolve().parent.parent.parent / ".env"
+if env_path.exists():
+    load_dotenv(env_path)
+
 from backend.core.logger import get_logger
 
 logger = get_logger("SafetyCore")

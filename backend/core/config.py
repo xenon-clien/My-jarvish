@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     USER_NAME: str = "Shivam"
 
     # Production Application Allowlist (Single-App Focus)
-    PRODUCTION_ENABLED_APPS: List[str] = ["youtube"]
+    PRODUCTION_ENABLED_APPS: List[str] = ["youtube", "chrome", "google chrome", "edge", "browser"]
 
     # AI Brain Provider Configuration
     AI_PRIMARY_PROVIDER: str = "astra"

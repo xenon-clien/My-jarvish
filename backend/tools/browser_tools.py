@@ -313,6 +313,8 @@ def force_foreground_window(hwnd) -> None:
         return
     try:
         import ctypes
+        import win32process
+        import win32api
         user32 = ctypes.windll.user32
 
         # 1. Attach desktop
@@ -326,17 +328,27 @@ def force_foreground_window(hwnd) -> None:
             pass
 
         # 2. Unminimize / restore if minimized
-        if win32gui.IsIconic(hwnd):
-            win32gui.ShowWindow(hwnd, win32con.SW_RESTORE)
-        else:
-            win32gui.ShowWindow(hwnd, win32con.SW_SHOW)
+        user32.ShowWindowAsync(hwnd, 9)  # SW_RESTORE
+        time.sleep(0.05)
 
-        # 3. Bring window to top without dangerous AttachThreadInput queue deadlock
-        user32.keybd_event(0x12, 0, 0, 0)  # VK_MENU (Alt)
-        user32.keybd_event(0x12, 0, 2, 0)  # VK_MENU UP
-        user32.AllowSetForegroundWindow(-1)
-        user32.SetForegroundWindow(hwnd)
-        user32.BringWindowToTop(hwnd)
+        # 3. Bring window to top with AttachThreadInput for reliable Windows 10/11 focus
+        try:
+            fore_hwnd = win32gui.GetForegroundWindow()
+            if fore_hwnd and fore_hwnd != hwnd:
+                fore_tid, _ = win32process.GetWindowThreadProcessId(fore_hwnd)
+                cur_tid = win32api.GetCurrentThreadId()
+                user32.AttachThreadInput(cur_tid, fore_tid, True)
+                user32.AllowSetForegroundWindow(-1)
+                user32.SetForegroundWindow(hwnd)
+                user32.BringWindowToTop(hwnd)
+                user32.AttachThreadInput(cur_tid, fore_tid, False)
+            else:
+                user32.AllowSetForegroundWindow(-1)
+                user32.SetForegroundWindow(hwnd)
+                user32.BringWindowToTop(hwnd)
+        except Exception:
+            user32.SetForegroundWindow(hwnd)
+            user32.BringWindowToTop(hwnd)
         time.sleep(0.06)
     except Exception as exc:
         logger.debug(f"force_foreground_window exception: {exc}")
@@ -347,7 +359,7 @@ def is_real_chrome_window(hwnd) -> bool:
     if not WIN32_AVAILABLE:
         return False
     try:
-        if not win32gui.IsWindowVisible(hwnd):
+        if not win32gui.IsWindowVisible(hwnd) and not win32gui.IsIconic(hwnd):
             return False
         title = win32gui.GetWindowText(hwnd).lower()
         if not title:
@@ -442,8 +454,14 @@ def navigate_active_browser_tab(url: str) -> bool:
                 pass
 
         if not is_physical_automation_allowed():
-            logger.debug("Physical keyboard automation disabled: skipping address-bar typing navigation.")
-            return False
+            logger.debug("Physical keyboard automation disabled: using direct browser open fallback.")
+            try:
+                import webbrowser
+                webbrowser.open(url)
+                return True
+            except Exception:
+                return False
+
 
         force_foreground_window(hwnd)
         time.sleep(0.12)

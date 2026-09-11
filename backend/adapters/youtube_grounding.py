@@ -78,8 +78,13 @@ class YouTubePageObserver:
                 t = tabs.GetElement(i)
                 name = (t.CurrentName or "").lower()
                 if "youtube" in name:
-                    pat = t.GetCurrentPattern(10010)  # SelectionItemPattern
-                    sel_pat = pat.QueryInterface(mod.IUIAutomationSelectionItemPattern)
+                    try:
+                        pat = t.GetCurrentPattern(10010)  # SelectionItemPattern
+                        if pat:
+                            sel_pat = pat.QueryInterface(mod.IUIAutomationSelectionItemPattern)
+                            sel_pat.Select()
+                    except Exception:
+                        pass
                     safe_name = str(t.CurrentName or "").encode("ascii", "replace").decode("ascii")
                     logger.info(f"Switched directly to existing YouTube tab: '{safe_name}'")
                     return True
@@ -101,7 +106,7 @@ class YouTubePageObserver:
 
         def enum_cb(hwnd, extra):
             try:
-                if win32gui.IsWindowVisible(hwnd):
+                if win32gui.IsWindowVisible(hwnd) or win32gui.IsIconic(hwnd):
                     title = win32gui.GetWindowText(hwnd).strip()
                     cls = win32gui.GetClassName(hwnd).strip()
                     t_low = title.lower()
@@ -114,9 +119,19 @@ class YouTubePageObserver:
 
                     if any(b in t_low or b in c_low for b in ["chrome", "edge", "brave", "youtube"]):
                         rect = win32gui.GetWindowRect(hwnd)
+                        is_minimized = (rect[0] <= -30000) or win32gui.IsIconic(hwnd)
+                        if is_minimized:
+                            try:
+                                user32 = ctypes.windll.user32
+                                user32.ShowWindowAsync(hwnd, 9)  # SW_RESTORE
+                                time.sleep(0.12)
+                                rect = win32gui.GetWindowRect(hwnd)
+                            except Exception:
+                                pass
+
                         w = rect[2] - rect[0]
                         h = rect[3] - rect[1]
-                        if w > 300 and h > 200:
+                        if (w > 300 and h > 200) or is_minimized:
                             score = 100 if "youtube" in t_low else 50
                             if hwnd == win32gui.GetForegroundWindow():
                                 score += 30
