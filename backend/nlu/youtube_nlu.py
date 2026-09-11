@@ -636,7 +636,7 @@ class YouTubeSemanticEngine:
             )
 
         # ── 15. Plain YouTube Open ──────────────────────────────────────────
-        if re.search(r"\b(?:youtube|utube)\b", corrected_text) and re.search(r"\b(?:kholo|khol|open|launch|start|chalu)\b", corrected_text):
+        if re.search(r"\b(?:youtube|utube)\b", corrected_text) and re.search(r"\b(?:kholo|khol|open|launch|start|chalu)\b", corrected_text) and not re.search(r"\b(?:search|dhundo|dhoondo)\b", corrected_text):
             return YouTubeSemanticResult(
                 canonical_action="youtube.open",
                 arguments={},
@@ -646,14 +646,58 @@ class YouTubeSemanticEngine:
                 normalized_text=corrected_text
             )
 
-        # ── 16. Search on YouTube ───────────────────────────────────────────
+        # ── 15b. Perception Diagnostics ("screen pe kya dikh raha hai", "first 5 videos batao", etc.) ──
+        if re.search(r"\b(?:kya\s+dikh\s+raha\s+hai|kya\s+dikha\s+raha\s+hai|videos?\s+batao|results?\s+batao|kaunsa\s+page\s+open\s+hai|kaunsa\s+page\s+hai|kaunsi\s+video\s+chal\s+rahi\s+hai|kaunsa\s+gaana\s+chal\s+raha\s+hai|kya\s+chal\s+raha\s+hai|kya\s+play\s+ho\s+raha\s+hai|kaunse?\s+videos?\s+dikh\s+rahe?\s+hain?|screen\s+batao|youtube\s+pe\s+kya\s+hai|screen\s+pe\s+kya\s+hai)\b", corrected_text):
+            return YouTubeSemanticResult(
+                canonical_action="youtube.observe",
+                arguments={"max_items": 5},
+                confidence=0.98,
+                raw_text=raw_text,
+                normalized_text=corrected_text
+            )
+
+        # ── 16. Pure Ordinal Video Playback (e.g. "play first", "pehla chalao", "first play karo") ──
+        # If ordinal is specified without a real search query (only play verbs / video nouns)
+        if ordinal is not None and not re.search(r"\b(?:search|dhundo|dhoondo|khojo)\b", corrected_text):
+            # Check if utterance only contains ordinal words, play verbs, and filler/media nouns
+            text_without_ordinal = corrected_text
+            for filler_pat in cls.FILLERS:
+                text_without_ordinal = re.sub(filler_pat, " ", text_without_ordinal, flags=re.IGNORECASE)
+            for ord_val, patterns in cls.ORDINAL_MAP.items():
+                for pat in patterns:
+                    text_without_ordinal = re.sub(pat, " ", text_without_ordinal, flags=re.IGNORECASE)
+            text_without_ordinal = re.sub(r"\b(?:play|chalao|chala|laga|lagao|khol|kholo|open|start|dikhao|bajao|video|videos|gaana|song|item|result|number|\d+)\b", " ", text_without_ordinal, flags=re.IGNORECASE)
+            remaining_words = text_without_ordinal.strip().split()
+
+            if not remaining_words:
+                # Pure ordinal selection from visible screen cards!
+                return YouTubeSemanticResult(
+                    canonical_action="youtube.play_video",
+                    arguments={"ordinal": ordinal, "query": ""},
+                    query="",
+                    ordinal=ordinal,
+                    content_type="video",
+                    desired_state="VIDEO_PLAYING",
+                    confidence=0.97,
+                    raw_text=raw_text,
+                    normalized_text=corrected_text
+                )
+
+        # ── 17. Search on YouTube (Strip UI vocabulary: search bar, search box, etc.) ──
         cleaned_query = corrected_text
+        # Strip UI vocabulary first so "search bar" / "search box" doesn't become query words
+        cleaned_query = re.sub(r"\b(?:search\s+bar|search\s+box|searchbar|searchbox|bar|box)\b", " ", cleaned_query, flags=re.IGNORECASE)
         for filler_pat in cls.FILLERS:
             cleaned_query = re.sub(filler_pat, " ", cleaned_query, flags=re.IGNORECASE)
-        cleaned_query = re.sub(r"\b(?:youtube|search|dhundo|dhoondo|khojo|find|dikhao|chalao|play|laga|kholo|open|bajao)\b", " ", cleaned_query, flags=re.IGNORECASE)
+        cleaned_query = re.sub(r"\b(?:youtube|search|dhundo|dhoondo|khojo|find|dikhao|chalao|play|laga|kholo|open|bajao|type|dalo|daalo|likho|likh|enter)\b", " ", cleaned_query, flags=re.IGNORECASE)
+        # Also remove ordinal words from search query if any
+        if ordinal is not None:
+            for ord_val, patterns in cls.ORDINAL_MAP.items():
+                for pat in patterns:
+                    cleaned_query = re.sub(pat, " ", cleaned_query, flags=re.IGNORECASE)
         cleaned_query = " ".join(cleaned_query.split()).strip()
 
-        if re.search(r"\b(?:search|dhundo|dhoondo|khojo|find|dikhao)\b", corrected_text) and cleaned_query:
+        if re.search(r"\b(?:search|dhundo|dhoondo|khojo|find|dikhao|type|dalo|daalo|likho|likh|enter)\b", corrected_text) and cleaned_query:
             return YouTubeSemanticResult(
                 canonical_action="youtube.search",
                 arguments={"query": cleaned_query},
@@ -664,7 +708,7 @@ class YouTubeSemanticEngine:
                 normalized_text=corrected_text
             )
 
-        # ── 17. Conversational / Diagnostic Inquiries (Do NOT play videos) ───
+        # ── 18. Conversational / Diagnostic Inquiries (Do NOT play videos) ───
         if re.search(r"\b(?:kyu|kyun|ku|why|kaise|how|kya|problem|issue|dikkat|kharab|freeze|atak|chalta|chal\s+raha|chal\s+rahi|sun|suno|kuch|nahi|nhi)\b", corrected_text):
             return YouTubeSemanticResult(
                 canonical_action="youtube.unknown",
@@ -673,7 +717,7 @@ class YouTubeSemanticEngine:
                 normalized_text=corrected_text
             )
 
-        # ── 18. Play Video by Search Entity ─────────────────────────────────
+        # ── 19. Play Video by Search Entity ─────────────────────────────────
         # Must have an explicit play verb (chalao, play, laga, bajao, start)
         # OR explicit media noun (video, gaana, song, track) with query
         has_play_verb = bool(re.search(r"\b(?:chalao|chala|laga|lagao|play|bajao|start|sunao)\b", corrected_text))
@@ -692,7 +736,7 @@ class YouTubeSemanticEngine:
                 normalized_text=corrected_text
             )
 
-        # ── 19. Plain YouTube Mention ───────────────────────────────────────
+        # ── 20. Plain YouTube Mention ───────────────────────────────────────
         if re.search(r"\b(?:youtube|utube)\b", corrected_text):
             return YouTubeSemanticResult(
                 canonical_action="youtube.open",

@@ -48,23 +48,30 @@ class YouTubeAdapter:
 
         target_url = f"https://www.youtube.com/results?search_query={urllib.parse.quote_plus(query)}" if query else "https://www.youtube.com/"
 
-        # 1. Actuation: Try semantic tab switch/navigation first, else launch Chrome process
+        # 1. Actuation: Try CDP same-tab navigation first, then semantic tab switch/navigation, else launch Chrome process
         actuation_success = False
         launch_error = None
 
         try:
-            obs = self.observe_browser_state()
-            hwnd = obs.get("hwnd")
-
-            # Try semantic browser control if Chrome/Edge is already running
-            if obs.get("browser_running") and hwnd:
-                from backend.adapters.youtube_grounding import youtube_page_observer
-                if not query and youtube_page_observer.switch_to_youtube_tab(hwnd):
+            from backend.perception.browser_session import browser_session
+            if browser_session.is_cdp_available():
+                if browser_session.navigate_same_tab_sync(target_url):
                     actuation_success = True
-                else:
-                    nav = navigate_active_browser_tab(target_url)
-                    if nav:
+                    logger.info(f"Navigated existing CDP session tab to: {target_url}")
+
+            if not actuation_success:
+                obs = self.observe_browser_state()
+                hwnd = obs.get("hwnd")
+
+                # Try semantic browser control if Chrome/Edge is already running
+                if obs.get("browser_running") and hwnd:
+                    from backend.adapters.youtube_grounding import youtube_page_observer
+                    if not query and youtube_page_observer.switch_to_youtube_tab(hwnd):
                         actuation_success = True
+                    else:
+                        nav = navigate_active_browser_tab(target_url)
+                        if nav:
+                            actuation_success = True
 
             # If no existing session handled it, launch Google Chrome process with URL
             if not actuation_success:
@@ -83,6 +90,12 @@ class YouTubeAdapter:
                 "error": launch_error,
                 "message": "YouTube open nahi ho paya.",
             }
+
+        try:
+            from backend.perception.youtube_perception import youtube_perception
+            youtube_perception.invalidate_cache()
+        except Exception:
+            pass
 
         # 2. Observe & Verify (Bounded polling up to ~5 seconds)
         poll_deadline = time.time() + 5.0
@@ -129,13 +142,123 @@ class YouTubeAdapter:
             }
 
     def search(self, query: str) -> Dict[str, Any]:
-        """Search YouTube for a query string."""
-        return self.open(query=query)
+        """Search YouTube for a query string with same-tab reuse and closed-loop verification."""
+        from backend.core.safety import is_live_browser_automation_allowed
+        from backend.tools.browser_tools import launch_in_google_chrome, navigate_active_browser_tab
+        from backend.perception.browser_session import browser_session
+        from backend.perception.perception_types import PageType
+        import urllib.parse
+        import time
+
+        clean_query = (query or "").strip()
+        if not is_live_browser_automation_allowed():
+            logger.info("youtube.search: live browser automation is disabled in safe mode.")
+            return {
+                "status": "LIVE_AUTOMATION_DISABLED",
+                "verified": False,
+                "simulated": True,
+                "query": clean_query,
+                "url": f"https://www.youtube.com/results?search_query={urllib.parse.quote_plus(clean_query)}",
+                "message": "Live browser automation is disabled in development safe mode.",
+            }
+
+        target_url = f"https://www.youtube.com/results?search_query={urllib.parse.quote_plus(clean_query)}"
+
+        # 1. Actuation: Re-use active YouTube tab via CDP first to prevent duplicate tabs
+        actuation_success = False
+        launch_error = None
+
+        try:
+            if browser_session.is_cdp_available():
+                if browser_session.navigate_same_tab_sync(target_url):
+                    actuation_success = True
+                    logger.info(f"Reused existing CDP tab for search: {clean_query}")
+
+            if not actuation_success:
+                obs = self.observe_browser_state()
+                hwnd = obs.get("hwnd")
+                if obs.get("browser_running") and hwnd:
+                    nav = navigate_active_browser_tab(target_url)
+                    if nav:
+                        actuation_success = True
+
+            if not actuation_success:
+                launch_in_google_chrome(target_url)
+                actuation_success = True
+
+        except Exception as exc:
+            logger.error(f"Failed to actuate YouTube search: {exc}")
+            launch_error = str(exc)
+            actuation_success = False
+
+        if not actuation_success:
+            return {
+                "status": "BROKEN",
+                "verified": False,
+                "error": launch_error,
+                "message": f"YouTube par {clean_query} search nahi ho paya.",
+            }
+
+        try:
+            from backend.perception.youtube_perception import youtube_perception
+            youtube_perception.invalidate_cache()
+        except Exception:
+            pass
+
+        # 2. Closed-loop verification
+        poll_deadline = time.time() + 5.0
+        confirmed = False
+        last_state: Dict[str, Any] = {}
+
+        while time.time() < poll_deadline:
+            last_state = self.observe_browser_state(discover_candidates=True)
+            cur_url = (last_state.get("current_url") or "").lower()
+            cur_title = (last_state.get("window_title") or "").lower()
+            page_type = last_state.get("page_type")
+            perceived_query = (last_state.get("search_query") or "").lower()
+
+            if last_state.get("browser_running") and (
+                page_type == PageType.SEARCH_RESULTS.value or
+                "results?search_query=" in cur_url or
+                (clean_query.lower() in cur_title and "youtube" in cur_title) or
+                (clean_query.lower() in perceived_query)
+            ):
+                confirmed = True
+                break
+            time.sleep(0.3)
+
+        if confirmed:
+            return {
+                "status": "LIVE_VERIFIED",
+                "verified": True,
+                "query": clean_query,
+                "url": target_url,
+                "observed_state": last_state,
+                "message": f"Haan Shivam, YouTube par {clean_query} search kar diya hai.",
+            }
+        elif last_state.get("browser_running"):
+            return {
+                "status": "DEGRADED",
+                "verified": False,
+                "query": clean_query,
+                "url": target_url,
+                "observed_state": last_state,
+                "message": f"YouTube par {clean_query} search kiya hai, lekin results verify nahi ho paye.",
+            }
+        else:
+            return {
+                "status": "BROKEN",
+                "verified": False,
+                "query": clean_query,
+                "url": target_url,
+                "observed_state": last_state,
+                "message": "YouTube open nahi ho paya.",
+            }
 
     def play_video(self, query: str = "", ordinal: int = 1) -> Dict[str, Any]:
         """Play a video query or select N-th video with dynamic grounding and physical actuation."""
         if query:
-            return self.open(query=query)
+            return self.search(query=query)
 
         idx = ordinal or 1
         obs = self.observe_browser_state(discover_candidates=True)
@@ -144,12 +267,15 @@ class YouTubeAdapter:
 
         # If on watch page or current_video_id exists, filter it out from candidates
         # so ordinal 1 refers to the next / first recommended video on screen
-        if cur_id:
-            filtered = [c for c in candidates if c.video_id != cur_id]
+        if cur_id and cur_id != "UNKNOWN":
+            filtered = [c for c in candidates if (getattr(c, "video_id", None) or (c.get("video_id") if isinstance(c, dict) else None)) != cur_id]
             if filtered:
                 candidates = filtered
 
+        from backend.core.safety import is_live_browser_automation_allowed
         from backend.tools.browser_tools import navigate_active_browser_tab, force_foreground_window
+        from backend.perception.browser_session import browser_session
+        from backend.perception.youtube_perception import youtube_perception
         import time
 
         # Non-interactive development & test isolation
@@ -168,14 +294,32 @@ class YouTubeAdapter:
         # 1-based ordinal semantics: target_idx = ordinal - 1 exactly once
         if candidates and len(candidates) >= idx:
             target_cand = candidates[idx - 1]
-            expected_id = target_cand.video_id
+            expected_id = getattr(target_cand, "video_id", None) or (target_cand.get("video_id") if isinstance(target_cand, dict) else "UNKNOWN")
+            expected_url = getattr(target_cand, "url", None) or (target_cand.get("url") if isinstance(target_cand, dict) else None)
+            if not expected_url or expected_url == "UNKNOWN":
+                expected_url = f"https://www.youtube.com/watch?v={expected_id}"
 
-            # Semantic browser navigation (freeing physical mouse)
-            navigate_active_browser_tab(f"https://www.youtube.com/watch?v={expected_id}")
+            # Semantic browser navigation on SAME tab (never duplicate tabs)
+            nav_ok = False
+            if browser_session.is_cdp_available():
+                nav_ok = browser_session.navigate_same_tab_sync(expected_url)
+
+            if not nav_ok:
+                nav_ok = navigate_active_browser_tab(expected_url)
+
+            try:
+                youtube_perception.invalidate_cache()
+            except Exception:
+                pass
             time.sleep(0.8)
+
             after_obs = self.observe_browser_state()
             actual_id = after_obs.get("current_video_id", "UNKNOWN")
-            verified = (actual_id == expected_id) or (after_obs.get("playback_state") == "PLAYING" and actual_id != cur_id)
+            verified = (actual_id != "UNKNOWN" and actual_id == expected_id) or (
+                after_obs.get("playback_state") == "PLAYING" and actual_id != "UNKNOWN" and actual_id != cur_id
+            ) or (
+                after_obs.get("current_url") and expected_id != "UNKNOWN" and expected_id in after_obs.get("current_url")
+            )
 
             if not is_live_browser_automation_allowed() and not verified:
                 return {
@@ -190,7 +334,7 @@ class YouTubeAdapter:
 
             return {
                 "status": "LIVE_VERIFIED" if verified else "DEGRADED",
-                "message": f"Ji Boss, video number {idx} chala di.",
+                "message": f"Ji Boss, video number {idx} chala di." if verified else f"Video number {idx} play karne ki koshish ki, lekin playback verify nahi ho paya.",
                 "ordinal": idx,
                 "expected_video_id": expected_id,
                 "actual_video_id": actual_id,
@@ -282,6 +426,7 @@ class YouTubeAdapter:
         Uses 1-based ordinal semantics (target_idx = ordinal - 1 applied exactly once),
         dynamic candidate discovery via YouTubePageObserver, and closed-loop identity verification.
         """
+        from backend.core.safety import is_live_browser_automation_allowed
         idx = index or ordinal or 1
         obs = self.observe_browser_state(discover_candidates=True)
         candidates = obs.get("visible_short_candidates", [])
@@ -606,15 +751,91 @@ class YouTubeAdapter:
         return scroll_page(direction=direction, amount=amount)
 
     def observe_browser_state(self, discover_candidates: bool = False) -> Dict[str, Any]:
-        """Observe live browser state without fixed coordinates via YouTubePageObserver."""
-        from backend.adapters.youtube_grounding import youtube_page_observer
-        obs = youtube_page_observer.observe(discover_candidates=discover_candidates)
-        # Ensure backward-compatible keys
-        obs["url"] = obs.get("current_url")
-        obs["is_youtube"] = (obs.get("page_type") in ["HOME", "SHORTS", "VIDEO", "SEARCH_RESULTS"] or "youtube" in (obs.get("current_url") or "").lower() or "youtube" in (obs.get("window_title") or "").lower())
-        obs["is_shorts"] = (obs.get("page_type") == "SHORTS" or "/shorts" in (obs.get("current_url") or "").lower() or "short" in (obs.get("window_title") or "").lower())
-        obs["is_watch"] = (obs.get("page_type") == "VIDEO" or "/watch" in (obs.get("current_url") or "").lower() or " - youtube" in (obs.get("window_title") or "").lower())
-        return obs
+        """Observe live browser state via JARVIS Eyes V1 YouTubePerception with legacy fallback."""
+        try:
+            from backend.perception.youtube_perception import youtube_perception
+            from backend.perception.perception_types import PageType
+
+            snap = youtube_perception.observe(force_refresh=discover_candidates)
+            yt = snap.youtube
+            browser = snap.browser
+
+            page_type_str = yt.page_type.value if hasattr(yt.page_type, "value") else str(yt.page_type)
+            cur_url = yt.current_video.url if (yt.current_video and yt.current_video.url != "UNKNOWN") else browser.url
+            if cur_url == "UNKNOWN" and browser.url != "UNKNOWN":
+                cur_url = browser.url
+
+            playback_state = "UNKNOWN"
+            if yt.player and yt.player.exists:
+                playback_state = "PAUSED" if yt.player.paused is True else "PLAYING"
+
+            obs: Dict[str, Any] = {
+                "browser_running": browser.connected or (browser.hwnd != 0),
+                "browser_name": browser.browser_name,
+                "hwnd": browser.hwnd,
+                "window_title": browser.title,
+                "is_foreground": False,
+                "current_url": cur_url,
+                "url": cur_url,
+                "page_type": page_type_str,
+                "current_video_id": yt.current_video.video_id if yt.current_video else "UNKNOWN",
+                "current_title": yt.current_video.title if yt.current_video else "UNKNOWN",
+                "playback_state": playback_state,
+                "current_time": yt.player.current_time if yt.player else "UNKNOWN",
+                "duration": yt.player.duration if yt.player else "UNKNOWN",
+                "volume": yt.player.volume if yt.player else "UNKNOWN",
+                "muted": yt.player.muted if yt.player else "UNKNOWN",
+                "fullscreen": yt.controls.fullscreen if yt.controls else "UNKNOWN",
+                "theater_mode": yt.controls.theater if yt.controls else "UNKNOWN",
+                "miniplayer": yt.controls.miniplayer if yt.controls else "UNKNOWN",
+                "captions": yt.controls.captions if yt.controls else "UNKNOWN",
+                "playback_rate": yt.player.playback_rate if yt.player else 1.0,
+                "like_state": yt.controls.like_state if yt.controls else "UNKNOWN",
+                "visible_video_candidates": yt.visible_videos,
+                "visible_short_candidates": yt.visible_shorts,
+                "is_youtube": yt.is_youtube or ("youtube" in (cur_url or "").lower()) or ("youtube" in (browser.title or "").lower()),
+                "is_shorts": page_type_str == PageType.SHORTS.value or "/shorts" in (cur_url or "").lower(),
+                "is_watch": page_type_str == PageType.VIDEO.value or "/watch" in (cur_url or "").lower() or " - youtube" in (browser.title or "").lower(),
+                "search_query": yt.search_query,
+                "perception_snapshot": snap,
+            }
+
+            # If candidates were requested but CDP returned none, fallback to legacy UIA observer
+            if discover_candidates and not obs["visible_video_candidates"] and not obs["visible_short_candidates"]:
+                try:
+                    from backend.adapters.youtube_grounding import youtube_page_observer
+                    legacy_obs = youtube_page_observer.observe(discover_candidates=True)
+                    if legacy_obs.get("visible_video_candidates"):
+                        obs["visible_video_candidates"] = legacy_obs["visible_video_candidates"]
+                    if legacy_obs.get("visible_short_candidates"):
+                        obs["visible_short_candidates"] = legacy_obs["visible_short_candidates"]
+                except Exception:
+                    pass
+
+            return obs
+        except Exception as exc:
+            logger.debug(f"observe_browser_state perception fallback: {exc}")
+            from backend.adapters.youtube_grounding import youtube_page_observer
+            obs = youtube_page_observer.observe(discover_candidates=discover_candidates)
+            obs["url"] = obs.get("current_url")
+            obs["is_youtube"] = (obs.get("page_type") in ["HOME", "SHORTS", "VIDEO", "SEARCH_RESULTS"] or "youtube" in (obs.get("current_url") or "").lower() or "youtube" in (obs.get("window_title") or "").lower())
+            obs["is_shorts"] = (obs.get("page_type") == "SHORTS" or "/shorts" in (obs.get("current_url") or "").lower() or "short" in (obs.get("window_title") or "").lower())
+            obs["is_watch"] = (obs.get("page_type") == "VIDEO" or "/watch" in (obs.get("current_url") or "").lower() or " - youtube" in (obs.get("window_title") or "").lower())
+            return obs
+
+    def observe(self, max_items: int = 5) -> Dict[str, Any]:
+        """Perception inquiry method returning structured and human-readable perception data."""
+        from backend.perception.youtube_perception import youtube_perception
+        summary = youtube_perception.format_diagnostic_summary(max_items=max_items)
+        snap = youtube_perception.observe(force_refresh=True)
+        is_yt = snap.browser.connected or snap.youtube.is_youtube
+        return {
+            "status": "LIVE_VERIFIED" if is_yt else "DEGRADED",
+            "verified": is_yt,
+            "summary": summary,
+            "message": summary,
+            "snapshot": snap.to_dict(),
+        }
 
     def verify_state(self, action: str, expected_effect: str, result: Dict[str, Any], initial_state: Optional[Dict[str, Any]] = None) -> str:
         """Closed-loop verification against real observed desktop & browser state.
@@ -635,26 +856,69 @@ class YouTubeAdapter:
 
         state = self.observe_browser_state()
 
-        if action in ["youtube.open", "youtube.search", "youtube.play_video"]:
-            if state.get("browser_running") and state.get("is_youtube"):
+        if not state.get("browser_running"):
+            return "BROKEN"
+
+        if not state.get("is_youtube"):
+            return "DEGRADED"
+
+        if action == "youtube.open":
+            cur_url = (state.get("current_url") or "").lower()
+            title = (state.get("window_title") or "").lower()
+            if "youtube.com" in cur_url or "youtube" in title or state.get("is_youtube"):
                 return "LIVE_VERIFIED"
             return "DEGRADED"
 
-        if action in ["youtube.scroll", "scroll_page"]:
-            if state.get("browser_running") and state.get("is_youtube"):
+        if action == "youtube.search":
+            cur_url = (state.get("current_url") or "").lower()
+            page_type = state.get("page_type")
+            q = (result.get("query") or "").lower()
+            title = (state.get("window_title") or "").lower()
+            if page_type == "SEARCH_RESULTS" or "results?search_query=" in cur_url or (q and q in title):
+                return "LIVE_VERIFIED"
+            return "DEGRADED"
+
+        if action in ["youtube.play_video", "youtube.play_first_video"]:
+            actual_id = state.get("current_video_id", "UNKNOWN")
+            exp_id = result.get("expected_video_id")
+            page_type = state.get("page_type")
+            if exp_id and exp_id != "UNKNOWN":
+                if actual_id == exp_id:
+                    return "LIVE_VERIFIED"
+                return "DEGRADED"
+            if page_type == "VIDEO" and actual_id != "UNKNOWN":
                 return "LIVE_VERIFIED"
             return "DEGRADED"
 
         if action == "youtube.play_short":
-            if state.get("browser_running") and (state.get("is_shorts") or state.get("is_youtube")):
+            actual_id = state.get("current_video_id", "UNKNOWN")
+            exp_id = result.get("expected_video_id")
+            page_type = state.get("page_type")
+            if exp_id and exp_id != "UNKNOWN":
+                if actual_id == exp_id:
+                    return "LIVE_VERIFIED"
+                return "DEGRADED"
+            if page_type == "SHORTS":
                 return "LIVE_VERIFIED"
             return "DEGRADED"
 
-        # Media & playback controls
-        if state.get("browser_running") and state.get("is_youtube"):
-            return "LIVE_VERIFIED"
-        else:
+        if action in ["youtube.scroll", "scroll_page"]:
+            return "LIVE_VERIFIED" if state.get("is_youtube") else "DEGRADED"
+
+        if action == "youtube.observe":
+            return "LIVE_VERIFIED" if state.get("is_youtube") else "DEGRADED"
+
+        if action == "youtube.pause":
+            if state.get("playback_state") == "PAUSED":
+                return "LIVE_VERIFIED"
             return "DEGRADED"
+
+        if action in ["youtube.resume", "youtube.play"]:
+            if state.get("playback_state") == "PLAYING":
+                return "LIVE_VERIFIED"
+            return "DEGRADED"
+
+        return "LIVE_VERIFIED" if state.get("is_youtube") else "DEGRADED"
 
     def execute_canonical(self, canonical_action: str, arguments: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute any of the 25 canonical YouTube intents with state verification."""
@@ -677,6 +941,11 @@ class YouTubeAdapter:
                 raw_result = self.search(query=q)
                 expected_effect = "SEARCH_RESULTS_DISPLAYED"
                 response_msg = f"Haan Shivam, YouTube par {q} search kar diya hai."
+
+            elif canonical_action == "youtube.observe":
+                raw_result = self.observe()
+                expected_effect = "PAGE_OBSERVED"
+                response_msg = raw_result.get("summary") or "Page observed."
 
             elif canonical_action in ["youtube.play_video", "youtube.play_first_video"]:
                 q = args.get("query", "")

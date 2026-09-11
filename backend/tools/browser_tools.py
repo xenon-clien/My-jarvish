@@ -279,20 +279,20 @@ def launch_in_google_chrome(url: str) -> None:
     for p in chrome_paths:
         if os.path.exists(p):
             try:
-                subprocess.Popen([p, "--start-maximized", url])
+                subprocess.Popen([p, "--remote-debugging-port=9222", "--start-maximized", url])
                 return
             except Exception:
                 pass
             try:
                 import ctypes
-                ctypes.windll.shell32.ShellExecuteW(None, "open", p, f'--start-maximized "{url}"', None, 3)
+                ctypes.windll.shell32.ShellExecuteW(None, "open", p, f'--remote-debugging-port=9222 --start-maximized "{url}"', None, 3)
                 return
             except Exception:
                 pass
 
     # 2. Fall back to Windows Shell start
     try:
-        subprocess.Popen(f'start "" chrome --start-maximized "{url}"', shell=True)
+        subprocess.Popen(f'start "" chrome --remote-debugging-port=9222 --start-maximized "{url}"', shell=True)
         return
     except Exception:
         pass

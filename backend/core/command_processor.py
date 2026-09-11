@@ -373,19 +373,19 @@ class CommandProcessor:
                 if v_status == "LIVE_VERIFIED":
                     ctx.status = ExecutionStatus.VERIFIED_SUCCESS
                     ctx.verified = True
-                    ctx.response_message = adapter_res.get("message", "Ji Boss, ho gaya.")
+                    ctx.response_message = adapter_res.get("message") or "Ji Boss, ho gaya."
                 elif v_status == "DEGRADED":
                     ctx.status = ExecutionStatus.DEGRADED
                     ctx.verified = False
-                    ctx.response_message = adapter_res.get("message", "YouTube launch kiya hai, lekin main confirm nahi kar pa raha ki page open hua.")
+                    ctx.response_message = adapter_res.get("message") or "YouTube launch kiya hai, lekin main confirm nahi kar pa raha ki page open hua."
                 elif v_status in ["SIMULATED", "LIVE_AUTOMATION_DISABLED"]:
                     ctx.status = ExecutionStatus.SIMULATED
                     ctx.verified = False
-                    ctx.response_message = adapter_res.get("message", "Development safe mode active hai; live automation perform nahi kiya gaya.")
+                    ctx.response_message = adapter_res.get("message") or "Development safe mode active hai; live automation perform nahi kiya gaya."
                 else:
                     ctx.status = ExecutionStatus.VERIFIED_FAILURE
                     ctx.verified = False
-                    ctx.response_message = adapter_res.get("message", "YouTube action fail ho gaya.")
+                    ctx.response_message = adapter_res.get("message") or "YouTube action fail ho gaya."
                 ctx.execution_time_ms = round((time.time() - start_t) * 1000, 1)
                 return ctx
 
