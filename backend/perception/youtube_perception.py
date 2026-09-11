@@ -168,6 +168,54 @@ class YouTubePerception:
 
         return "\n".join(lines)
 
+    def format_voice_summary(self, max_items: int = 5) -> str:
+        """Format a natural, human-friendly Hindi/English voice response for Shivam without technical IDs."""
+        snap = self.observe()
+        yt = snap.youtube
+        pt = yt.page_type.value if hasattr(yt.page_type, "value") else str(yt.page_type)
+
+        if not snap.browser.connected and not yt.is_youtube and not snap.browser.hwnd:
+            return "Shivam, YouTube browser open nahi hai ya connect nahi ho pa raha."
+
+        vids = yt.visible_videos or []
+        shorts = yt.visible_shorts or []
+        count = min(len(vids), max_items) if vids else 0
+
+        ordinals_hi = ["pehli", "doosri", "teesri", "chauthi", "paanchvi", "chhatthi", "saatvi", "aathvi", "nauvi", "dasvi"]
+
+        if pt == PageType.VIDEO.value:
+            if yt.current_video.title != "UNKNOWN":
+                return f"Shivam, abhi ye video chal rahi hai: '{yt.current_video.title}'."
+            return "Shivam, YouTube par video chal rahi hai."
+
+        if vids and count > 0:
+            items_text = []
+            for i, item in enumerate(vids[:count]):
+                ord_word = ordinals_hi[i] if i < len(ordinals_hi) else f"number {i+1}"
+                items_text.append(f"{ord_word} '{item.title}'")
+            if len(items_text) == 1:
+                return f"Shivam, screen par abhi {items_text[0]} dikh rahi hai."
+            elif len(items_text) == 2:
+                return f"Shivam, YouTube par abhi do videos dikh rahi hain: {items_text[0]}, aur {items_text[1]}."
+            else:
+                formatted_list = ", ".join(items_text[:-1]) + f", aur {items_text[-1]}"
+                return f"Shivam, screen par ye {count} videos dikh rahi hain: {formatted_list}."
+
+        if shorts:
+            scount = min(len(shorts), max_items)
+            items_text = []
+            for i, item in enumerate(shorts[:scount]):
+                ord_word = ordinals_hi[i] if i < len(ordinals_hi) else f"number {i+1}"
+                items_text.append(f"{ord_word} '{item.title}'")
+            formatted_list = ", ".join(items_text[:-1]) + f", aur {items_text[-1]}" if len(items_text) > 1 else items_text[0]
+            return f"Shivam, screen par ye Shorts dikh rahe hain: {formatted_list}."
+
+        if pt == PageType.SEARCH_RESULTS.value and yt.search_query != "UNKNOWN":
+            return f"Shivam, YouTube par '{yt.search_query}' ke search results open hain lekin koi video cards visible nahi hain."
+
+        return "Shivam, YouTube open hai lekin screen par koi video card dikh nahi raha."
+
 
 # Global singleton
 youtube_perception = YouTubePerception()
+

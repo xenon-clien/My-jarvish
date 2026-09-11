@@ -827,13 +827,14 @@ class YouTubeAdapter:
         """Perception inquiry method returning structured and human-readable perception data."""
         from backend.perception.youtube_perception import youtube_perception
         summary = youtube_perception.format_diagnostic_summary(max_items=max_items)
+        spoken_msg = youtube_perception.format_voice_summary(max_items=max_items)
         snap = youtube_perception.observe(force_refresh=True)
         is_yt = snap.browser.connected or snap.youtube.is_youtube
         return {
             "status": "LIVE_VERIFIED" if is_yt else "DEGRADED",
             "verified": is_yt,
             "summary": summary,
-            "message": summary,
+            "message": spoken_msg,
             "snapshot": snap.to_dict(),
         }
 

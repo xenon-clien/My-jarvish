@@ -647,21 +647,30 @@ class YouTubeSemanticEngine:
             )
 
         # ── 15b. Perception Diagnostics ("screen pe kya dikh raha hai", "abhi youtube pe kon do videos dikh rahi hai", etc.) ──
-        has_inquiry = bool(re.search(r"\b(?:kya|kaun|kon|kaunsa|konsa|kaunsi|konsi|kaunse|konse|koun|kounsi|batao|dikhao|dikh|list|name|naam)\b", corrected_text))
-        has_visible_verb = bool(re.search(r"\b(?:dikh\s+rah[aie]|dikh\s+rahe|dikha\s+rah[aie]|dikhta|dikhti|chal\s+rah[aie]|chal\s+rahe|open\s+hai|chal\s+raha|play\s+ho\s+rah[aie])\b", corrected_text))
-        has_media_target = bool(re.search(r"\b(?:video|videos|short|shorts|gaana|screen|page|feed|result|results)\b", corrected_text))
+        has_imperative_action = bool(re.search(r"\b(?:play\s+karo|chalao|lagao|bajao|search\s+karo|dhundo|dhoondo|khojo|pause\s+karo|roko|band\s+karo|kholo)\b", corrected_text))
+        has_inquiry = bool(re.search(r"\b(?:kya|kaun|kon|kaunsa|konsa|kaunsi|konsi|kaunse|konse|koun|kounsi|batao|dikhao|dikh|list|name|naam|which|what|show|tell)\b", corrected_text))
+        has_visible_verb = bool(re.search(r"\b(?:dikh\s+rah[aie]|dikh\s+rahe|dikha\s+rah[aie]|dikhta|dikhti|chal\s+rah[aie]|chal\s+rahe|open\s+hai|chal\s+raha|play\s+ho\s+rah[aie]|hain|hai|visible|showing)\b", corrected_text))
+        has_media_target = bool(re.search(r"\b(?:video|videos|short|shorts|gaana|screen|page|feed|result|results|youtube|utube)\b", corrected_text))
 
-        is_diagnostic = (has_inquiry and has_visible_verb) or (has_inquiry and has_media_target and "batao" in corrected_text) or bool(re.search(r"\b(?:screen\s+pe\s+kya|kya\s+chal\s+raha|kya\s+play\s+ho\s+raha|youtube\s+pe\s+kya)\b", corrected_text))
+        is_diagnostic = not has_imperative_action and (
+            (has_inquiry and (has_visible_verb or has_media_target)) or
+            bool(re.search(r"\b(?:screen\s+pe\s+kya|kya\s+chal\s+raha|kya\s+play\s+ho\s+raha|youtube\s+pe\s+kya)\b", corrected_text))
+        )
 
         if is_diagnostic:
             diag_count = 5
             count_match = re.search(r"\b(?:(\d+)|ek|do|teen|char|chaar|paanch|chhe|saat|aath|nau|das)\s+(?:video|videos|short|shorts|card|cards)\b", corrected_text)
+            if not count_match:
+                count_match = re.search(r"\b(?:video|videos|short|shorts|card|cards)\s+(?:(\d+)|ek|do|teen|char|chaar|paanch|chhe|saat|aath|nau|das)\b", corrected_text)
             if count_match:
-                raw_c = count_match.group(1) or count_match.group(0).split()[0]
-                if raw_c.isdigit():
-                    diag_count = int(raw_c)
-                elif raw_c in cls.HINDI_NUMBERS:
-                    diag_count = int(cls.HINDI_NUMBERS[raw_c])
+                tokens = count_match.group(0).split()
+                for tok in tokens:
+                    if tok.isdigit():
+                        diag_count = int(tok)
+                        break
+                    elif tok in cls.HINDI_NUMBERS:
+                        diag_count = int(cls.HINDI_NUMBERS[tok])
+                        break
 
             return YouTubeSemanticResult(
                 canonical_action="youtube.observe",
