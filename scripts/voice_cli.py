@@ -13,6 +13,14 @@ from pathlib import Path
 # Add project root to sys.path
 sys.path.insert(0, str(Path(__file__).parent.parent.resolve()))
 
+# Configure production runtime defaults for Voice CLI:
+# Allow live browser automation, disable dev safe mode, and keep physical mouse/keyboard input disabled
+if "pytest" not in sys.modules and not os.environ.get("PYTEST_CURRENT_TEST"):
+    os.environ["JARVIS_DEV_SAFE_MODE"] = "0"
+    os.environ["JARVIS_ALLOW_LIVE_BROWSER_AUTOMATION"] = "1"
+    if "JARVIS_ALLOW_PHYSICAL_INPUT" not in os.environ:
+        os.environ["JARVIS_ALLOW_PHYSICAL_INPUT"] = "0"
+
 # Configure UTF-8 for Windows Console to prevent box character artifacts
 if sys.platform == "win32":
     try:

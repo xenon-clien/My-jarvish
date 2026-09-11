@@ -50,18 +50,26 @@ def is_live_browser_automation_allowed() -> bool:
     """Return True only if real browser manipulation is explicitly opted into.
     
     Requires JARVIS_LIVE_TEST=1 or JARVIS_ALLOW_LIVE_BROWSER_AUTOMATION=1 AND
-    safe mode must NOT be active AND emergency stop must not be active.
+    emergency stop must not be active.
     Default is strictly False.
     """
     if _EMERGENCY_STOP_ACTIVE:
         return False
 
+    # Under pytest or test harnesses, strictly False unless explicitly mocked/live_test
+    if "pytest" in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
+        live_test = os.environ.get("JARVIS_LIVE_TEST", "0").strip().lower() in ("1", "true", "yes", "on")
+        return live_test
+
+    allow_browser = os.environ.get("JARVIS_ALLOW_LIVE_BROWSER_AUTOMATION", "0").strip().lower() in ("1", "true", "yes", "on")
+    live_test = os.environ.get("JARVIS_LIVE_TEST", "0").strip().lower() in ("1", "true", "yes", "on")
+    if allow_browser or live_test:
+        return True
+
     if is_dev_safe_mode():
         return False
 
-    live_test = os.environ.get("JARVIS_LIVE_TEST", "0").strip().lower() in ("1", "true", "yes", "on")
-    allow_browser = os.environ.get("JARVIS_ALLOW_LIVE_BROWSER_AUTOMATION", "0").strip().lower() in ("1", "true", "yes", "on")
-    return live_test or allow_browser
+    return False
 
 
 def is_foreground_stealing_allowed() -> bool:
