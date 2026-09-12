@@ -19,10 +19,10 @@ load_dotenv(Path(__file__).parent.resolve() / ".env")
 
 # Configure production runtime defaults for native desktop app:
 if "pytest" not in sys.modules and not os.environ.get("PYTEST_CURRENT_TEST"):
-    os.environ["JARVIS_DEV_SAFE_MODE"] = "0"
-    os.environ["JARVIS_ALLOW_LIVE_BROWSER_AUTOMATION"] = "1"
-    os.environ["JARVIS_ALLOW_PHYSICAL_INPUT"] = "1"
-    os.environ["JARVIS_ALLOW_FOREGROUND_FOCUS"] = "1"
+    os.environ["JARVIS_DEV_SAFE_MODE"] = os.environ.get("JARVIS_DEV_SAFE_MODE", "0")
+    os.environ["JARVIS_ALLOW_LIVE_BROWSER_AUTOMATION"] = os.environ.get("JARVIS_ALLOW_LIVE_BROWSER_AUTOMATION", "1")
+    os.environ["JARVIS_ALLOW_PHYSICAL_INPUT"] = os.environ.get("JARVIS_ALLOW_PHYSICAL_INPUT", "0")
+    os.environ["JARVIS_ALLOW_FOREGROUND_FOCUS"] = os.environ.get("JARVIS_ALLOW_FOREGROUND_FOCUS", "0")
 
 from backend.core.logger import get_logger
 from backend.voice.audio_manager import audio_manager

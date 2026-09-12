@@ -1018,7 +1018,29 @@ class ScrollPageArgs(BaseModel):
     args_schema=ScrollPageArgs,
 )
 def scroll_page(direction: str = "down", amount: int = 500) -> Dict[str, Any]:
-    """Scroll the active browser page smoothly with keyboard PageDown/PageUp without moving mouse cursor."""
+    """Scroll the active browser page smoothly via CDP script or keyboard PageDown/PageUp."""
+    from backend.core.safety import is_physical_automation_allowed, safe_blocked_result
+    is_down = direction.lower() in ["down", "niche", "bottom", "neeche"]
+
+    # 1. Try semantic browser scroll via CDP if session is active
+    try:
+        from backend.perception.browser_session import browser_session
+        if browser_session.is_cdp_available():
+            delta = amount if is_down else -amount
+            browser_session.evaluate_script_sync(f"window.scrollBy({{top: {delta}, behavior: 'smooth'}});")
+            return {
+                "status": "success",
+                "direction": direction,
+                "message": f"Ji Boss, {'neeche' if is_down else 'upar'} scroll kar diya.",
+                "method": "cdp_dom_scroll",
+            }
+    except Exception:
+        pass
+
+    # 2. Safety Guard: Block physical keyboard automation when disabled
+    if not is_physical_automation_allowed():
+        return safe_blocked_result("scroll_page")
+
     if not WIN32_AVAILABLE:
         return {"status": "error", "message": "Windows API unavailable."}
     import ctypes
@@ -1030,8 +1052,6 @@ def scroll_page(direction: str = "down", amount: int = 500) -> Dict[str, Any]:
         time.sleep(0.05)
     except Exception:
         pass
-
-    is_down = direction.lower() in ["down", "niche", "bottom", "neeche"]
 
     # Keyboard PageDown / PageUp - ZERO cursor movement, ZERO mouse freeze!
     vk_code = 0x22 if is_down else 0x21  # VK_NEXT (Page Down) or VK_PRIOR (Page Up)

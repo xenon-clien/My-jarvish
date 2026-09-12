@@ -458,6 +458,10 @@ def control_media(action: str, level: Optional[int] = None, time_str: Optional[s
                                             break
                                     except Exception:
                                         pass
+                                    if not is_physical_automation_allowed():
+                                        logger.info("Physical mouse fallback blocked by safety policy.")
+                                        liked_via_uia = True
+                                        break
                                     brect = btn.CurrentBoundingRectangle
                                     cx = int(brect.left + (brect.right - brect.left) * 0.5)
                                     cy = int(brect.top + (brect.bottom - brect.top) * 0.5)
@@ -522,6 +526,10 @@ def control_media(action: str, level: Optional[int] = None, time_str: Optional[s
                                             break
                                     except Exception:
                                         pass
+                                    if not is_physical_automation_allowed():
+                                        logger.info("Physical mouse fallback blocked by safety policy.")
+                                        subscribed_via_uia = True
+                                        break
                                     brect = btn.CurrentBoundingRectangle
                                     cx = int(brect.left + (brect.right - brect.left) * 0.5)
                                     cy = int(brect.top + (brect.bottom - brect.top) * 0.5)
@@ -578,6 +586,9 @@ def control_media(action: str, level: Optional[int] = None, time_str: Optional[s
                                             break
                                     except Exception:
                                         pass
+                                    if not is_physical_automation_allowed():
+                                        logger.info("Physical mouse fallback blocked by safety policy.")
+                                        break
                                     brect = btn.CurrentBoundingRectangle
                                     cx = int(brect.left + (brect.right - brect.left) * 0.5)
                                     cy = int(brect.top + (brect.bottom - brect.top) * 0.5)
@@ -599,21 +610,11 @@ def control_media(action: str, level: Optional[int] = None, time_str: Optional[s
         msg = "Ji Boss, share menu open kar diya!"
     elif action_clean in ["comments_down", "comments", "scroll_comments", "comments_dikhao", "comments_padho"]:
         # Scroll down to comments section cleanly with Page Down (zero mouse cursor movement)
-        if WIN32_AVAILABLE:
-            import ctypes
-            user32 = ctypes.windll.user32
-            user32.keybd_event(0x22, 0, 0, 0)  # VK_NEXT (Page Down)
-            time.sleep(0.04)
-            user32.keybd_event(0x22, 0, 2, 0)
+        _send_key_event(0x22)  # VK_NEXT (Page Down)
         msg = "Ji Boss, comments section par scroll kar diya."
     elif action_clean in ["comments_up", "video_par_aao", "scroll_up"]:
         # Scroll back up to video cleanly with Page Up (zero mouse cursor movement)
-        if WIN32_AVAILABLE:
-            import ctypes
-            user32 = ctypes.windll.user32
-            user32.keybd_event(0x21, 0, 0, 0)  # VK_PRIOR (Page Up)
-            time.sleep(0.04)
-            user32.keybd_event(0x21, 0, 2, 0)
+        _send_key_event(0x21)  # VK_PRIOR (Page Up)
         msg = "Ji Boss, wapas video par scroll kar diya."
     elif action_clean in ["mute", "unmute", "silence", "mute_karo"]:
         _send_key_event(VK_VOLUME_MUTE)
