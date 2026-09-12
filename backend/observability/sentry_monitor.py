@@ -7,8 +7,15 @@ from functools import wraps
 import os
 import re
 from typing import Any, Callable, Dict, Optional
-import sentry_sdk
-from sentry_sdk.integrations.logging import LoggingIntegration
+
+try:
+    import sentry_sdk
+    from sentry_sdk.integrations.logging import LoggingIntegration
+    _SENTRY_AVAILABLE = True
+except ImportError:
+    sentry_sdk = None  # type: ignore[assignment]
+    LoggingIntegration = None  # type: ignore[assignment,misc]
+    _SENTRY_AVAILABLE = False
 
 from backend.core.config import get_settings
 from backend.core.logger import get_logger
@@ -47,7 +54,7 @@ class SentryMonitor:
 
     def _init_sentry(self) -> None:
         """Initialize Sentry SDK with strict PII protection."""
-        if not self.dsn:
+        if not _SENTRY_AVAILABLE or not self.dsn:
             logger.debug("Sentry DSN not configured. Running in local error-boundary mode.")
             return
 
@@ -77,7 +84,7 @@ class SentryMonitor:
     ) -> None:
         """Capture an exception with sanitized execution metadata."""
         logger.error(f"Capturing exception in {adapter or 'Core'} -> {exc}")
-        if not self.initialized:
+        if not _SENTRY_AVAILABLE or not self.initialized:
             return
 
         with sentry_sdk.push_scope() as scope:

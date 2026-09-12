@@ -1,4 +1,4 @@
-﻿"""Regression tests specifically proving the fix for the 'Open YouTube' false-success bug.
+"""Regression tests specifically proving the fix for the 'Open YouTube' false-success bug.
 
 Tests:
 1. Safe/dev mode: Open YouTube -> verified=False, NO LIVE_VERIFIED, NO success claim.
