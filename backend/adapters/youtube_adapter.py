@@ -3,6 +3,7 @@
 Standardized, verifiable adapter mapping all 25 canonical YouTube intents
 with resource locking and closed-loop verification.
 """
+import time
 from typing import Any, Dict, Optional
 from backend.core.logger import get_logger
 from backend.core.task_manager import task_manager, TaskPriority, TaskState
@@ -341,37 +342,47 @@ class YouTubeAdapter:
                 "verified": verified,
             }
 
-        # Candidates not exposed (e.g. on Shorts page, blank tab, or initial load)
-        if obs.get("page_type") == "VIDEO" or obs.get("is_watch"):
-            return self.resume()
+        # Candidates not immediately available: perform bounded retry for DOM recommendations to render
+        poll_deadline = time.time() + 1.5
+        while time.time() < poll_deadline:
+            time.sleep(0.3)
+            retry_obs = self.observe_browser_state(discover_candidates=True)
+            retry_cands = retry_obs.get("visible_video_candidates", [])
+            if cur_id and cur_id != "UNKNOWN":
+                retry_cands = [c for c in retry_cands if (getattr(c, "video_id", None) or (c.get("video_id") if isinstance(c, dict) else None)) != cur_id]
+            if retry_cands and len(retry_cands) >= idx:
+                candidates = retry_cands
+                target_cand = candidates[idx - 1]
+                expected_id = getattr(target_cand, "video_id", None) or (target_cand.get("video_id") if isinstance(target_cand, dict) else "UNKNOWN")
+                expected_url = getattr(target_cand, "url", None) or (target_cand.get("url") if isinstance(target_cand, dict) else None)
+                if not expected_url or expected_url == "UNKNOWN":
+                    expected_url = f"https://www.youtube.com/watch?v={expected_id}"
 
-        hwnd = obs.get("hwnd")
-        if hwnd:
-            force_foreground_window(hwnd)
-            time.sleep(0.06)
+                nav_ok = False
+                if browser_session.is_cdp_available():
+                    nav_ok = browser_session.navigate_same_tab_sync(expected_url)
+                if not nav_ok:
+                    nav_ok = navigate_active_browser_tab(expected_url)
 
-        after_obs = self.observe_browser_state()
-        new_candidates = after_obs.get("visible_video_candidates", [])
-        if new_candidates and len(new_candidates) >= idx:
-            target_cand = new_candidates[idx - 1]
-            expected_id = target_cand.video_id
-            navigate_active_browser_tab(f"https://www.youtube.com/watch?v={expected_id}")
-            time.sleep(0.8)
-            final_obs = self.observe_browser_state()
-            actual_id = final_obs.get("current_video_id", "UNKNOWN")
-            verified = (actual_id == expected_id) or (final_obs.get("playback_state") == "PLAYING") or (final_obs.get("page_type") == "VIDEO")
-            return {
-                "status": "LIVE_VERIFIED" if verified else "DEGRADED",
-                "message": f"Ji Boss, video number {idx} chala di.",
-                "ordinal": idx,
-                "expected_video_id": expected_id,
-                "actual_video_id": actual_id,
-                "verified": verified,
-            }
+                time.sleep(0.8)
+                after_obs = self.observe_browser_state()
+                actual_id = after_obs.get("current_video_id", "UNKNOWN")
+                verified = (actual_id != "UNKNOWN" and actual_id == expected_id) or (
+                    after_obs.get("playback_state") == "PLAYING" and actual_id != "UNKNOWN" and actual_id != cur_id
+                )
+                return {
+                    "status": "LIVE_VERIFIED" if verified else "DEGRADED",
+                    "message": f"Ji Boss, video number {idx} chala di." if verified else f"Video number {idx} play karne ki koshish ki, lekin playback verify nahi ho paya.",
+                    "ordinal": idx,
+                    "expected_video_id": expected_id,
+                    "actual_video_id": actual_id,
+                    "verified": verified,
+                }
 
+        # Candidates genuinely unavailable on page: NEVER fall back to resume()
         return {
             "status": "DEGRADED",
-            "message": f"Ji Boss, video number {idx} chala di.",
+            "message": f"Video number {idx} screen par nahi dikh rahi hai Boss.",
             "ordinal": idx,
             "verified": False,
         }
@@ -509,7 +520,7 @@ class YouTubeAdapter:
             }
 
         return {
-            "status": "LIVE_VERIFIED" if verified else ("LIVE_VERIFIED" if after_obs.get("browser_running") else "DEGRADED"),
+            "status": "LIVE_VERIFIED" if verified else "DEGRADED",
             "message": "Ji Boss, agla short chala diya.",
             "before_video_id": before_id,
             "after_video_id": after_id,
@@ -543,7 +554,7 @@ class YouTubeAdapter:
             }
 
         return {
-            "status": "LIVE_VERIFIED" if verified else ("LIVE_VERIFIED" if after_obs.get("browser_running") else "DEGRADED"),
+            "status": "LIVE_VERIFIED" if verified else "DEGRADED",
             "message": "Ji Boss, pichla short chala diya.",
             "before_video_id": before_id,
             "after_video_id": after_id,
@@ -562,7 +573,15 @@ class YouTubeAdapter:
             return {"status": "LIVE_VERIFIED", "message": "Video pehle se hi paused hai Boss.", "verified": True}
         from backend.tools.media_tools import control_media
         res = control_media(action="pause")
-        return {"status": "LIVE_VERIFIED" if obs.get("browser_running") else "DEGRADED", "message": "Ji Boss, video pause kar diya.", "raw_result": res}
+        time.sleep(0.20)
+        post_obs = self.observe_browser_state()
+        is_paused = (post_obs.get("playback_state") == "PAUSED")
+        return {
+            "status": "LIVE_VERIFIED" if is_paused else "DEGRADED",
+            "message": "Ji Boss, video pause kar diya.",
+            "verified": is_paused,
+            "raw_result": res,
+        }
 
     def resume(self) -> Dict[str, Any]:
         """Ensure playback state is PLAYING idempotently."""
@@ -571,7 +590,15 @@ class YouTubeAdapter:
             return {"status": "LIVE_VERIFIED", "message": "Video pehle se hi chal rahi hai Boss.", "verified": True}
         from backend.tools.media_tools import control_media
         res = control_media(action="play")
-        return {"status": "LIVE_VERIFIED" if obs.get("browser_running") else "DEGRADED", "message": "Ji Boss, video resume kar diya.", "raw_result": res}
+        time.sleep(0.20)
+        post_obs = self.observe_browser_state()
+        is_playing = (post_obs.get("playback_state") == "PLAYING")
+        return {
+            "status": "LIVE_VERIFIED" if is_playing else "DEGRADED",
+            "message": "Ji Boss, video resume kar diya.",
+            "verified": is_playing,
+            "raw_result": res,
+        }
 
     def play(self) -> Dict[str, Any]:
         """Alias for resume."""
@@ -585,7 +612,15 @@ class YouTubeAdapter:
             return {"status": "LIVE_VERIFIED", "message": f"Fullscreen pehle se hi {'on' if enabled else 'off'} hai Boss.", "verified": True}
         from backend.tools.media_tools import control_media
         res = control_media(action="fullscreen")
-        return {"status": "LIVE_VERIFIED" if obs.get("browser_running") else "DEGRADED", "message": "Ji Boss, fullscreen kar diya." if enabled else "Ji Boss, fullscreen se bahar aa gaye.", "raw_result": res}
+        time.sleep(0.20)
+        post_obs = self.observe_browser_state()
+        verified = (post_obs.get("fullscreen") == enabled) if post_obs.get("fullscreen") not in ["UNKNOWN", None] else False
+        return {
+            "status": "LIVE_VERIFIED" if verified else "DEGRADED",
+            "message": "Ji Boss, fullscreen kar diya." if enabled else "Ji Boss, fullscreen se bahar aa gaye.",
+            "verified": verified,
+            "raw_result": res,
+        }
 
     def toggle_fullscreen(self) -> Dict[str, Any]:
         """Alias for fullscreen toggle."""
@@ -679,7 +714,27 @@ class YouTubeAdapter:
             return {"status": "LIVE_VERIFIED", "message": "Video pe like pehle se nahi hai Boss.", "verified": True}
         from backend.tools.media_tools import control_media
         res = control_media(action="like")
-        return {"status": "LIVE_VERIFIED" if obs.get("browser_running") else "DEGRADED", "message": "Ji Boss, video like kar diya." if enabled else "Ji Boss, like hata diya.", "raw_result": res}
+        time.sleep(0.25)
+        post_obs = self.observe_browser_state()
+        new_like = post_obs.get("like_state")
+
+        if (enabled and new_like is True) or (not enabled and new_like is False):
+            status = "LIVE_VERIFIED"
+            verified = True
+        elif post_obs.get("browser_running") and post_obs.get("is_youtube"):
+            status = "DEGRADED"
+            verified = False
+        else:
+            status = "BROKEN"
+            verified = False
+
+        return {
+            "status": status,
+            "verified": verified,
+            "message": "Ji Boss, video like kar diya." if enabled else "Ji Boss, like hata diya.",
+            "raw_result": res,
+            "like_state": new_like,
+        }
 
     def like(self) -> Dict[str, Any]:
         """Alias for set_like."""
@@ -816,7 +871,7 @@ class YouTubeAdapter:
         if result.get("simulated"):
             return "SIMULATED"
 
-        if result.get("status") in ["LIVE_VERIFIED", "DEGRADED", "BROKEN", "SIMULATED", "LIVE_AUTOMATION_DISABLED"]:
+        if result.get("status") in ["DEGRADED", "BROKEN", "SIMULATED", "LIVE_AUTOMATION_DISABLED"]:
             return result["status"]
 
         state = self.observe_browser_state()
@@ -830,7 +885,7 @@ class YouTubeAdapter:
         if action == "youtube.open":
             cur_url = (state.get("current_url") or "").lower()
             title = (state.get("window_title") or "").lower()
-            if "youtube.com" in cur_url or "youtube" in title or state.get("is_youtube"):
+            if ("youtube.com" in cur_url or "youtube" in title or state.get("is_youtube")) and cur_url != "about:blank":
                 return "LIVE_VERIFIED"
             return "DEGRADED"
 
@@ -883,13 +938,100 @@ class YouTubeAdapter:
                 return "LIVE_VERIFIED"
             return "DEGRADED"
 
-        return "LIVE_VERIFIED" if state.get("is_youtube") else "DEGRADED"
+        if action in ["youtube.set_fullscreen", "youtube.fullscreen"]:
+            if state.get("fullscreen") is True:
+                return "LIVE_VERIFIED"
+            return "DEGRADED"
+
+        if action in ["youtube.set_like", "youtube.like"]:
+            if state.get("like_state") is True:
+                return "LIVE_VERIFIED"
+            return "DEGRADED"
+
+        if action == "youtube.set_theater_mode":
+            if state.get("theater_mode") is True:
+                return "LIVE_VERIFIED"
+            return "DEGRADED"
+
+        if action == "youtube.set_miniplayer":
+            if state.get("miniplayer") is True:
+                return "LIVE_VERIFIED"
+            return "DEGRADED"
+
+        if action in ["youtube.set_captions", "youtube.captions"]:
+            if state.get("captions") not in [None, "UNKNOWN"]:
+                return "LIVE_VERIFIED"
+            return "DEGRADED"
+
+        if action == "youtube.mute":
+            if state.get("muted") is True:
+                return "LIVE_VERIFIED"
+            return "DEGRADED"
+
+        if action in ["youtube.next_short", "youtube.prev_short", "youtube.previous_short"]:
+            if result.get("verified") is True:
+                return "LIVE_VERIFIED"
+            return "DEGRADED"
+
+        if action in [
+            "youtube.replay",
+            "youtube.seek_forward",
+            "youtube.seek_backward",
+            "youtube.seek_timestamp",
+            "youtube.set_volume",
+            "youtube.volume_up",
+            "youtube.volume_down",
+            "youtube.set_playback_speed",
+            "youtube.speed_up",
+            "youtube.speed_down",
+        ]:
+            if (result.get("verified") is True or result.get("status") == "LIVE_VERIFIED") and state.get("is_youtube"):
+                return "LIVE_VERIFIED"
+            return "DEGRADED"
+
+        return "DEGRADED"
 
     def execute_canonical(self, canonical_action: str, arguments: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute any of the 25 canonical YouTube intents with state verification."""
         args = arguments or {}
         raw_result: Dict[str, Any] = {}
-        expected_effect = "UNKNOWN"
+        effects_map = {
+            "youtube.open": "NAVIGATED_HOME",
+            "youtube.search": "SEARCH_RESULTS_DISPLAYED",
+            "youtube.observe": "PAGE_OBSERVED",
+            "youtube.play_video": "VIDEO_PLAYING",
+            "youtube.play_first_video": "VIDEO_PLAYING",
+            "youtube.play_short": "SHORT_PLAYING",
+            "youtube.next_short": "NAVIGATED_NEXT_SHORT",
+            "youtube.previous_short": "NAVIGATED_PREV_SHORT",
+            "youtube.prev_short": "NAVIGATED_PREV_SHORT",
+            "youtube.scroll": "PAGE_SCROLLED",
+            "scroll_page": "PAGE_SCROLLED",
+            "youtube.pause": "PAUSED",
+            "youtube.resume": "PLAYING",
+            "youtube.play": "PLAYING",
+            "youtube.set_fullscreen": "FULLSCREEN_STATE_SET",
+            "youtube.fullscreen": "FULLSCREEN_STATE_SET",
+            "youtube.set_theater_mode": "THEATER_MODE_SET",
+            "youtube.set_miniplayer": "MINIPLAYER_STATE_SET",
+            "youtube.set_captions": "CAPTIONS_STATE_SET",
+            "youtube.captions": "CAPTIONS_STATE_SET",
+            "youtube.set_playback_speed": "SPEED_SET",
+            "youtube.speed_up": "SPEED_INCREASED",
+            "youtube.speed_down": "SPEED_DECREASED",
+            "youtube.seek_forward": "SEEKED_FORWARD",
+            "youtube.seek_backward": "SEEKED_BACKWARD",
+            "youtube.seek_timestamp": "SEEKED_TO_TIMESTAMP",
+            "youtube.set_volume": "VOLUME_LEVEL_SET",
+            "youtube.volume_up": "VOLUME_INCREASED",
+            "youtube.volume_down": "VOLUME_DECREASED",
+            "youtube.mute": "MUTED",
+            "youtube.unmute": "UNMUTED",
+            "youtube.set_like": "LIKED_STATE_SET",
+            "youtube.like": "LIKED_STATE_SET",
+            "youtube.replay": "REPLAYED",
+        }
+        expected_effect = effects_map.get(canonical_action, "UNKNOWN")
         response_msg = "Ji Boss, ho gaya."
 
         initial_state = self.observe_browser_state()

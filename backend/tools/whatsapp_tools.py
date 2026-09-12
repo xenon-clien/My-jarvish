@@ -32,6 +32,10 @@ from backend.core.logger import get_logger
 from backend.core.permissions import PermissionLevel, ToolCategory
 from backend.database.repositories import contact_repo
 from backend.tools.registry import tool
+from backend.core.safety import (
+    is_physical_automation_allowed,
+    is_foreground_stealing_allowed,
+)
 
 logger = get_logger("WhatsAppTools")
 
@@ -48,6 +52,8 @@ def _sanitize_phone_number(raw: str) -> str:
 
 def _focus_whatsapp_window() -> bool:
     """Find and focus the WhatsApp Desktop or Web window."""
+    if not is_foreground_stealing_allowed():
+        return False
     if not WIN32_AVAILABLE:
         return False
     windows = []
@@ -74,6 +80,8 @@ def _focus_whatsapp_window() -> bool:
 
 def _send_hotkey(vk_code: int, ctrl: bool = False, shift: bool = False, alt: bool = False, delay_s: float = 0.1) -> None:
     """Send virtual key combination with modifiers."""
+    if not is_physical_automation_allowed():
+        return
     if not WIN32_AVAILABLE:
         return
     def _worker():
@@ -334,6 +342,16 @@ def call_whatsapp_contact(contact_or_phone: str = "active", call_type: str = "vo
     target = (contact_or_phone or "").strip()
     recipient_name = target or "Active Contact"
 
+    if not is_physical_automation_allowed():
+        return {
+            "status": "SIMULATED",
+            "recipient": recipient_name,
+            "call_type": call_type,
+            "message": f"Simulation: WhatsApp {call_type} call to {recipient_name} (physical automation disabled).",
+            "simulated": True,
+            "verified": False,
+        }
+
     # If calling the active chat directly
     if not target or target.lower() in ["active", "this contact", "this person", "current chat", "isko", "usko", "chat"]:
         _trigger_whatsapp_call_action(call_type=call_type)
@@ -391,6 +409,14 @@ def call_whatsapp_contact(contact_or_phone: str = "active", call_type: str = "vo
 )
 def control_whatsapp_call(action: str = "end") -> Dict[str, Any]:
     """Control active WhatsApp call state."""
+    if not is_physical_automation_allowed():
+        return {
+            "status": "SIMULATED",
+            "action": action,
+            "message": f"Simulation: WhatsApp call action '{action}' (physical automation disabled).",
+            "simulated": True,
+            "verified": False,
+        }
     _focus_whatsapp_window()
     act = action.lower().strip()
 
@@ -418,16 +444,31 @@ def control_whatsapp_call(action: str = "end") -> Dict[str, Any]:
 )
 def manage_whatsapp_chat(action: str, query: Optional[str] = None) -> Dict[str, Any]:
     """Execute WhatsApp chat management shortcuts."""
+    if not is_physical_automation_allowed():
+        return {
+            "status": "SIMULATED",
+            "action": action,
+            "message": f"Simulation: WhatsApp chat action '{action}' (physical automation disabled).",
+            "simulated": True,
+            "verified": False,
+        }
     _focus_whatsapp_window()
     act = action.lower().strip()
 
     if act in ["search", "find", "search_chat"]:
         _send_hotkey(0x46, ctrl=True, delay_s=0.05)  # Ctrl+F
-        if query:
+        if query and is_physical_automation_allowed():
             time.sleep(0.1)
             from backend.skills.actions import action_engine
             import asyncio
-            asyncio.create_task(action_engine.type_text(query, press_enter=True))
+            try:
+                loop = asyncio.get_running_loop()
+                loop.create_task(action_engine.type_text(query, press_enter=True))
+            except RuntimeError:
+                try:
+                    asyncio.run(action_engine.type_text(query, press_enter=True))
+                except Exception as exc:
+                    logger.debug(f"Failed to type whatsapp query: {exc}")
         msg = f"WhatsApp chat search kiya: '{query or ''}'."
     elif act in ["next", "next_chat", "agla"]:
         _send_hotkey(0x09, ctrl=True, delay_s=0.05)  # Ctrl+Tab
@@ -471,6 +512,14 @@ def manage_whatsapp_chat(action: str, query: Optional[str] = None) -> Dict[str, 
 )
 def control_whatsapp_status(action: str = "open") -> Dict[str, Any]:
     """Control WhatsApp status stories."""
+    if not is_physical_automation_allowed():
+        return {
+            "status": "SIMULATED",
+            "action": action,
+            "message": f"Simulation: WhatsApp status action '{action}' (physical automation disabled).",
+            "simulated": True,
+            "verified": False,
+        }
     _focus_whatsapp_window()
     act = action.lower().strip()
 
@@ -502,6 +551,14 @@ def control_whatsapp_status(action: str = "open") -> Dict[str, Any]:
 )
 def delete_whatsapp_message(mode: str = "last_sent") -> Dict[str, Any]:
     """Delete last sent message or clear input draft."""
+    if not is_physical_automation_allowed():
+        return {
+            "status": "SIMULATED",
+            "mode": mode,
+            "message": f"Simulation: WhatsApp delete message ({mode}) (physical automation disabled).",
+            "simulated": True,
+            "verified": False,
+        }
     _focus_whatsapp_window()
     if mode.lower() in ["draft", "input", "box", "clear_draft"]:
         _send_hotkey(0x41, ctrl=True, delay_s=0.05)  # Ctrl+A
@@ -524,6 +581,13 @@ def delete_whatsapp_message(mode: str = "last_sent") -> Dict[str, Any]:
 )
 def send_active_message() -> Dict[str, Any]:
     """Press Enter to send active drafted message."""
+    if not is_physical_automation_allowed():
+        return {
+            "status": "SIMULATED",
+            "message": "Simulation: Send active message (physical automation disabled).",
+            "simulated": True,
+            "verified": False,
+        }
     _focus_whatsapp_window()
     _send_hotkey(0x0D, delay_s=0.05)
     return {"status": "success", "message": "Message send kar diya."}

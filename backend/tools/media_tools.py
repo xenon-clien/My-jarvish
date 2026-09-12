@@ -3,9 +3,27 @@
 Controls active Windows media playback (YouTube in browser, Spotify, VLC, Windows Media)
 using native Windows hardware media virtual keys.
 """
+import contextlib
 import time
 from typing import Any, Dict, Optional
 from pydantic import BaseModel, Field
+
+@contextlib.contextmanager
+def safe_clipboard():
+    """Context manager ensuring Windows clipboard is always closed cleanly."""
+    opened = False
+    try:
+        import win32clipboard
+        win32clipboard.OpenClipboard()
+        opened = True
+        yield win32clipboard
+    finally:
+        if opened:
+            try:
+                import win32clipboard
+                win32clipboard.CloseClipboard()
+            except Exception:
+                pass
 
 try:
     import win32api
@@ -71,9 +89,7 @@ class MediaControlArgs(BaseModel):
 
 
 def _seek_youtube_url_bar(time_param: str) -> bool:
-    """Seek YouTube video in active browser window by cleanly appending &t=...s to URL."""
-    if not WIN32_AVAILABLE:
-        return False
+    """Seek YouTube video in active browser window cleanly by CDP or appending &t=...s to URL."""
     try:
         import re
         total_seconds = 0
@@ -89,6 +105,25 @@ def _seek_youtube_url_bar(time_param: str) -> bool:
             except Exception:
                 total_seconds = 0
 
+        # 1. Prefer silent CDP evaluation (zero physical/clipboard impact)
+        try:
+            from backend.perception.browser_session import browser_session
+            if browser_session.is_cdp_available():
+                res = browser_session.evaluate_sync(
+                    f"(() => {{ const v = document.querySelector('video'); if (v) {{ v.currentTime = {total_seconds}; return true; }} return false; }})()"
+                )
+                if res:
+                    return True
+        except Exception as exc:
+            logger.debug(f"CDP seek failed, falling back: {exc}")
+
+        # Guard physical automation and foreground stealing
+        if not is_physical_automation_allowed() or not is_foreground_stealing_allowed():
+            return False
+
+        if not WIN32_AVAILABLE:
+            return False
+
         sec_param = f"{total_seconds}s" if total_seconds else time_param
 
         from backend.adapters.youtube_grounding import youtube_page_observer
@@ -99,6 +134,17 @@ def _seek_youtube_url_bar(time_param: str) -> bool:
         best_hwnd = win_info[0]
         force_foreground_window(best_hwnd)
         time.sleep(0.10)
+
+        import win32clipboard
+
+        # Backup existing clipboard
+        old_clipboard = None
+        try:
+            with safe_clipboard() as cb:
+                if cb.IsClipboardFormatAvailable(cb.CF_UNICODETEXT):
+                    old_clipboard = cb.GetClipboardData(cb.CF_UNICODETEXT)
+        except Exception:
+            pass
 
         # 1. Focus URL bar with Ctrl+L
         win32api.keybd_event(0x11, 0, 0, 0)
@@ -117,12 +163,11 @@ def _seek_youtube_url_bar(time_param: str) -> bool:
         time.sleep(0.06)
 
         # 3. Read clipboard URL and clean old timestamps
-        import win32clipboard
         current_url = ""
         try:
-            win32clipboard.OpenClipboard()
-            current_url = win32clipboard.GetClipboardData(win32clipboard.CF_UNICODETEXT)
-            win32clipboard.CloseClipboard()
+            with safe_clipboard() as cb:
+                if cb.IsClipboardFormatAvailable(cb.CF_UNICODETEXT):
+                    current_url = cb.GetClipboardData(cb.CF_UNICODETEXT)
         except Exception:
             pass
 
@@ -133,24 +178,35 @@ def _seek_youtube_url_bar(time_param: str) -> bool:
         else:
             new_url = f"https://www.youtube.com/watch?v=yFuQpbCPvPo&t={sec_param}"
 
-        # 4. Put new clean URL on clipboard
-        win32clipboard.OpenClipboard()
-        win32clipboard.EmptyClipboard()
-        win32clipboard.SetClipboardText(new_url, win32clipboard.CF_UNICODETEXT)
-        win32clipboard.CloseClipboard()
-        time.sleep(0.04)
+        try:
+            # 4. Put new clean URL on clipboard
+            with safe_clipboard() as cb:
+                cb.EmptyClipboard()
+                cb.SetClipboardText(new_url, cb.CF_UNICODETEXT)
+            time.sleep(0.04)
 
-        # 5. Paste with Ctrl+V and press Enter
-        win32api.keybd_event(0x11, 0, 0, 0)
-        win32api.keybd_event(0x56, 0, 0, 0)
-        time.sleep(0.04)
-        win32api.keybd_event(0x56, 0, win32con.KEYEVENTF_KEYUP, 0)
-        win32api.keybd_event(0x11, 0, win32con.KEYEVENTF_KEYUP, 0)
-        time.sleep(0.06)
+            # 5. Paste with Ctrl+V and press Enter
+            win32api.keybd_event(0x11, 0, 0, 0)
+            win32api.keybd_event(0x56, 0, 0, 0)
+            time.sleep(0.04)
+            win32api.keybd_event(0x56, 0, win32con.KEYEVENTF_KEYUP, 0)
+            win32api.keybd_event(0x11, 0, win32con.KEYEVENTF_KEYUP, 0)
+            time.sleep(0.06)
 
-        win32api.keybd_event(0x0D, 0, 0, 0)
-        time.sleep(0.04)
-        win32api.keybd_event(0x0D, 0, win32con.KEYEVENTF_KEYUP, 0)
+            win32api.keybd_event(0x0D, 0, 0, 0)
+            time.sleep(0.04)
+            win32api.keybd_event(0x0D, 0, win32con.KEYEVENTF_KEYUP, 0)
+        finally:
+            # Restore user's previous clipboard
+            if old_clipboard is not None:
+                try:
+                    time.sleep(0.05)
+                    with safe_clipboard() as cb:
+                        cb.EmptyClipboard()
+                        cb.SetClipboardText(old_clipboard, cb.CF_UNICODETEXT)
+                except Exception:
+                    pass
+
         return True
     except Exception as exc:
         logger.warning(f"URL bar seek error: {exc}")

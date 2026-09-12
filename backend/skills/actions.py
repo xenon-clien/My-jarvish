@@ -27,6 +27,23 @@ try:
 except ImportError:
     WIN32_AVAILABLE = False
 
+import contextlib
+
+@contextlib.contextmanager
+def safe_clipboard():
+    """Context manager ensuring Windows clipboard is always closed cleanly."""
+    opened = False
+    try:
+        win32clipboard.OpenClipboard()
+        opened = True
+        yield win32clipboard
+    finally:
+        if opened:
+            try:
+                win32clipboard.CloseClipboard()
+            except Exception:
+                pass
+
 from backend.core.logger import get_logger
 from backend.core.safety import (
     is_dev_safe_mode,
@@ -206,6 +223,18 @@ class UniversalActionEngine:
     ) -> ActionResult:
         """Universal Click: Resolves target via Accessibility/UIAutomation -> Visual -> Coordinates."""
         start = time.time()
+        if not is_physical_automation_allowed():
+            return ActionResult(
+                success=True,
+                action="click",
+                application=app_name or "active",
+                tier_used=FallbackTier.COORDINATE_FALLBACK,
+                message=f"Simulation: Click '{target or (x, y)}' (physical input disabled).",
+                data={"simulated": True},
+                verified=False,
+                execution_time_ms=(time.time() - start) * 1000,
+            )
+
         hwnd_info = self.find_window(app_name) if app_name else None
         if hwnd_info:
             self.focus_window_by_hwnd(hwnd_info[0])
@@ -259,6 +288,18 @@ class UniversalActionEngine:
     ) -> ActionResult:
         """Universal Scroll: direction in ['up', 'down', 'top', 'bottom']."""
         start = time.time()
+        if not is_physical_automation_allowed():
+            return ActionResult(
+                success=True,
+                action="scroll",
+                application=app_name or "active",
+                tier_used=FallbackTier.KEYBOARD_SHORTCUT,
+                message=f"Simulation: Scrolled {direction} (physical input disabled).",
+                data={"simulated": True},
+                verified=False,
+                execution_time_ms=(time.time() - start) * 1000,
+            )
+
         hwnd_info = self.find_window(app_name) if app_name else None
         if hwnd_info:
             self.focus_window_by_hwnd(hwnd_info[0])
@@ -306,6 +347,18 @@ class UniversalActionEngine:
     ) -> ActionResult:
         """Universal Text Typing: Clipboard injection + keystroke fallback."""
         start = time.time()
+        if not is_physical_automation_allowed():
+            return ActionResult(
+                success=True,
+                action="type_text",
+                application=app_name or "active",
+                tier_used=FallbackTier.KEYBOARD_SHORTCUT,
+                message=f"Simulation: Typed text '{text[:30]}...' (physical input disabled).",
+                data={"text": text, "simulated": True},
+                verified=False,
+                execution_time_ms=(time.time() - start) * 1000,
+            )
+
         hwnd_info = self.find_window(app_name) if app_name else None
         if hwnd_info:
             self.focus_window_by_hwnd(hwnd_info[0])
@@ -319,11 +372,18 @@ class UniversalActionEngine:
 
         # Use Windows Clipboard for unicode fidelity & instant speed
         if WIN32_AVAILABLE:
+            old_clipboard = None
             try:
-                win32clipboard.OpenClipboard()
-                win32clipboard.EmptyClipboard()
-                win32clipboard.SetClipboardText(text, win32clipboard.CF_UNICODETEXT)
-                win32clipboard.CloseClipboard()
+                with safe_clipboard() as cb:
+                    if cb.IsClipboardFormatAvailable(cb.CF_UNICODETEXT):
+                        old_clipboard = cb.GetClipboardData(cb.CF_UNICODETEXT)
+            except Exception:
+                pass
+
+            try:
+                with safe_clipboard() as cb:
+                    cb.EmptyClipboard()
+                    cb.SetClipboardText(text, cb.CF_UNICODETEXT)
                 time.sleep(0.03)
                 self.send_key_press(0x56, ctrl=True)  # Ctrl + V
                 time.sleep(0.04)
@@ -333,6 +393,15 @@ class UniversalActionEngine:
                     vk = ord(char.upper()) if char.isalnum() else 0x20
                     self.send_key_press(vk)
                     time.sleep(0.01)
+            finally:
+                if old_clipboard is not None:
+                    try:
+                        time.sleep(0.05)
+                        with safe_clipboard() as cb:
+                            cb.EmptyClipboard()
+                            cb.SetClipboardText(old_clipboard, cb.CF_UNICODETEXT)
+                    except Exception:
+                        pass
 
         if press_enter:
             time.sleep(0.04)

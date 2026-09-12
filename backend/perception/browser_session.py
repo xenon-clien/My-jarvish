@@ -18,6 +18,12 @@ logger = get_logger("YouTubeBrowserSession")
 DEFAULT_CDP_URL = os.environ.get("CHROME_CDP_URL", "http://127.0.0.1:9222")
 
 
+import threading
+import time
+import socket
+import concurrent.futures
+from urllib.parse import urlparse
+
 class YouTubeBrowserSession:
     """Single authoritative browser session controller for YouTube over CDP."""
 
@@ -28,20 +34,52 @@ class YouTubeBrowserSession:
         self._context = None
         self._page = None
         self._page_id = None
-        self._lock = asyncio.Lock()
+        self._lock = None
+        self._last_cdp_check: float = 0.0
+        self._cdp_cached_status: bool = False
+
+        # Dedicated persistent background event loop thread for all Playwright operations
+        self._loop = asyncio.new_event_loop()
+        self._thread = threading.Thread(target=self._run_loop, name="BrowserSessionLoop", daemon=True)
+        self._thread.start()
+
+    def _run_loop(self) -> None:
+        """Run dedicated event loop continuously on background worker thread."""
+        asyncio.set_event_loop(self._loop)
+        self._loop.run_forever()
 
     def is_cdp_available(self) -> bool:
-        """Fast synchronous check if Chrome CDP HTTP endpoint is responding."""
+        """Fast non-blocking check with caching if Chrome CDP port is responding."""
+        now = time.time()
+        if now - self._last_cdp_check < 2.0:
+            return self._cdp_cached_status
+
+        self._last_cdp_check = now
+        host = "127.0.0.1"
+        port = 9222
         try:
-            url = f"{self.cdp_url.rstrip('/')}/json/version"
-            with urllib.request.urlopen(url, timeout=0.8) as resp:
-                return resp.status == 200
+            p = urlparse(self.cdp_url)
+            host = p.hostname or "127.0.0.1"
+            port = p.port or 9222
         except Exception:
-            return False
+            pass
+
+        try:
+            with socket.create_connection((host, port), timeout=0.04):
+                self._cdp_cached_status = True
+        except (socket.timeout, ConnectionRefusedError, OSError):
+            self._cdp_cached_status = False
+
+        return self._cdp_cached_status
+
+    def _get_lock(self) -> asyncio.Lock:
+        if self._lock is None:
+            self._lock = asyncio.Lock()
+        return self._lock
 
     async def connect(self) -> bool:
         """Connect or reconnect to Chrome over CDP and discover/track the YouTube tab."""
-        async with self._lock:
+        async with self._get_lock():
             # If already connected and active page is open, verify connection
             if self._browser is not None and self._page is not None:
                 try:
@@ -151,7 +189,7 @@ class YouTubeBrowserSession:
 
     async def close(self) -> None:
         """Detach from CDP session without terminating the user's Chrome."""
-        async with self._lock:
+        async with self._get_lock():
             try:
                 if self._browser is not None:
                     await self._browser.close()
@@ -169,19 +207,24 @@ class YouTubeBrowserSession:
     # ── Synchronous Bridge Methods ──────────────────────────────────────────
 
     def execute_async_safe(self, coro):
-        """Run an async coroutine safely from synchronous code."""
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            loop = None
-
-        if loop and loop.is_running():
-            # Create a separate thread to run the coroutine to avoid nested event loop conflict
-            import concurrent.futures
-            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-                return executor.submit(lambda: asyncio.run(coro)).result(timeout=10.0)
-        else:
+        """Run an async coroutine safely on the dedicated persistent event loop thread."""
+        if hasattr(self, "_thread") and threading.current_thread() == self._thread:
+            raise RuntimeError("execute_async_safe cannot be called from within the dedicated BrowserSessionLoop thread")
+        if not hasattr(self, "_loop") or not self._loop.is_running():
             return asyncio.run(coro)
+        try:
+            future = asyncio.run_coroutine_threadsafe(coro, self._loop)
+            return future.result(timeout=12.0)
+        except concurrent.futures.TimeoutError:
+            try:
+                future.cancel()
+            except Exception:
+                pass
+            logger.warning("execute_async_safe coroutine timed out after 12.0s")
+            return None
+        except Exception as exc:
+            logger.debug(f"execute_async_safe error: {exc}")
+            return None
 
     def navigate_same_tab_sync(self, url: str) -> bool:
         """Synchronous helper for same-tab navigation."""
@@ -198,6 +241,10 @@ class YouTubeBrowserSession:
         except Exception as exc:
             logger.debug(f"evaluate_sync exception: {exc}")
             return None
+
+    def evaluate_script_sync(self, script: str, *args) -> Any:
+        """Alias for evaluate_sync."""
+        return self.evaluate_sync(script, *args)
 
 
 # Global singleton instance

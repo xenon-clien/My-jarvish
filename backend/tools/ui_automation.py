@@ -38,6 +38,23 @@ try:
 except ImportError:
     WIN32_AVAILABLE = False
 
+import contextlib
+
+@contextlib.contextmanager
+def safe_clipboard():
+    """Context manager ensuring Windows clipboard is always closed cleanly."""
+    opened = False
+    try:
+        win32clipboard.OpenClipboard()
+        opened = True
+        yield win32clipboard
+    finally:
+        if opened:
+            try:
+                win32clipboard.CloseClipboard()
+            except Exception:
+                pass
+
 
 # ==========================================
 # Input Schemas
@@ -240,6 +257,13 @@ def switch_window(target_app: str) -> Dict[str, Any]:
     """Focus and bring target application window to the foreground."""
     hwnd, title = find_app_window(target_app)
     if hwnd:
+        if not is_foreground_stealing_allowed():
+            return {
+                "status": "BLOCKED_SAFETY",
+                "app": target_app,
+                "window_title": title,
+                "message": f"Window '{title}' mili, lekin safe mode mein foreground focus switch allowed nahi hai.",
+            }
         success = force_foreground_window(hwnd)
         if success:
             logger.info(f"Switched window to '{title}' (HWND: {hwnd})")
@@ -356,31 +380,59 @@ def scroll_screen(direction: str = "down", amount: int = 4) -> Dict[str, Any]:
 )
 def type_into_element(text: str, press_enter: bool = False) -> Dict[str, Any]:
     """Paste/Type text into the currently active element via Windows clipboard."""
+    if not is_physical_automation_allowed():
+        return {
+            "status": "SIMULATED",
+            "text": text,
+            "message": f"Simulation: '{text}' type kar diya (physical automation disabled).",
+            "simulated": True,
+            "verified": False,
+        }
+
     if not WIN32_AVAILABLE:
         return {"status": "unsupported", "message": "Typing requires Windows API."}
 
+    old_clipboard = None
     try:
-        win32clipboard.OpenClipboard()
-        win32clipboard.EmptyClipboard()
-        win32clipboard.SetClipboardText(text, win32clipboard.CF_UNICODETEXT)
-        win32clipboard.CloseClipboard()
-        time.sleep(0.05)
+        # Backup existing clipboard
+        try:
+            with safe_clipboard() as cb:
+                if cb.IsClipboardFormatAvailable(cb.CF_UNICODETEXT):
+                    old_clipboard = cb.GetClipboardData(cb.CF_UNICODETEXT)
+        except Exception:
+            pass
 
-        user32 = ctypes.windll.user32
-        VK_CONTROL = 0x11
-        VK_V = 0x56
-        VK_RETURN = 0x0D
+        try:
+            with safe_clipboard() as cb:
+                cb.EmptyClipboard()
+                cb.SetClipboardText(text, cb.CF_UNICODETEXT)
+            time.sleep(0.05)
 
-        # Ctrl + V to paste
-        user32.keybd_event(VK_CONTROL, 0, 0, 0)
-        user32.keybd_event(VK_V, 0, 0, 0)
-        user32.keybd_event(VK_V, 0, 2, 0)
-        user32.keybd_event(VK_CONTROL, 0, 2, 0)
+            user32 = ctypes.windll.user32
+            VK_CONTROL = 0x11
+            VK_V = 0x56
+            VK_RETURN = 0x0D
 
-        if press_enter:
-            time.sleep(0.06)
-            user32.keybd_event(VK_RETURN, 0, 0, 0)
-            user32.keybd_event(VK_RETURN, 0, 2, 0)
+            # Ctrl + V to paste
+            user32.keybd_event(VK_CONTROL, 0, 0, 0)
+            user32.keybd_event(VK_V, 0, 0, 0)
+            user32.keybd_event(VK_V, 0, 2, 0)
+            user32.keybd_event(VK_CONTROL, 0, 2, 0)
+
+            if press_enter:
+                time.sleep(0.06)
+                user32.keybd_event(VK_RETURN, 0, 0, 0)
+                user32.keybd_event(VK_RETURN, 0, 2, 0)
+        finally:
+            # Restore user's previous clipboard
+            if old_clipboard is not None:
+                try:
+                    time.sleep(0.05)
+                    with safe_clipboard() as cb:
+                        cb.EmptyClipboard()
+                        cb.SetClipboardText(old_clipboard, cb.CF_UNICODETEXT)
+                except Exception:
+                    pass
 
         logger.info(f"Typed text '{text}' (press_enter={press_enter})")
         return {
@@ -404,6 +456,15 @@ def type_into_element(text: str, press_enter: bool = False) -> Dict[str, Any]:
 )
 def navigate_back_forward(direction: str = "back") -> Dict[str, Any]:
     """Send Alt+Left (Back) or Alt+Right (Forward) key sequence."""
+    if not is_physical_automation_allowed():
+        return {
+            "status": "SIMULATED",
+            "direction": direction,
+            "message": f"Simulation: {direction} navigate kar diya (physical automation disabled).",
+            "simulated": True,
+            "verified": False,
+        }
+
     try:
         user32 = ctypes.windll.user32
         VK_MENU = 0x12       # Alt key

@@ -1,4 +1,5 @@
 """Web search, YouTube automation, browser navigation, and tab management tools for JARVIS AI."""
+import contextlib
 import re
 import time
 import urllib.parse
@@ -7,6 +8,23 @@ import webbrowser
 from typing import Any, Dict, Optional
 import requests
 from pydantic import BaseModel, Field
+
+@contextlib.contextmanager
+def safe_clipboard():
+    """Context manager ensuring Windows clipboard is always closed cleanly."""
+    opened = False
+    try:
+        import win32clipboard
+        win32clipboard.OpenClipboard()
+        opened = True
+        yield win32clipboard
+    finally:
+        if opened:
+            try:
+                import win32clipboard
+                win32clipboard.CloseClipboard()
+            except Exception:
+                pass
 
 try:
     import win32api
@@ -474,25 +492,48 @@ def navigate_active_browser_tab(url: str) -> bool:
         user32.keybd_event(VK_CONTROL, 0, 2, 0)
         time.sleep(0.08)
 
-        # 2. Put target URL on Windows clipboard with retry
-        for _ in range(5):
+        # 2. Preserve user's prior clipboard content before overwrite
+        old_clipboard = None
+        for _ in range(3):
             try:
-                win32clipboard.OpenClipboard()
-                win32clipboard.EmptyClipboard()
-                win32clipboard.SetClipboardText(url, win32clipboard.CF_UNICODETEXT)
-                win32clipboard.CloseClipboard()
+                with safe_clipboard() as cb:
+                    if cb.IsClipboardFormatAvailable(cb.CF_UNICODETEXT):
+                        old_clipboard = cb.GetClipboardData(cb.CF_UNICODETEXT)
                 break
             except Exception:
-                time.sleep(0.03)
+                time.sleep(0.02)
 
-        # 3. Ctrl + V to paste URL
-        user32.keybd_event(VK_CONTROL, 0, 0, 0)
-        user32.keybd_event(VK_V, 0, 0, 0)
-        user32.keybd_event(VK_V, 0, 2, 0)
-        user32.keybd_event(VK_CONTROL, 0, 2, 0)
-        time.sleep(0.05)
+        try:
+            # 3. Put target URL on Windows clipboard with retry
+            for _ in range(5):
+                try:
+                    with safe_clipboard() as cb:
+                        cb.EmptyClipboard()
+                        cb.SetClipboardText(url, cb.CF_UNICODETEXT)
+                    break
+                except Exception:
+                    time.sleep(0.03)
 
-        # 4. Press Enter to navigate current tab
+            # 4. Ctrl + V to paste URL
+            user32.keybd_event(VK_CONTROL, 0, 0, 0)
+            user32.keybd_event(VK_V, 0, 0, 0)
+            user32.keybd_event(VK_V, 0, 2, 0)
+            user32.keybd_event(VK_CONTROL, 0, 2, 0)
+            time.sleep(0.05)
+        finally:
+            # 5. Restore user's prior clipboard content so their copied data is never lost
+            if old_clipboard is not None:
+                time.sleep(0.04)
+                for _ in range(3):
+                    try:
+                        with safe_clipboard() as cb:
+                            cb.EmptyClipboard()
+                            cb.SetClipboardText(old_clipboard, cb.CF_UNICODETEXT)
+                        break
+                    except Exception:
+                        time.sleep(0.02)
+
+        # 6. Press Enter to navigate current tab
         user32.keybd_event(VK_RETURN, 0, 0, 0)
         time.sleep(0.04)
         user32.keybd_event(VK_RETURN, 0, 2, 0)
@@ -796,16 +837,26 @@ def close_browser_tab(target: Optional[str] = None) -> Dict[str, Any]:
                 "message": "Yes Boss! Active browser tab close kar diya hai.",
             }
         else:
-            # If target was youtube/video and no visible window exists, terminate any orphan chrome background processes
-            if any(w in target_clean for w in ["youtube", "video", "browser", "chrome"]):
-                try:
-                    import subprocess
-                    subprocess.run(["taskkill", "/IM", "chrome.exe", "/F"], capture_output=True)
-                except Exception:
-                    pass
+            # Cleanly close tab via CDP if available without killing Chrome processes
+            closed_via_cdp = False
+            try:
+                from backend.perception.browser_session import browser_session
+                if browser_session.is_cdp_available():
+                    page = browser_session.execute_async_safe(browser_session.get_page())
+                    if page:
+                        browser_session.execute_async_safe(page.close())
+                        closed_via_cdp = True
+            except Exception:
+                pass
+
+            if closed_via_cdp:
+                return {
+                    "status": "success",
+                    "message": "Yes Boss! Active browser tab close kar diya hai.",
+                }
             return {
-                "status": "success",
-                "message": "Yes Boss! YouTube video background process band kar diya hai.",
+                "status": "not_found",
+                "message": f"Tab matching '{target}' nahi mila ya pehle se hi band hai.",
             }
 
     return {
@@ -1027,7 +1078,7 @@ def scroll_page(direction: str = "down", amount: int = 500) -> Dict[str, Any]:
         from backend.perception.browser_session import browser_session
         if browser_session.is_cdp_available():
             delta = amount if is_down else -amount
-            browser_session.evaluate_script_sync(f"window.scrollBy({{top: {delta}, behavior: 'smooth'}});")
+            browser_session.evaluate_sync(f"window.scrollBy({{top: {delta}, behavior: 'smooth'}});")
             return {
                 "status": "success",
                 "direction": direction,
