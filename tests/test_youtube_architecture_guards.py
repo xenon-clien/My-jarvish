@@ -219,3 +219,56 @@ def test_play_first_target_resolution():
     )
     plan = youtube_planner.plan("youtube.play_video", {"ordinal": 1}, snapshot_before=snapshot)
     assert plan.target_video.video_id == "REAL_DOM_VID_001"
+
+def test_search_rejects_empty_or_whitespace_query():
+    """Verify that search verification rejects empty or whitespace-only queries."""
+    before = PerceptionSnapshot(browser_running=True, is_youtube=True, page_type=PageType.HOME)
+    after = PerceptionSnapshot(browser_running=True, is_youtube=True, page_type=PageType.SEARCH_RESULTS, search_query="")
+    status, verified, msg = youtube_verifier.verify(
+        action="youtube.search",
+        arguments={"query": "   "},
+        actuation_result={"actuation_status": ActionStatus.LIVE_VERIFIED},
+        snapshot_before=before,
+        snapshot_after=after,
+    )
+    assert status == ActionStatus.DEGRADED
+    assert verified is False
+
+def test_next_short_transition_requires_strict_id_change():
+    """Verify that next_short rejects stalled short transitions even if actuation succeeded."""
+    same_vid = CurrentVideoInfo(video_id="STALLED_SHORT_123", title="Short", url="")
+    before = PerceptionSnapshot(browser_running=True, is_youtube=True, page_type=PageType.SHORTS, current_video=same_vid)
+    after = PerceptionSnapshot(browser_running=True, is_youtube=True, page_type=PageType.SHORTS, current_video=same_vid)
+    status, verified, msg = youtube_verifier.verify(
+        action="youtube.next_short",
+        arguments={},
+        actuation_result={"actuation_status": ActionStatus.LIVE_VERIFIED},
+        snapshot_before=before,
+        snapshot_after=after,
+    )
+    assert status == ActionStatus.DEGRADED
+    assert verified is False
+
+def test_models_from_dict_preserves_falsy_values():
+    """Verify PerceptionSnapshot.from_dict does not coerce 0 volume or False like_state."""
+    snap = PerceptionSnapshot.from_dict({
+        "volume": 0,
+        "like_state": False,
+        "is_youtube": True,
+    })
+    assert snap.player.volume == 0
+    assert snap.controls.like_state is False
+
+def test_youtube_adapter_convenience_methods():
+    """Verify YouTubeAdapter methods call controller without AttributeError or TypeError."""
+    from backend.adapters.youtube_adapter import youtube_adapter
+    res1 = youtube_adapter.set_fullscreen(enabled=True)
+    assert isinstance(res1, dict)
+    res2 = youtube_adapter.set_theater_mode(enabled=True)
+    assert isinstance(res2, dict)
+    res3 = youtube_adapter.set_miniplayer(enabled=True)
+    assert isinstance(res3, dict)
+    res4 = youtube_adapter.set_captions(enabled=True)
+    assert isinstance(res4, dict)
+    res5 = youtube_adapter.seek_timestamp(seconds=120, raw_timestamp="02:00")
+    assert isinstance(res5, dict)

@@ -145,8 +145,17 @@ class YouTubeBrowserSession:
                 if youtube_page:
                     self._page = youtube_page
                 elif pages:
-                    # Reuse existing blank/generic tab rather than spawning new tab
-                    self._page = pages[0]
+                    # Reuse existing blank/new tab rather than overwriting user's active non-YouTube tab
+                    blank_page = None
+                    for p in pages:
+                        try:
+                            u = (p.url or "").lower()
+                            if u in ["about:blank", "chrome://newtab", "chrome://newtab/"]:
+                                blank_page = p
+                                break
+                        except Exception:
+                            continue
+                    self._page = blank_page if blank_page else await self._context.new_page()
                 else:
                     self._page = await self._context.new_page()
 
@@ -166,12 +175,35 @@ class YouTubeBrowserSession:
                 return False
 
     async def get_page(self):
-        """Get the active tracked YouTube page, attempting reconnect if needed."""
+        """Get the active tracked YouTube page, reconnecting if needed."""
         if self._page is None or (hasattr(self._page, "is_closed") and self._page.is_closed()):
             ok = await self.connect()
             if not ok:
                 return None
         return self._page
+
+    async def _find_youtube_page(self):
+        """Locate any open page on the YouTube domain."""
+        if not self._context:
+            return None
+        for p in self._context.pages:
+            try:
+                if "youtube.com" in (p.url or "").lower():
+                    return p
+            except Exception:
+                continue
+        return None
+
+    async def _wait_for_youtube_tab(self, timeout: float = 6.0):
+        """Poll for a newly launched YouTube tab to appear in the CDP session."""
+        deadline = time.time() + timeout
+        while time.time() < deadline:
+            p = await self._find_youtube_page()
+            if p:
+                return p
+            await asyncio.sleep(0.3)
+
+        return None
 
     async def ensure_youtube_page(self, target_url: Optional[str] = None, launch_if_needed: bool = False):
         """Ensure a single controlled YouTube page is ready, optionally launching Chrome with CDP."""
@@ -202,7 +234,7 @@ class YouTubeBrowserSession:
         return None
 
     def _launch_chrome_process(self, url: str) -> None:
-        """Launch Chrome process with --remote-debugging-port=9222 without webbrowser.open fallback."""
+        """Launch Chrome process with --remote-debugging-port=9222 without external webbrowser fallback."""
         chrome_paths = [
             r"C:\Program Files\Google\Chrome\Application\chrome.exe",
             r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
@@ -217,9 +249,9 @@ class YouTubeBrowserSession:
                 except Exception:
                     pass
 
-        # Windows start fallback with explicit port flag
+        # Windows start fallback with explicit port flag using safe token list
         try:
-            subprocess.Popen(f'start "" chrome --remote-debugging-port=9222 --start-maximized "{url}"', shell=True)
+            subprocess.Popen(["cmd.exe", "/c", "start", "", "chrome", "--remote-debugging-port=9222", "--start-maximized", url])
         except Exception as exc:
             logger.error(f"Failed to launch Chrome with CDP: {exc}")
 

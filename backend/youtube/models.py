@@ -194,7 +194,7 @@ class PerceptionSnapshot:
             paused=is_paused if is_paused is not None else False,
             current_time=data.get("current_time", 0.0) or 0.0,
             duration=data.get("duration", 0.0) or 0.0,
-            volume=data.get("volume", 100) or 100,
+            volume=data.get("volume") if data.get("volume") is not None else 100,
             muted=data.get("muted", False) or False,
             playback_rate=data.get("playback_rate", 1.0) or 1.0,
         )
@@ -204,7 +204,7 @@ class PerceptionSnapshot:
             theater=data.get("theater_mode", False) or False,
             miniplayer=data.get("miniplayer", False) or False,
             captions=data.get("captions", False) or False,
-            like_state=data.get("like_state", "unliked") or "unliked",
+            like_state=data.get("like_state") if data.get("like_state") is not None else "unliked",
         )
 
         raw_vids = data.get("visible_video_candidates") or data.get("candidates") or []

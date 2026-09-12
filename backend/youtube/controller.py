@@ -199,14 +199,26 @@ class YouTubeController:
     def set_fullscreen(self, enabled: bool = True) -> Dict[str, Any]:
         return self.execute_canonical("youtube.set_fullscreen", {"enabled": enabled})
 
+    def toggle_fullscreen(self) -> Dict[str, Any]:
+        return self.set_fullscreen(True)
+
     def set_theater_mode(self, enabled: bool = True) -> Dict[str, Any]:
         return self.execute_canonical("youtube.set_theater_mode", {"enabled": enabled})
+
+    def toggle_theater(self) -> Dict[str, Any]:
+        return self.set_theater_mode(True)
 
     def set_miniplayer(self, enabled: bool = True) -> Dict[str, Any]:
         return self.execute_canonical("youtube.set_miniplayer", {"enabled": enabled})
 
+    def toggle_miniplayer(self) -> Dict[str, Any]:
+        return self.set_miniplayer(True)
+
     def set_captions(self, enabled: bool = True) -> Dict[str, Any]:
         return self.execute_canonical("youtube.set_captions", {"enabled": enabled})
+
+    def toggle_captions(self) -> Dict[str, Any]:
+        return self.set_captions(True)
 
     def set_playback_speed(self, rate: float = 1.0) -> Dict[str, Any]:
         return self.execute_canonical("youtube.set_playback_speed", {"rate": rate})
@@ -223,8 +235,8 @@ class YouTubeController:
     def seek_backward(self, seconds: int = 10) -> Dict[str, Any]:
         return self.execute_canonical("youtube.seek_backward", {"seconds": seconds})
 
-    def seek_timestamp(self, seconds: int = 0) -> Dict[str, Any]:
-        return self.execute_canonical("youtube.seek_timestamp", {"seconds": seconds})
+    def seek_timestamp(self, seconds: int = 0, raw_timestamp: str = "") -> Dict[str, Any]:
+        return self.execute_canonical("youtube.seek_timestamp", {"seconds": seconds, "raw_timestamp": raw_timestamp})
 
     def set_volume(self, level: int = 50) -> Dict[str, Any]:
         return self.execute_canonical("youtube.set_volume", {"level": level})

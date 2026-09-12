@@ -10,7 +10,7 @@ Implements Phase 17 Central Verification invariants:
 - Completely eliminates generic 'if is_youtube: LIVE_VERIFIED'.
 """
 import urllib.parse
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
 from backend.core.logger import get_logger
 from backend.youtube.dom import normalize_search_query
@@ -67,10 +67,13 @@ class YouTubeVerifier:
         if action == "youtube.search":
             q = (arguments.get("query") or "").strip()
             norm_req = normalize_search_query(q)
+            if not norm_req:
+                return ActionStatus.DEGRADED, False, "Search query specify nahi ki gayi hai."
+
             norm_obs = normalize_search_query(snapshot_after.search_query)
 
             # Exact equality verification (Phase 9)
-            if norm_req and norm_req == norm_obs:
+            if norm_req == norm_obs:
                 return ActionStatus.LIVE_VERIFIED, True, f"Haan Shivam, YouTube par {q} search kar diya hai."
 
             # Direct check against URL parameter search_query
@@ -128,8 +131,6 @@ class YouTubeVerifier:
             after_id = snapshot_after.current_video.video_id
             if before_id != "UNKNOWN" and after_id != "UNKNOWN" and before_id != after_id:
                 return ActionStatus.LIVE_VERIFIED, True, "Ji Boss, agla short chala diya." if "next" in action else "Ji Boss, pichla short chala diya."
-            if actuation_result.get("actuation_status") == ActionStatus.LIVE_VERIFIED:
-                return ActionStatus.LIVE_VERIFIED, True, "Short transitioned."
             return ActionStatus.DEGRADED, False, "Short change verify nahi ho paya."
 
         # ── 5. Verify: Player Controls (Phase 14 Exact State Checks) ────────

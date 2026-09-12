@@ -195,8 +195,8 @@ class YouTubeAdapter:
         return self.resume()
 
     def set_fullscreen(self, enabled: bool = True) -> Dict[str, Any]:
-        """Toggle fullscreen."""
-        res = youtube_controller.toggle_fullscreen()
+        """Set or toggle fullscreen."""
+        res = youtube_controller.set_fullscreen(enabled=enabled)
         return self._format_result(res)
 
     def toggle_fullscreen(self) -> Dict[str, Any]:
@@ -208,18 +208,18 @@ class YouTubeAdapter:
         return self.toggle_fullscreen()
 
     def set_theater_mode(self, enabled: bool = True) -> Dict[str, Any]:
-        """Toggle theater mode."""
-        res = youtube_controller.toggle_theater()
+        """Set theater mode."""
+        res = youtube_controller.set_theater_mode(enabled=enabled)
         return self._format_result(res)
 
     def set_miniplayer(self, enabled: bool = True) -> Dict[str, Any]:
-        """Toggle miniplayer."""
-        res = youtube_controller.toggle_miniplayer()
+        """Set miniplayer mode."""
+        res = youtube_controller.set_miniplayer(enabled=enabled)
         return self._format_result(res)
 
     def set_captions(self, enabled: bool = True) -> Dict[str, Any]:
-        """Toggle captions."""
-        res = youtube_controller.toggle_captions()
+        """Set captions."""
+        res = youtube_controller.set_captions(enabled=enabled)
         return self._format_result(res)
 
     def toggle_captions(self) -> Dict[str, Any]:
@@ -369,14 +369,15 @@ class YouTubeAdapter:
         out["arguments"] = args
         out["expected_effect"] = expected_effect
 
-        # Pass through verification
-        v_status = self.verify_state(canonical_action, expected_effect, out, initial_state=initial_state)
-        if v_status == "LIVE_VERIFIED":
-            out["status"] = "LIVE_VERIFIED"
-            out["verified"] = True
-        elif v_status in ["DEGRADED", "BROKEN", "SIMULATED"]:
-            out["status"] = v_status
-            out["verified"] = False
+        # Pass through verification: if controller already verified the action, preserve it
+        if out.get("status") != "LIVE_VERIFIED" and not out.get("verified"):
+            v_status = self.verify_state(canonical_action, expected_effect, out, initial_state=initial_state)
+            if v_status == "LIVE_VERIFIED":
+                out["status"] = "LIVE_VERIFIED"
+                out["verified"] = True
+            elif v_status in ["DEGRADED", "BROKEN", "SIMULATED"]:
+                out["status"] = v_status
+                out["verified"] = False
 
         return out
 
