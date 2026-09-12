@@ -103,14 +103,11 @@ class UniversalActionEngine:
 
     @staticmethod
     def send_hardware_wheel(delta: int, x: Optional[int] = None, y: Optional[int] = None) -> None:
-        """Send hardware mouse wheel scroll event."""
+        """Send hardware mouse wheel scroll event without moving physical cursor."""
         if not is_physical_automation_allowed():
             return
         if not WIN32_AVAILABLE:
             return
-        if x is not None and y is not None:
-            user32.SetCursorPos(int(x), int(y))
-            time.sleep(0.03)
         user32.mouse_event(0x0800, 0, 0, int(delta), 0)  # MOUSEEVENTF_WHEEL
 
     @staticmethod
@@ -282,13 +279,13 @@ class UniversalActionEngine:
             tier = FallbackTier.KEYBOARD_SHORTCUT
             msg = "Scrolled to bottom."
         elif dir_clean in ["up", "upar"]:
-            self.send_hardware_wheel(abs(amount), cx, cy)
-            tier = FallbackTier.ACCESSIBILITY_TREE
-            msg = f"Scrolled up by {amount} units."
+            self.send_key_press(0x21)  # VK_PRIOR (Page Up)
+            tier = FallbackTier.KEYBOARD_SHORTCUT
+            msg = f"Scrolled up."
         else:
-            self.send_hardware_wheel(-abs(amount), cx, cy)
-            tier = FallbackTier.ACCESSIBILITY_TREE
-            msg = f"Scrolled down by {amount} units."
+            self.send_key_press(0x22)  # VK_NEXT (Page Down)
+            tier = FallbackTier.KEYBOARD_SHORTCUT
+            msg = f"Scrolled down."
 
         return ActionResult(
             success=True,

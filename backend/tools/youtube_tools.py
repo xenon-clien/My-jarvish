@@ -60,8 +60,16 @@ class YouTubeVolumeStepArgs(BaseModel):
 class YouTubeLikeArgs(BaseModel):
     enabled: bool = Field(True, description="True to like the video, False to remove like.")
 
+class YouTubeScrollArgs(BaseModel):
+    direction: str = Field("down", description="Direction to scroll: 'down', 'up', 'top', 'bottom'.")
+    amount: int = Field(500, description="Scroll amount in units.")
 
-# ── Canonical 25 YouTube Intent Tools ────────────────────────────────────────
+class YouTubeObserveArgs(BaseModel):
+    max_items: int = Field(5, description="Maximum number of items to observe on the page.")
+    target: Optional[str] = Field("video", description="Target type to observe: 'video', 'short', or 'all'.")
+
+
+# ── Canonical YouTube Intent Tools ──────────────────────────────────────────
 
 CANONICAL_YOUTUBE_INTENTS = [
     ("youtube.open", YouTubeOpenArgs, "Open YouTube home page or search query in the browser."),
@@ -89,6 +97,8 @@ CANONICAL_YOUTUBE_INTENTS = [
     ("youtube.unmute", YouTubeEmptyArgs, "Unmute audio output idempotently."),
     ("youtube.set_like", YouTubeLikeArgs, "Like or unlike video idempotently."),
     ("youtube.replay", YouTubeEmptyArgs, "Restart playback from the beginning (00:00)."),
+    ("youtube.scroll", YouTubeScrollArgs, "Scroll the YouTube page or feed up, down, to top, or to bottom."),
+    ("youtube.observe", YouTubeObserveArgs, "Observe currently visible videos, shorts, or playback state on YouTube."),
 ]
 
 

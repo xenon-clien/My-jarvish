@@ -199,15 +199,7 @@ def click_screen_video(index: int = 1, section: Optional[str] = "auto") -> Dict[
         time.sleep(0.08)
 
         if is_short:
-            # When already inside the full-screen Shorts player:
-            center_x = int(left + width * 0.50)
-            center_y = int(top + height * 0.50)
-            user32.SetCursorPos(center_x, center_y)
-            user32.mouse_event(0x0002, 0, 0, 0, 0)
-            time.sleep(0.03)
-            user32.mouse_event(0x0004, 0, 0, 0, 0)
-            time.sleep(0.05)
-
+            # When already inside the full-screen Shorts player (no mouse cursor movement needed)
             if index == 1:
                 # Scroll back to the top-most short
                 for _ in range(6):
@@ -502,6 +494,8 @@ def navigate_active_browser_tab(url: str) -> bool:
 
         # 4. Press Enter to navigate current tab
         user32.keybd_event(VK_RETURN, 0, 0, 0)
+        time.sleep(0.04)
+        user32.keybd_event(VK_RETURN, 0, 2, 0)
         safe_title = str(title or "").encode("ascii", "replace").decode("ascii")
         logger.info(f"Navigated active browser tab in '{safe_title}' to {url}")
         return True

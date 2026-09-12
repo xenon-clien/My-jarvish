@@ -450,16 +450,29 @@ def control_media(action: str, level: Optional[int] = None, time_str: Optional[s
                                 btn = btns.GetElement(i)
                                 b_name = (btn.CurrentName or "").lower()
                                 if "like this" in b_name or b_name.startswith("like"):
+                                    try:
+                                        inv = btn.GetCurrentPattern(mod.UIA_InvokePatternId)
+                                        if inv:
+                                            inv.QueryInterface(mod.IUIAutomationInvokePattern).Invoke()
+                                            liked_via_uia = True
+                                            break
+                                    except Exception:
+                                        pass
                                     brect = btn.CurrentBoundingRectangle
                                     cx = int(brect.left + (brect.right - brect.left) * 0.5)
                                     cy = int(brect.top + (brect.bottom - brect.top) * 0.5)
                                     import ctypes
+                                    from ctypes import wintypes
                                     user32 = ctypes.windll.user32
+                                    pt = wintypes.POINT()
+                                    has_pt = bool(user32.GetCursorPos(ctypes.byref(pt)))
                                     user32.SetCursorPos(cx, cy)
                                     time.sleep(0.04)
                                     user32.mouse_event(0x0002, 0, 0, 0, 0)
                                     time.sleep(0.04)
                                     user32.mouse_event(0x0004, 0, 0, 0, 0)
+                                    if has_pt:
+                                        user32.SetCursorPos(pt.x, pt.y)
                                     liked_via_uia = True
                                     break
                 except Exception:
@@ -501,16 +514,29 @@ def control_media(action: str, level: Optional[int] = None, time_str: Optional[s
                                 btn = btns.GetElement(i)
                                 b_name = (btn.CurrentName or "").lower()
                                 if "subscribe" in b_name:
+                                    try:
+                                        inv = btn.GetCurrentPattern(mod.UIA_InvokePatternId)
+                                        if inv:
+                                            inv.QueryInterface(mod.IUIAutomationInvokePattern).Invoke()
+                                            subscribed_via_uia = True
+                                            break
+                                    except Exception:
+                                        pass
                                     brect = btn.CurrentBoundingRectangle
                                     cx = int(brect.left + (brect.right - brect.left) * 0.5)
                                     cy = int(brect.top + (brect.bottom - brect.top) * 0.5)
                                     import ctypes
+                                    from ctypes import wintypes
                                     user32 = ctypes.windll.user32
+                                    pt = wintypes.POINT()
+                                    has_pt = bool(user32.GetCursorPos(ctypes.byref(pt)))
                                     user32.SetCursorPos(cx, cy)
                                     time.sleep(0.04)
                                     user32.mouse_event(0x0002, 0, 0, 0, 0)
                                     time.sleep(0.04)
                                     user32.mouse_event(0x0004, 0, 0, 0, 0)
+                                    if has_pt:
+                                        user32.SetCursorPos(pt.x, pt.y)
                                     subscribed_via_uia = True
                                     break
                 except Exception:
@@ -545,16 +571,28 @@ def control_media(action: str, level: Optional[int] = None, time_str: Optional[s
                                 btn = btns.GetElement(i)
                                 b_name = (btn.CurrentName or "").lower()
                                 if "share" in b_name:
+                                    try:
+                                        inv = btn.GetCurrentPattern(mod.UIA_InvokePatternId)
+                                        if inv:
+                                            inv.QueryInterface(mod.IUIAutomationInvokePattern).Invoke()
+                                            break
+                                    except Exception:
+                                        pass
                                     brect = btn.CurrentBoundingRectangle
                                     cx = int(brect.left + (brect.right - brect.left) * 0.5)
                                     cy = int(brect.top + (brect.bottom - brect.top) * 0.5)
                                     import ctypes
+                                    from ctypes import wintypes
                                     user32 = ctypes.windll.user32
+                                    pt = wintypes.POINT()
+                                    has_pt = bool(user32.GetCursorPos(ctypes.byref(pt)))
                                     user32.SetCursorPos(cx, cy)
                                     time.sleep(0.04)
                                     user32.mouse_event(0x0002, 0, 0, 0, 0)
                                     time.sleep(0.04)
                                     user32.mouse_event(0x0004, 0, 0, 0, 0)
+                                    if has_pt:
+                                        user32.SetCursorPos(pt.x, pt.y)
                                     break
                 except Exception:
                     pass
