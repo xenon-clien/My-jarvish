@@ -473,12 +473,14 @@ class YouTubePageObserver:
                         seen_titles.add(clean_name)
 
                         match = re.search(r"[?&]v=([a-zA-Z0-9_-]{11})", f"{name} {href} {help_text}")
-                        vid_id = match.group(1) if match else f"cand_{len(collected) + 1}"
+                        if not match:
+                            continue
+                        vid_id = match.group(1)
                         if vid_id in seen_ids:
-                            vid_id = f"cand_{len(collected) + 1}"
+                            continue
                         seen_ids.add(vid_id)
 
-                        canonical_url = f"https://www.youtube.com/watch?v={vid_id}" if match else f"https://www.youtube.com/results?search_query={clean_name}"
+                        canonical_url = f"https://www.youtube.com/watch?v={vid_id}"
                         rect_tuple = (brect.left, brect.top, brect.right, brect.bottom)
 
                         collected.append((brect.top, brect.left, clean_name, vid_id, canonical_url, rect_tuple))

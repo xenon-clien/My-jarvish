@@ -113,6 +113,7 @@ class PerceptionFusion:
             # Fallback: Infer strictly from URL / Title without fabricating DOM cards
             inferred_type = PageType.UNKNOWN
             curr_video = CurrentVideoInfo()
+            inferred_search_query = "UNKNOWN"
 
             if is_youtube:
                 if "/shorts" in url_lower:
@@ -131,6 +132,11 @@ class PerceptionFusion:
                         curr_video.is_short = False
                 elif "/results" in url_lower or "search_query=" in url_lower:
                     inferred_type = PageType.SEARCH_RESULTS
+                    import re
+                    import urllib.parse
+                    m = re.search(r"[?&]search_query=([^&]+)", primary_url)
+                    if m:
+                        inferred_search_query = urllib.parse.unquote_plus(m.group(1)).strip()
                 elif "youtube.com" in url_lower:
                     inferred_type = PageType.HOME
                 elif " - youtube" in title_lower:
@@ -139,7 +145,7 @@ class PerceptionFusion:
             snapshot.youtube = YouTubeState(
                 is_youtube=is_youtube,
                 page_type=inferred_type,
-                search_query="UNKNOWN",
+                search_query=inferred_search_query,
                 current_video=curr_video,
                 player=PlayerState(exists=False),
                 visible_videos=[],  # Never fabricate visible video cards if DOM not queried

@@ -107,13 +107,19 @@ class YouTubeAdapter:
             last_state = self.observe_browser_state()
             cur_url = (last_state.get("current_url") or "").lower()
             cur_title = (last_state.get("window_title") or "").lower()
-            if last_state.get("browser_running") and (
-                last_state.get("is_youtube") or
-                "youtube.com" in cur_url or
-                "youtube" in cur_title
-            ):
-                confirmed = True
-                break
+            perceived_q = (last_state.get("search_query") or "").lower()
+            clean_q = (query or "").strip().lower()
+
+            if last_state.get("browser_running") and last_state.get("is_youtube"):
+                if clean_q:
+                    import urllib.parse
+                    quoted_q = urllib.parse.quote_plus(clean_q).lower()
+                    if (clean_q in perceived_q and perceived_q != "unknown") or (quoted_q in cur_url and "search_query=" in cur_url) or (clean_q in cur_title and "youtube" in cur_title):
+                        confirmed = True
+                        break
+                else:
+                    confirmed = True
+                    break
             time.sleep(0.3)
 
         # 3. Formulate verified outcome
@@ -218,12 +224,17 @@ class YouTubeAdapter:
             page_type = last_state.get("page_type")
             perceived_query = (last_state.get("search_query") or "").lower()
 
-            if last_state.get("browser_running") and (
-                page_type == PageType.SEARCH_RESULTS.value or
-                "results?search_query=" in cur_url or
-                (clean_query.lower() in cur_title and "youtube" in cur_title) or
-                (clean_query.lower() in perceived_query)
-            ):
+            clean_q = clean_query.lower().strip()
+            import urllib.parse
+            quoted_q = urllib.parse.quote_plus(clean_q).lower()
+
+            query_observed = (
+                (clean_q in perceived_query and perceived_query != "unknown") or
+                (quoted_q in cur_url and "search_query=" in cur_url) or
+                (clean_q in cur_title and "youtube" in cur_title)
+            )
+
+            if last_state.get("browser_running") and query_observed:
                 confirmed = True
                 break
             time.sleep(0.3)
@@ -316,10 +327,12 @@ class YouTubeAdapter:
 
             after_obs = self.observe_browser_state()
             actual_id = after_obs.get("current_video_id", "UNKNOWN")
-            verified = (actual_id != "UNKNOWN" and actual_id == expected_id) or (
-                after_obs.get("playback_state") == "PLAYING" and actual_id != "UNKNOWN" and actual_id != cur_id
-            ) or (
-                after_obs.get("current_url") and expected_id != "UNKNOWN" and expected_id in after_obs.get("current_url")
+            verified = (
+                actual_id != "UNKNOWN" and
+                expected_id != "UNKNOWN" and
+                not expected_id.startswith("VID_SIM_") and
+                not expected_id.startswith("cand_") and
+                actual_id == expected_id
             )
 
             if not is_live_browser_automation_allowed() and not verified:
@@ -367,8 +380,12 @@ class YouTubeAdapter:
                 time.sleep(0.8)
                 after_obs = self.observe_browser_state()
                 actual_id = after_obs.get("current_video_id", "UNKNOWN")
-                verified = (actual_id != "UNKNOWN" and actual_id == expected_id) or (
-                    after_obs.get("playback_state") == "PLAYING" and actual_id != "UNKNOWN" and actual_id != cur_id
+                verified = (
+                    actual_id != "UNKNOWN" and
+                    expected_id != "UNKNOWN" and
+                    not expected_id.startswith("VID_SIM_") and
+                    not expected_id.startswith("cand_") and
+                    actual_id == expected_id
                 )
                 return {
                     "status": "LIVE_VERIFIED" if verified else "DEGRADED",
@@ -430,7 +447,12 @@ class YouTubeAdapter:
             time.sleep(0.8)
             after_obs = self.observe_browser_state()
             actual_id = after_obs.get("current_video_id", "UNKNOWN")
-            verified = (actual_id == expected_id) or (after_obs.get("page_type") == "SHORTS")
+            verified = (
+                actual_id != "UNKNOWN" and
+                expected_id != "UNKNOWN" and
+                not expected_id.startswith("SHORT_SIM_") and
+                actual_id == expected_id
+            )
 
             if not is_live_browser_automation_allowed() and not verified:
                 return {
@@ -885,41 +907,55 @@ class YouTubeAdapter:
         if action == "youtube.open":
             cur_url = (state.get("current_url") or "").lower()
             title = (state.get("window_title") or "").lower()
-            if ("youtube.com" in cur_url or "youtube" in title or state.get("is_youtube")) and cur_url != "about:blank":
+            q = (result.get("query") or "").lower().strip()
+            if state.get("is_youtube") and cur_url != "about:blank":
+                if q:
+                    import urllib.parse
+                    quoted_q = urllib.parse.quote_plus(q).lower()
+                    perceived_q = (state.get("search_query") or "").lower().strip()
+                    query_observed = (
+                        (q in perceived_q and perceived_q != "unknown") or
+                        (quoted_q in cur_url and "search_query=" in cur_url) or
+                        (q in title and "youtube" in title)
+                    )
+                    return "LIVE_VERIFIED" if query_observed else "DEGRADED"
                 return "LIVE_VERIFIED"
             return "DEGRADED"
 
         if action == "youtube.search":
             cur_url = (state.get("current_url") or "").lower()
-            page_type = state.get("page_type")
-            q = (result.get("query") or "").lower()
+            q = (result.get("query") or "").lower().strip()
             title = (state.get("window_title") or "").lower()
-            if page_type == "SEARCH_RESULTS" or "results?search_query=" in cur_url or (q and q in title):
-                return "LIVE_VERIFIED"
+            perceived_q = (state.get("search_query") or "").lower().strip()
+            if q and state.get("is_youtube"):
+                import urllib.parse
+                quoted_q = urllib.parse.quote_plus(q).lower()
+                query_observed = (
+                    (q in perceived_q and perceived_q != "unknown") or
+                    (quoted_q in cur_url and "search_query=" in cur_url) or
+                    (q in title and "youtube" in title)
+                )
+                if query_observed:
+                    return "LIVE_VERIFIED"
+                return "DEGRADED"
             return "DEGRADED"
 
         if action in ["youtube.play_video", "youtube.play_first_video"]:
             actual_id = state.get("current_video_id", "UNKNOWN")
             exp_id = result.get("expected_video_id")
-            page_type = state.get("page_type")
-            if exp_id and exp_id != "UNKNOWN":
+            if exp_id and exp_id != "UNKNOWN" and not exp_id.startswith("cand_") and not exp_id.startswith("VID_SIM_"):
                 if actual_id == exp_id:
                     return "LIVE_VERIFIED"
                 return "DEGRADED"
-            if page_type == "VIDEO" and actual_id != "UNKNOWN":
-                return "LIVE_VERIFIED"
             return "DEGRADED"
 
         if action == "youtube.play_short":
             actual_id = state.get("current_video_id", "UNKNOWN")
             exp_id = result.get("expected_video_id")
-            page_type = state.get("page_type")
-            if exp_id and exp_id != "UNKNOWN":
+            if exp_id and exp_id != "UNKNOWN" and not exp_id.startswith("SHORT_SIM_"):
                 if actual_id == exp_id:
                     return "LIVE_VERIFIED"
                 return "DEGRADED"
-            if page_type == "SHORTS":
-                return "LIVE_VERIFIED"
             return "DEGRADED"
 
         if action in ["youtube.scroll", "scroll_page"]:
@@ -959,7 +995,8 @@ class YouTubeAdapter:
             return "DEGRADED"
 
         if action in ["youtube.set_captions", "youtube.captions"]:
-            if state.get("captions") not in [None, "UNKNOWN"]:
+            en = result.get("arguments", {}).get("enabled", True) if isinstance(result.get("arguments"), dict) else True
+            if state.get("captions") == en:
                 return "LIVE_VERIFIED"
             return "DEGRADED"
 
