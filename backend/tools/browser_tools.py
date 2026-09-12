@@ -1024,17 +1024,7 @@ class ScrollPageArgs(BaseModel):
     args_schema=ScrollPageArgs,
 )
 def scroll_page(direction: str = "down", amount: int = 500) -> Dict[str, Any]:
-    """Scroll the active browser page smoothly with hardware mouse wheel and keyboard fallback."""
-    if not is_physical_automation_allowed():
-        is_down = direction.lower() in ["down", "niche", "bottom", "neeche"]
-        return {
-            "status": "SIMULATED",
-            "direction": direction,
-            "message": f"Simulation: scroll {'neeche' if is_down else 'upar'} (physical automation disabled).",
-            "simulated": True,
-            "verified": False,
-        }
-
+    """Scroll the active browser page smoothly with keyboard PageDown/PageUp without moving mouse cursor."""
     if not WIN32_AVAILABLE:
         return {"status": "error", "message": "Windows API unavailable."}
     import ctypes
@@ -1043,73 +1033,17 @@ def scroll_page(direction: str = "down", amount: int = 500) -> Dict[str, Any]:
 
     try:
         _focus_media_window()
-        time.sleep(0.08)
+        time.sleep(0.05)
     except Exception:
         pass
 
-    # 1. Discover genuine browser window HWND (avoiding terminal/IDE coordinates)
-    browser_hwnd = 0
-    candidates = []
-
-    def enum_cb(hwnd, extra):
-        if win32gui.IsWindowVisible(hwnd):
-            title = win32gui.GetWindowText(hwnd).lower()
-            cls = win32gui.GetClassName(hwnd).lower()
-            if any(ex in title for ex in ["antigravity", "vscode", "visual studio", "cmd.exe", "powershell", "jarvis"]):
-                return
-            if "youtube" in title or "chrome" in cls or "edge" in cls or "brave" in cls or "chrome" in title:
-                rect = win32gui.GetWindowRect(hwnd)
-                w = rect[2] - rect[0]
-                h = rect[3] - rect[1]
-                if w > 400 and h > 300:
-                    score = 100 if "youtube" in title else 50
-                    extra.append((score, hwnd, rect))
-
-    win32gui.EnumWindows(enum_cb, candidates)
-    if candidates:
-        candidates.sort(key=lambda x: x[0], reverse=True)
-        _, browser_hwnd, b_rect = candidates[0]
-        force_foreground_window(browser_hwnd)
-        time.sleep(0.06)
-        left, top, right, bottom = b_rect
-        w = max(600, right - left)
-        h = max(400, bottom - top)
-        scroll_x = int(left + w * 0.70)
-        scroll_y = int(top + h * 0.50)
-    else:
-        fg_hwnd = win32gui.GetForegroundWindow() if WIN32_AVAILABLE else 0
-        if fg_hwnd and win32gui.IsWindow(fg_hwnd):
-            rect = win32gui.GetWindowRect(fg_hwnd)
-            left, top, right, bottom = rect
-            w = max(600, right - left)
-            h = max(400, bottom - top)
-            scroll_x = int(left + w * 0.70)
-            scroll_y = int(top + h * 0.50)
-        else:
-            sw = user32.GetSystemMetrics(0) or 1920
-            sh = user32.GetSystemMetrics(1) or 1080
-            scroll_x = int(sw * 0.70)
-            scroll_y = int(sh * 0.50)
-
-    # 2. Position cursor over browser viewport scroll region
-    user32.SetCursorPos(scroll_x, scroll_y)
-    time.sleep(0.04)
-
     is_down = direction.lower() in ["down", "niche", "bottom", "neeche"]
-    delta = -120 if is_down else 120
-    notches = max(6, int(amount) // 60)
-    raw_val = ctypes.c_ulong(delta & 0xFFFFFFFF).value
 
-    # 3. Dispatch multi-step smooth hardware wheel events
-    for _ in range(notches):
-        user32.mouse_event(0x0800, 0, 0, raw_val, 0)
-        time.sleep(0.02)
-
-    # 4. Redundant hardware PageDown / PageUp with physical scan code
+    # Keyboard PageDown / PageUp - ZERO cursor movement, ZERO mouse freeze!
     vk_code = 0x22 if is_down else 0x21  # VK_NEXT (Page Down) or VK_PRIOR (Page Up)
     scan_code = user32.MapVirtualKeyW(vk_code, 0)
     user32.keybd_event(vk_code, scan_code, 0, 0)
-    time.sleep(0.03)
+    time.sleep(0.04)
     user32.keybd_event(vk_code, scan_code, 2, 0)  # KEYEVENTF_KEYUP
 
     return {
@@ -1117,4 +1051,5 @@ def scroll_page(direction: str = "down", amount: int = 500) -> Dict[str, Any]:
         "direction": direction,
         "message": f"Ji Boss, {'neeche' if is_down else 'upar'} scroll kar diya.",
     }
+
 

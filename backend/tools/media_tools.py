@@ -51,17 +51,8 @@ def _send_key_event(vk_code: int) -> None:
 
 
 def _click_video_player_center() -> None:
-    """Simulate a physical hardware left mouse click at the center of the active YouTube video."""
-    if not is_physical_automation_allowed():
-        return
-    if not WIN32_AVAILABLE:
-        return
-    import ctypes
-    user32 = ctypes.windll.user32
-    # Click at current cursor position (which _focus_media_window positioned over video)
-    user32.mouse_event(0x0002, 0, 0, 0, 0)  # LEFT DOWN
-    time.sleep(0.03)
-    user32.mouse_event(0x0004, 0, 0, 0, 0)  # LEFT UP
+    """Safe no-op to prevent physical mouse hijacking and cursor freezing."""
+    return
 
 
 class MediaControlArgs(BaseModel):
@@ -100,19 +91,13 @@ def _seek_youtube_url_bar(time_param: str) -> bool:
 
         sec_param = f"{total_seconds}s" if total_seconds else time_param
 
-        windows = []
-        def enum_handler(hwnd, extra):
-            if win32gui.IsWindowVisible(hwnd):
-                title = win32gui.GetWindowText(hwnd)
-                cls = win32gui.GetClassName(hwnd)
-                if "chrome" in cls.lower() or "youtube" in title.lower() or "edge" in title.lower():
-                    extra.append((hwnd, title))
-        win32gui.EnumWindows(enum_handler, windows)
-        if not windows:
-            return False
-
+        from backend.adapters.youtube_grounding import youtube_page_observer
         from backend.tools.browser_tools import force_foreground_window
-        force_foreground_window(hwnd)
+        win_info = youtube_page_observer.get_browser_window()
+        if not win_info:
+            return False
+        best_hwnd = win_info[0]
+        force_foreground_window(best_hwnd)
         time.sleep(0.10)
 
         # 1. Focus URL bar with Ctrl+L
@@ -180,12 +165,10 @@ def _focus_media_window() -> bool:
         return False
     try:
         from backend.tools.browser_tools import force_foreground_window
-        import ctypes
-        user32 = ctypes.windll.user32
 
         candidates = []
         def enum_cb(hwnd, extra):
-            if win32gui.IsWindowVisible(hwnd):
+            if win32gui.IsWindowVisible(hwnd) or win32gui.IsIconic(hwnd):
                 title = win32gui.GetWindowText(hwnd).lower()
                 cls = win32gui.GetClassName(hwnd).lower()
                 # Skip IDEs and terminal windows
@@ -196,24 +179,17 @@ def _focus_media_window() -> bool:
                     rect = win32gui.GetWindowRect(hwnd)
                     w = rect[2] - rect[0]
                     h = rect[3] - rect[1]
-                    if w > 400 and h > 300:
-                        # Prioritize windows with 'youtube' in title
+                    is_min = (rect[0] <= -30000) or win32gui.IsIconic(hwnd)
+                    if (w > 400 and h > 300) or is_min:
                         score = 100 if "youtube" in title else 50
-                        extra.append((score, hwnd, rect))
+                        extra.append((score, hwnd))
         win32gui.EnumWindows(enum_cb, candidates)
 
         if candidates:
             candidates.sort(key=lambda x: x[0], reverse=True)
-            _, best_hwnd, rect = candidates[0]
+            _, best_hwnd = candidates[0]
             force_foreground_window(best_hwnd)
-            time.sleep(0.08)
-
-            # Move cursor over video player area to ensure active DOM interaction
-            left, top, right, bottom = rect
-            width = right - left
-            height = bottom - top
-            user32.SetCursorPos(int(left + width * 0.40), int(top + height * 0.35))
-            time.sleep(0.03)
+            time.sleep(0.06)
             return True
     except Exception as e:
         logger.debug(f"Focus media window error: {e}")
@@ -584,37 +560,21 @@ def control_media(action: str, level: Optional[int] = None, time_str: Optional[s
                     pass
         msg = "Ji Boss, share menu open kar diya!"
     elif action_clean in ["comments_down", "comments", "scroll_comments", "comments_dikhao", "comments_padho"]:
-        # Scroll down to comments section
+        # Scroll down to comments section cleanly with Page Down (zero mouse cursor movement)
         if WIN32_AVAILABLE:
             import ctypes
             user32 = ctypes.windll.user32
-            sw = user32.GetSystemMetrics(0)
-            sh = user32.GetSystemMetrics(1)
-            user32.SetCursorPos(int(sw * 0.45), int(sh * 0.50))
-            time.sleep(0.04)
-            raw_down = ctypes.c_ulong((-120) & 0xFFFFFFFF).value
-            for _ in range(6):
-                user32.mouse_event(0x0800, 0, 0, raw_down, 0)
-                time.sleep(0.02)
             user32.keybd_event(0x22, 0, 0, 0)  # VK_NEXT (Page Down)
-            time.sleep(0.03)
+            time.sleep(0.04)
             user32.keybd_event(0x22, 0, 2, 0)
         msg = "Ji Boss, comments section par scroll kar diya."
     elif action_clean in ["comments_up", "video_par_aao", "scroll_up"]:
-        # Scroll back up to video
+        # Scroll back up to video cleanly with Page Up (zero mouse cursor movement)
         if WIN32_AVAILABLE:
             import ctypes
             user32 = ctypes.windll.user32
-            sw = user32.GetSystemMetrics(0)
-            sh = user32.GetSystemMetrics(1)
-            user32.SetCursorPos(int(sw * 0.45), int(sh * 0.50))
-            time.sleep(0.04)
-            raw_up = ctypes.c_ulong(120 & 0xFFFFFFFF).value
-            for _ in range(6):
-                user32.mouse_event(0x0800, 0, 0, raw_up, 0)
-                time.sleep(0.02)
             user32.keybd_event(0x21, 0, 0, 0)  # VK_PRIOR (Page Up)
-            time.sleep(0.03)
+            time.sleep(0.04)
             user32.keybd_event(0x21, 0, 2, 0)
         msg = "Ji Boss, wapas video par scroll kar diya."
     elif action_clean in ["mute", "unmute", "silence", "mute_karo"]:

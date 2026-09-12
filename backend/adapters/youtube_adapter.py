@@ -369,52 +369,13 @@ class YouTubeAdapter:
                 "verified": verified,
             }
 
-        # Physical actuation fallback guarded by is_physical_automation_allowed
-        if not is_physical_automation_allowed():
-            return safe_blocked_result("youtube.play_video", "physical layout click blocked in safe development mode")
-
-        if WIN32_AVAILABLE:
-            try:
-                import ctypes
-                user32 = ctypes.windll.user32
-                target_hwnd = hwnd or (win32gui.GetForegroundWindow() if WIN32_AVAILABLE else 0)
-                if target_hwnd and win32gui.IsWindow(target_hwnd):
-                    force_foreground_window(target_hwnd)
-                    time.sleep(0.08)
-                    rect = win32gui.GetWindowRect(target_hwnd)
-                    bw = rect[2] - rect[0]
-                    bh = rect[3] - rect[1]
-                    if bw > 400 and bh > 300:
-                        col_idx = (idx - 1) % 4
-                        row_idx = (idx - 1) // 4
-                        vx = int(rect[0] + bw * (0.28 + col_idx * 0.22))
-                        vy = int(rect[1] + bh * (0.35 + row_idx * 0.28))
-                        user32.SetCursorPos(vx, vy)
-                        time.sleep(0.05)
-                        user32.mouse_event(0x0002, 0, 0, 0, 0)
-                        time.sleep(0.05)
-                        user32.mouse_event(0x0004, 0, 0, 0, 0)
-                        time.sleep(0.8)
-                        final_obs = self.observe_browser_state()
-                        actual_id = final_obs.get("current_video_id", "UNKNOWN")
-                        verified = (actual_id != "UNKNOWN" and actual_id != cur_id) or (final_obs.get("page_type") == "VIDEO") or (final_obs.get("playback_state") == "PLAYING")
-                        return {
-                            "status": "LIVE_VERIFIED" if verified else "DEGRADED",
-                            "message": f"Ji Boss, video number {idx} chala di.",
-                            "ordinal": idx,
-                            "expected_video_id": actual_id,
-                            "actual_video_id": actual_id,
-                            "verified": verified,
-                        }
-            except Exception as exc:
-                logger.debug(f"Direct layout click exception: {exc}")
-
         return {
             "status": "DEGRADED",
             "message": f"Ji Boss, video number {idx} chala di.",
             "ordinal": idx,
             "verified": False,
         }
+
 
     def play_first_video(self, ordinal: int = 1) -> Dict[str, Any]:
         """Alias for play_video."""

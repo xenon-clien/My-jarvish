@@ -500,7 +500,12 @@ class YouTubeSemanticEngine:
             )
 
         # ── 9. Relative Seek Forward / Backward ────────────────────────────
-        if re.search(r"\b(?:aage|forward|skip)\b", corrected_text) and not re.search(r"\b(?:short|video)\b", corrected_text):
+        is_media_level = bool(re.search(r"\b(?:volume|awaj|awaaz|sound|speed|raftar)\b", corrected_text))
+        is_seek_fwd = not is_media_level and bool(
+            re.search(r"\b(?:bhagao|fast\s*forward|aage\s*karo|forward\s*karo|skip\s*karo|aage\s*badhao)\b", corrected_text) or
+            (re.search(r"\b(?:aage|forward|skip)\b", corrected_text) and not re.search(r"\b(?:next|agla|pehla|doosra|teesra)\s+(?:short|video)\b", corrected_text))
+        )
+        if is_seek_fwd:
             secs = cls.extract_time_seconds(corrected_text)
             return YouTubeSemanticResult(
                 canonical_action="youtube.seek_forward",
@@ -512,7 +517,11 @@ class YouTubeSemanticEngine:
                 raw_text=raw_text,
                 normalized_text=corrected_text
             )
-        if re.search(r"\b(?:peeche|rewind|backward)\b", corrected_text):
+        is_seek_bwd = not is_media_level and bool(
+            re.search(r"\b(?:peeche|rewind|backward|piche|peechhe)\b", corrected_text) and
+            not re.search(r"\b(?:previous|pichla|prev)\s+(?:short|video)\b", corrected_text)
+        )
+        if is_seek_bwd:
             secs = cls.extract_time_seconds(corrected_text)
             return YouTubeSemanticResult(
                 canonical_action="youtube.seek_backward",

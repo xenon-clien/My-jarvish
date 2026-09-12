@@ -327,26 +327,17 @@ def scroll_screen(direction: str = "down", amount: int = 4) -> Dict[str, Any]:
 
     try:
         user32 = ctypes.windll.user32
-        if WIN32_AVAILABLE:
-            fg = win32gui.GetForegroundWindow()
-            if fg:
-                rect = win32gui.GetWindowRect(fg)
-                center_x = (rect[0] + rect[2]) // 2
-                center_y = (rect[1] + rect[3]) // 2
-                user32.SetCursorPos(center_x, center_y)
-                time.sleep(0.02)
-
-        MOUSEEVENTF_WHEEL = 0x0800
-        steps = max(1, min(amount, 15))
         is_down = direction.lower() in ["down", "neeche", "niche", "bottom"]
-        delta = -120 * steps if is_down else 120 * steps
-
-        user32.mouse_event(MOUSEEVENTF_WHEEL, 0, 0, delta, 0)
-        logger.info(f"Scrolled screen {direction} by {steps} steps")
+        vk_code = 0x22 if is_down else 0x21  # VK_NEXT (Page Down) or VK_PRIOR (Page Up)
+        scan_code = user32.MapVirtualKeyW(vk_code, 0)
+        user32.keybd_event(vk_code, scan_code, 0, 0)
+        time.sleep(0.04)
+        user32.keybd_event(vk_code, scan_code, 2, 0)  # KEYEVENTF_KEYUP
+        logger.info(f"Scrolled screen {direction} via keyboard page navigation (zero cursor movement)")
         return {
             "status": "success",
             "direction": "down" if is_down else "up",
-            "steps": steps,
+            "steps": amount,
             "message": f"Ji Boss, screen {'neeche' if is_down else 'upar'} scroll kar diya.",
         }
     except Exception as exc:
