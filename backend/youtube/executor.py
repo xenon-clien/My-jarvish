@@ -75,7 +75,7 @@ class YouTubeExecutor:
             return {"actuation_status": ActionStatus.LIVE_VERIFIED, "target_url": target_url}
 
         # Ensure active controlled page exists for all other actions
-        if not youtube_session.is_cdp_available():
+        if not youtube_perception.is_override_active() and not youtube_session.is_cdp_available():
             return {"actuation_status": ActionStatus.CDP_UNAVAILABLE, "error": "No controlled YouTube tab found over CDP"}
 
         # ── 2. Action: youtube.search (Phase 10 Same Tab Guarantee) ─────────
@@ -95,17 +95,33 @@ class YouTubeExecutor:
         # ── 3. Action: youtube.play_video (Phase 12 Video Execution) ────────
         if action in ["youtube.play_video", "youtube.play_first_video"]:
             q = (args.get("query") or "").strip()
-            if q:
-                # Direct query search navigation
-                target_url = f"https://www.youtube.com/results?search_query={urllib.parse.quote_plus(q)}"
-                youtube_session.navigate_sync(target_url)
-                return {"actuation_status": ActionStatus.LIVE_VERIFIED, "query": q}
+            ordinal = args.get("ordinal", 1)
+            target_video = plan.target_video
 
-            if not plan.target_video:
+            if q:
+                # 1. Direct query search navigation
+                target_url = f"https://www.youtube.com/results?search_query={urllib.parse.quote_plus(q)}"
+                nav_ok = youtube_session.navigate_sync(target_url)
+                if not nav_ok and not youtube_perception.is_override_active():
+                    return {"actuation_status": ActionStatus.DEGRADED, "error": "Navigation to search failed"}
+                time.sleep(0.5)
+
+                # 2. Observe fresh rendered cards on search results page
+                search_snapshot = youtube_perception.observe_fresh(force_refresh=True)
+                visible_vids = search_snapshot.visible_videos
+                if not visible_vids or len(visible_vids) < ordinal:
+                    return {
+                        "actuation_status": ActionStatus.TARGET_NOT_VISIBLE,
+                        "error": f"Search results for '{q}' did not show video ordinal {ordinal}",
+                        "ordinal": ordinal,
+                    }
+                target_video = visible_vids[ordinal - 1]
+
+            if not target_video:
                 return {"actuation_status": ActionStatus.TARGET_NOT_VISIBLE, "error": "No visible target video"}
 
-            target_url = plan.target_video.url
-            vid_id = plan.target_video.video_id
+            target_url = target_video.url
+            vid_id = target_video.video_id
 
             # Preferred: exact DOM card click or same-page navigation
             clicked = youtube_session.evaluate_sync(get_dom_card_click_script(vid_id))
@@ -115,7 +131,7 @@ class YouTubeExecutor:
             return {
                 "actuation_status": ActionStatus.LIVE_VERIFIED,
                 "expected_video_id": vid_id,
-                "ordinal": plan.target_ordinal,
+                "ordinal": ordinal if q else plan.target_ordinal,
             }
 
         # ── 4. Action: youtube.play_short (Phase 13 Shorts Execution) ───────

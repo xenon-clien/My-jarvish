@@ -4,7 +4,7 @@ Enforces strict boundaries before any tool execution to ensure
 destructive, sensitive, or external operations never execute silently.
 """
 from enum import Enum, IntEnum
-from typing import Optional
+from typing import Any, Dict, List, Optional
 from pydantic import BaseModel
 
 from backend.core.config import Settings, get_settings

@@ -76,11 +76,6 @@ class YouTubeAdapter:
         res = youtube_controller.open(query=query)
         out = self._format_result(res)
         out["query"] = query
-        # Provide verification check for mocked tests
-        v_status = self.verify_state("youtube.open", "NAVIGATED_HOME", out)
-        if v_status == "LIVE_VERIFIED" and out["status"] != "LIVE_VERIFIED":
-            out["status"] = "LIVE_VERIFIED"
-            out["verified"] = True
         return out
 
     def search(self, query: str) -> Dict[str, Any]:
@@ -163,30 +158,12 @@ class YouTubeAdapter:
         return self.prev_short()
 
     def pause(self) -> Dict[str, Any]:
-        """Pause playback with idempotency."""
-        obs = self.observe_browser_state()
-        pb = obs.get("playback_state", "")
-        if pb == "PAUSED":
-            return {
-                "status": "LIVE_VERIFIED",
-                "verified": True,
-                "action": "youtube.pause",
-                "message": "Ji Boss, video pehle se hi paused hai.",
-            }
+        """Pause playback via authoritative YouTubeController."""
         res = youtube_controller.pause()
         return self._format_result(res)
 
     def resume(self) -> Dict[str, Any]:
-        """Resume playback with idempotency."""
-        obs = self.observe_browser_state()
-        pb = obs.get("playback_state", "")
-        if pb == "PLAYING":
-            return {
-                "status": "LIVE_VERIFIED",
-                "verified": True,
-                "action": "youtube.resume",
-                "message": "Ji Boss, video pehle se hi chal rahi hai.",
-            }
+        """Resume playback via authoritative YouTubeController."""
         res = youtube_controller.resume()
         return self._format_result(res)
 
@@ -282,16 +259,7 @@ class YouTubeAdapter:
         return self._format_result(res)
 
     def set_like(self, enabled: bool = True) -> Dict[str, Any]:
-        """Like or unlike video with idempotency."""
-        obs = self.observe_browser_state()
-        lk = obs.get("like_state")
-        if enabled and (lk is True or lk == "liked"):
-            return {
-                "status": "LIVE_VERIFIED",
-                "verified": True,
-                "action": "youtube.set_like",
-                "message": "Ji Boss, video pehle se hi liked hai.",
-            }
+        """Like or unlike video via authoritative YouTubeController."""
         res = youtube_controller.set_like(enabled=enabled)
         return self._format_result(res)
 
@@ -363,22 +331,11 @@ class YouTubeAdapter:
 
         initial_state = self.observe_browser_state()
 
-        res = youtube_controller.execute(canonical_action, args)
+        res = youtube_controller.execute_canonical(canonical_action, args)
         out = self._format_result(res)
         out["canonical_action"] = canonical_action
         out["arguments"] = args
         out["expected_effect"] = expected_effect
-
-        # Pass through verification: if controller already verified the action, preserve it
-        if out.get("status") != "LIVE_VERIFIED" and not out.get("verified"):
-            v_status = self.verify_state(canonical_action, expected_effect, out, initial_state=initial_state)
-            if v_status == "LIVE_VERIFIED":
-                out["status"] = "LIVE_VERIFIED"
-                out["verified"] = True
-            elif v_status in ["DEGRADED", "BROKEN", "SIMULATED"]:
-                out["status"] = v_status
-                out["verified"] = False
-
         return out
 
     def verify_state(
@@ -388,146 +345,70 @@ class YouTubeAdapter:
         result: Dict[str, Any],
         initial_state: Optional[Dict[str, Any]] = None,
     ) -> str:
-        """Closed-loop verification against real observed desktop & browser state."""
+        """Closed-loop verification delegating directly to authoritative YouTubeVerifier."""
         if not isinstance(result, dict) or result.get("status") == "error":
             return "BROKEN"
 
         if result.get("simulated"):
             return "SIMULATED"
 
-        if result.get("status") in ["DEGRADED", "BROKEN", "SIMULATED", "LIVE_AUTOMATION_DISABLED", "TARGET_NOT_VISIBLE", "UNSUPPORTED"]:
-            return result["status"]
-
-        state = self.observe_browser_state()
-
-        if not state.get("browser_running"):
-            return "BROKEN"
-
-        if not state.get("is_youtube"):
-            return "DEGRADED"
-
-        if action == "youtube.open":
-            cur_url = (state.get("current_url") or "").lower()
-            q = (result.get("query") or "").lower().strip()
-            if state.get("is_youtube") and cur_url != "about:blank":
-                if q:
-                    import urllib.parse
-                    quoted_q = urllib.parse.quote_plus(q).lower()
-                    perceived_q = (state.get("search_query") or "").lower().strip()
-                    query_observed = (
-                        (q in perceived_q and perceived_q != "unknown")
-                        or (quoted_q in cur_url and "search_query=" in cur_url)
-                        or (q in (state.get("window_title") or "").lower() and "youtube" in (state.get("window_title") or "").lower())
-                    )
-                    return "LIVE_VERIFIED" if query_observed else "DEGRADED"
-                return "LIVE_VERIFIED"
-            return "DEGRADED"
-
-        if action == "youtube.search":
-            cur_url = (state.get("current_url") or "").lower()
-            q = (result.get("query") or (result.get("arguments") or {}).get("query") or expected_effect or "").lower().strip()
-            title = (state.get("window_title") or "").lower()
-            perceived_q = (state.get("search_query") or "").lower().strip()
-            if q and state.get("is_youtube"):
-                import urllib.parse
-                quoted_q = urllib.parse.quote_plus(q).lower()
-                query_observed = (
-                    (q in perceived_q and perceived_q != "unknown")
-                    or (quoted_q in cur_url and "search_query=" in cur_url)
-                    or (q in title and "youtube" in title)
-                )
-                if query_observed:
-                    return "LIVE_VERIFIED"
-                return "DEGRADED"
-            return "DEGRADED"
-
-        if action in ["youtube.play_video", "youtube.play_first_video"]:
-            actual_id = state.get("current_video_id", "UNKNOWN")
-            exp_id = result.get("expected_video_id")
-            if exp_id and exp_id != "UNKNOWN" and not exp_id.startswith("cand_") and not exp_id.startswith("VID_SIM_"):
-                if actual_id == exp_id:
-                    return "LIVE_VERIFIED"
-                return "DEGRADED"
-            return "DEGRADED"
-
-        if action == "youtube.play_short":
-            actual_id = state.get("current_video_id", "UNKNOWN")
-            exp_id = result.get("expected_video_id")
-            if exp_id and exp_id != "UNKNOWN" and not exp_id.startswith("SHORT_SIM_"):
-                if actual_id == exp_id:
-                    return "LIVE_VERIFIED"
-                return "DEGRADED"
-            return "DEGRADED"
-
-        if action in ["youtube.scroll", "scroll_page"]:
-            return "LIVE_VERIFIED" if state.get("is_youtube") else "DEGRADED"
-
-        if action == "youtube.observe":
-            return "LIVE_VERIFIED" if state.get("is_youtube") else "DEGRADED"
-
-        if action == "youtube.pause":
-            if state.get("playback_state") == "PAUSED":
-                return "LIVE_VERIFIED"
-            return "DEGRADED"
-
-        if action in ["youtube.resume", "youtube.play"]:
-            if state.get("playback_state") == "PLAYING":
-                return "LIVE_VERIFIED"
-            return "DEGRADED"
-
-        if action in ["youtube.set_fullscreen", "youtube.fullscreen"]:
-            if state.get("fullscreen") is True:
-                return "LIVE_VERIFIED"
-            return "DEGRADED"
-
-        if action in ["youtube.set_like", "youtube.like"]:
-            if state.get("like_state") is True:
-                return "LIVE_VERIFIED"
-            return "DEGRADED"
-
-        if action == "youtube.set_theater_mode":
-            if state.get("theater_mode") is True:
-                return "LIVE_VERIFIED"
-            return "DEGRADED"
-
-        if action == "youtube.set_miniplayer":
-            if state.get("miniplayer") is True:
-                return "LIVE_VERIFIED"
-            return "DEGRADED"
-
-        if action in ["youtube.set_captions", "youtube.captions"]:
-            en = result.get("arguments", {}).get("enabled", True) if isinstance(result.get("arguments"), dict) else True
-            if state.get("captions") == en:
-                return "LIVE_VERIFIED"
-            return "DEGRADED"
-
-        if action == "youtube.mute":
-            if state.get("muted") is True:
-                return "LIVE_VERIFIED"
-            return "DEGRADED"
-
-        if action in ["youtube.next_short", "youtube.prev_short", "youtube.previous_short"]:
-            if result.get("verified") is True:
-                return "LIVE_VERIFIED"
-            return "DEGRADED"
-
-        if action in [
-            "youtube.replay",
-            "youtube.seek_forward",
-            "youtube.seek_backward",
-            "youtube.seek_timestamp",
-            "youtube.set_volume",
-            "youtube.volume_up",
-            "youtube.volume_down",
-            "youtube.set_playback_speed",
-            "youtube.speed_up",
-            "youtube.speed_down",
+        if result.get("status") in [
+            "DEGRADED",
+            "BROKEN",
+            "SIMULATED",
+            "LIVE_AUTOMATION_DISABLED",
+            "TARGET_NOT_VISIBLE",
+            "UNSUPPORTED",
+            "CDP_UNAVAILABLE",
         ]:
-            if (result.get("verified") is True or result.get("status") == "LIVE_VERIFIED") and state.get("is_youtube"):
-                return "LIVE_VERIFIED"
-            return "DEGRADED"
+            return str(result["status"])
 
-        return "DEGRADED"
+        # Construct actuation result and arguments from result dict
+        act_res = dict(result)
+        args = dict(result.get("arguments") or {})
+        if "query" in result and "query" not in args:
+            args["query"] = result["query"]
+        if "expected_video_id" in result and "expected_video_id" not in act_res:
+            act_res["expected_video_id"] = result["expected_video_id"]
+        if "expected" in result and "expected_video_id" not in act_res:
+            act_res["expected_video_id"] = result["expected"]
+
+        # Map argument parameters to target keys expected by verifier
+        if "target_captions" not in act_res and "enabled" in args and "caption" in action:
+            act_res["target_captions"] = args["enabled"]
+        if "target_fullscreen" not in act_res and "enabled" in args and "fullscreen" in action:
+            act_res["target_fullscreen"] = args["enabled"]
+        if "target_theater" not in act_res and "enabled" in args and "theater" in action:
+            act_res["target_theater"] = args["enabled"]
+        if "target_miniplayer" not in act_res and "enabled" in args and "miniplayer" in action:
+            act_res["target_miniplayer"] = args["enabled"]
+        if "target_like" not in act_res and "enabled" in args and "like" in action:
+            act_res["target_like"] = args["enabled"]
+        if "target_volume" not in act_res and "level" in args:
+            lvl = args["level"]
+            act_res["target_volume"] = (lvl / 100.0) if lvl > 1.0 else lvl
+        if "target_muted" not in act_res and action == "youtube.mute":
+            act_res["target_muted"] = True
+        if "target_muted" not in act_res and action == "youtube.unmute":
+            act_res["target_muted"] = False
+        if "target_rate" not in act_res and "rate" in args:
+            act_res["target_rate"] = args["rate"]
+        if "target_time" not in act_res and "seconds" in args:
+            act_res["target_time"] = args["seconds"]
+
+        # Convert observed states to PerceptionSnapshots
+        curr_obs = self.observe_browser_state()
+        snap_after = PerceptionSnapshot.from_dict(curr_obs)
+        snap_before = PerceptionSnapshot.from_dict(initial_state) if initial_state else snap_after
+
+        v_status, _, _ = youtube_verifier.verify(
+            action=action,
+            arguments=args,
+            actuation_result=act_res,
+            snapshot_before=snap_before,
+            snapshot_after=snap_after,
+        )
+        return v_status.value if hasattr(v_status, "value") else str(v_status)
 
     def _verify_youtube_active(self, task: Any = None, result: Any = None) -> bool:
         """Verify that YouTube is actively open and running in the browser."""

@@ -277,6 +277,9 @@ class PerceptionSnapshot:
                 or bool(raw_vids)
                 or bool(raw_shorts)
                 or bool(cur_vid_id and cur_vid_id != "UNKNOWN")
+                or bool(data.get("playback_state"))
+                or ("like_state" in data)
+                or ("captions" in data)
             )
 
         br_running = data.get("browser_running")

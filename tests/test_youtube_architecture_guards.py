@@ -272,3 +272,133 @@ def test_youtube_adapter_convenience_methods():
     assert isinstance(res4, dict)
     res5 = youtube_adapter.seek_timestamp(seconds=120, raw_timestamp="02:00")
     assert isinstance(res5, dict)
+
+
+def test_youtube_adapter_cannot_promote_unverified_statuses():
+    """Verify that YouTubeAdapter NEVER promotes DEGRADED, BROKEN, or SIMULATED to LIVE_VERIFIED."""
+    from unittest.mock import patch
+    from backend.adapters.youtube_adapter import youtube_adapter
+    from backend.youtube.controller import youtube_controller
+
+    # 1. Controller returns DEGRADED -> Adapter must preserve DEGRADED
+    degraded_res = ActionResult(
+        status=ActionStatus.DEGRADED,
+        verified=False,
+        action="youtube.open",
+        message="YouTube open verify nahi ho paya.",
+    )
+    with patch("backend.core.safety.is_live_browser_automation_allowed", return_value=True), \
+         patch.object(youtube_controller, "open", return_value=degraded_res), \
+         patch.object(youtube_adapter, "observe_browser_state", return_value={"browser_running": True, "is_youtube": True}):
+        res = youtube_adapter.open()
+        assert res["status"] == "DEGRADED"
+        assert res["verified"] is False
+        assert res["status"] != "LIVE_VERIFIED"
+
+    # 2. Controller execute_canonical returns BROKEN -> Adapter must preserve BROKEN
+    broken_res = ActionResult(
+        status=ActionStatus.BROKEN,
+        verified=False,
+        action="youtube.pause",
+        message="DOM error",
+    )
+    with patch("backend.core.safety.is_live_browser_automation_allowed", return_value=True), \
+         patch.object(youtube_controller, "execute_canonical", return_value=broken_res), \
+         patch.object(youtube_adapter, "observe_browser_state", return_value={"browser_running": True, "is_youtube": True}):
+        res = youtube_adapter.execute_canonical("youtube.pause")
+        assert res["status"] == "BROKEN"
+        assert res["verified"] is False
+        assert res["status"] != "LIVE_VERIFIED"
+
+    # 3. Controller execute_canonical returns SIMULATED -> Adapter must preserve SIMULATED
+    sim_res = ActionResult(
+        status=ActionStatus.SIMULATED,
+        verified=False,
+        action="youtube.search",
+        message="Simulated run",
+    )
+    with patch("backend.core.safety.is_live_browser_automation_allowed", return_value=True), \
+         patch.object(youtube_controller, "execute_canonical", return_value=sim_res), \
+         patch.object(youtube_adapter, "observe_browser_state", return_value={"browser_running": True, "is_youtube": True}):
+        res = youtube_adapter.execute_canonical("youtube.search", {"query": "carryminati"})
+        assert res["status"] == "SIMULATED"
+        assert res["verified"] is False
+        assert res["status"] != "LIVE_VERIFIED"
+
+
+def test_play_video_with_query_requires_exact_video_id():
+    """Verify play_video(query=...) strictly requires actual_video_id == expected_video_id and fails on search page."""
+    before = PerceptionSnapshot(browser_running=True, is_youtube=True, page_type=PageType.HOME)
+
+    # State where only search results page is open, no video playback has occurred
+    search_page_after = PerceptionSnapshot(
+        browser_running=True,
+        is_youtube=True,
+        page_type=PageType.SEARCH_RESULTS,
+        search_query="carryminati",
+        url="https://www.youtube.com/results?search_query=carryminati",
+        current_video=CurrentVideoInfo(video_id="UNKNOWN", title="carryminati - YouTube", url=""),
+    )
+
+    status_search, verified_search, msg_search = youtube_verifier.verify(
+        action="youtube.play_video",
+        arguments={"query": "carryminati", "ordinal": 1},
+        actuation_result={
+            "actuation_status": ActionStatus.LIVE_VERIFIED,
+            "expected_video_id": "TARGET_VID_999",
+            "ordinal": 1,
+        },
+        snapshot_before=before,
+        snapshot_after=search_page_after,
+    )
+    assert status_search == ActionStatus.DEGRADED
+    assert verified_search is False
+    assert "playback verify nahi ho paya" in msg_search
+
+    # State where the target video is actually playing and ID matches exactly
+    playing_after = PerceptionSnapshot(
+        browser_running=True,
+        is_youtube=True,
+        page_type=PageType.VIDEO,
+        url="https://www.youtube.com/watch?v=TARGET_VID_999",
+        current_video=CurrentVideoInfo(video_id="TARGET_VID_999", title="CarryMinati Video", url="https://www.youtube.com/watch?v=TARGET_VID_999"),
+    )
+
+    status_playing, verified_playing, msg_playing = youtube_verifier.verify(
+        action="youtube.play_video",
+        arguments={"query": "carryminati", "ordinal": 1},
+        actuation_result={
+            "actuation_status": ActionStatus.LIVE_VERIFIED,
+            "expected_video_id": "TARGET_VID_999",
+            "ordinal": 1,
+        },
+        snapshot_before=before,
+        snapshot_after=playing_after,
+    )
+    assert status_playing == ActionStatus.LIVE_VERIFIED
+    assert verified_playing is True
+    assert "video number 1 chala di" in msg_playing
+
+
+def test_search_rejects_window_title_substring_without_exact_query():
+    """Verify search rejects LIVE_VERIFIED if query only exists as substring in window_title."""
+    before = PerceptionSnapshot(browser_running=True, is_youtube=True, page_type=PageType.HOME)
+    title_only_after = PerceptionSnapshot(
+        browser_running=True,
+        is_youtube=True,
+        page_type=PageType.SEARCH_RESULTS,
+        search_query="totally different query",
+        url="https://www.youtube.com/results?search_query=totally+different+query",
+        window_title="karan aujla - YouTube",
+    )
+
+    status, verified, _ = youtube_verifier.verify(
+        action="youtube.search",
+        arguments={"query": "karan aujla"},
+        actuation_result={"actuation_status": ActionStatus.LIVE_VERIFIED},
+        snapshot_before=before,
+        snapshot_after=title_only_after,
+    )
+    assert status == ActionStatus.DEGRADED
+    assert verified is False
+

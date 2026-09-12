@@ -53,14 +53,22 @@ class YouTubeVerifier:
                     return ActionStatus.LIVE_VERIFIED, True, "Haan Shivam, YouTube open kar diya hai."
                 return ActionStatus.DEGRADED, False, "YouTube open verify nahi ho paya."
 
-            # If query requested, query MUST be directly observed in URL, search input, or title
+            # If query requested, query MUST be directly observed in search input or URL query parameter
             norm_q = normalize_search_query(q)
             norm_obs = normalize_search_query(snapshot_after.search_query)
-            quoted_q = urllib.parse.quote_plus(norm_q).lower()
-            url_low = snapshot_after.url.lower()
 
-            if norm_q == norm_obs or (quoted_q in url_low and "search_query=" in url_low) or (norm_q in normalize_search_query(snapshot_after.window_title)):
+            if norm_q and norm_q == norm_obs:
                 return ActionStatus.LIVE_VERIFIED, True, f"Haan Shivam, YouTube par {q} search kar diya hai."
+
+            try:
+                p = urllib.parse.urlparse(snapshot_after.url)
+                params = urllib.parse.parse_qs(p.query)
+                url_q = params.get("search_query", [""])[0]
+                if normalize_search_query(url_q) == norm_q:
+                    return ActionStatus.LIVE_VERIFIED, True, f"Haan Shivam, YouTube par {q} search kar diya hai."
+            except Exception:
+                pass
+
             return ActionStatus.DEGRADED, False, f"YouTube par {q} kholne ki koshish ki, lekin results verify nahi ho paye."
 
         # ── 2. Verify: youtube.search (Phase 9 Exact Search Semantics) ──────
@@ -72,11 +80,11 @@ class YouTubeVerifier:
 
             norm_obs = normalize_search_query(snapshot_after.search_query)
 
-            # Exact equality verification (Phase 9)
+            # Exact equality verification: observed search input must match requested query
             if norm_req == norm_obs:
                 return ActionStatus.LIVE_VERIFIED, True, f"Haan Shivam, YouTube par {q} search kar diya hai."
 
-            # Direct check against URL parameter search_query
+            # Direct check against parsed URL parameter search_query
             try:
                 p = urllib.parse.urlparse(snapshot_after.url)
                 params = urllib.parse.parse_qs(p.query)
@@ -86,22 +94,10 @@ class YouTubeVerifier:
             except Exception:
                 pass
 
-            # Direct check against title
-            if norm_req in normalize_search_query(snapshot_after.window_title) and "youtube" in snapshot_after.window_title.lower():
-                return ActionStatus.LIVE_VERIFIED, True, f"Haan Shivam, YouTube par {q} search kar diya hai."
-
             return ActionStatus.DEGRADED, False, f"YouTube par {q} search kiya, lekin search results verify nahi ho paye."
 
         # ── 3. Verify: youtube.play_video (Phase 12 Video Identity) ─────────
         if action in ["youtube.play_video", "youtube.play_first_video"]:
-            q = (arguments.get("query") or "").strip()
-            if q:
-                norm_req = normalize_search_query(q)
-                norm_obs = normalize_search_query(snapshot_after.search_query)
-                if norm_req == norm_obs or norm_req in normalize_search_query(snapshot_after.window_title):
-                    return ActionStatus.LIVE_VERIFIED, True, f"Ji Boss, YouTube par {q} chala diya."
-                return ActionStatus.DEGRADED, False, f"YouTube par {q} play karne ki koshish ki, lekin verify nahi hua."
-
             expected_id = actuation_result.get("expected_video_id")
             actual_id = snapshot_after.current_video.video_id
             ord_num = actuation_result.get("ordinal", 1)
@@ -135,11 +131,15 @@ class YouTubeVerifier:
 
         # ── 5. Verify: Player Controls (Phase 14 Exact State Checks) ────────
         if action == "youtube.pause":
+            if snapshot_before.player.paused is True and snapshot_after.player.paused is True:
+                return ActionStatus.LIVE_VERIFIED, True, "Ji Boss, video pehle se hi paused hai."
             if snapshot_after.player.paused is True:
                 return ActionStatus.LIVE_VERIFIED, True, "Ji Boss, video pause kar diya."
             return ActionStatus.DEGRADED, False, "Video pause verify nahi ho paya."
 
         if action in ["youtube.resume", "youtube.play"]:
+            if snapshot_before.player.paused is False and snapshot_after.player.paused is False:
+                return ActionStatus.LIVE_VERIFIED, True, "Ji Boss, video pehle se hi chal rahi hai."
             if snapshot_after.player.paused is False:
                 return ActionStatus.LIVE_VERIFIED, True, "Ji Boss, video resume kar diya."
             return ActionStatus.DEGRADED, False, "Video play verify nahi ho paya."
@@ -208,7 +208,16 @@ class YouTubeVerifier:
 
         if action in ["youtube.set_like", "youtube.like"]:
             target_lk = actuation_result.get("target_like")
-            if snapshot_after.controls.like_state == target_lk and target_lk is not None:
+            before_lk = snapshot_before.controls.like_state
+            after_lk = snapshot_after.controls.like_state
+            is_before_liked = (before_lk is True or before_lk == "liked")
+            is_after_liked = (after_lk is True or after_lk == "liked")
+
+            if target_lk is True and is_before_liked and is_after_liked:
+                return ActionStatus.LIVE_VERIFIED, True, "Ji Boss, video pehle se hi liked hai."
+
+            match = is_after_liked if target_lk else (after_lk is False or after_lk in ["unliked", "none", "UNKNOWN"])
+            if match and target_lk is not None:
                 return ActionStatus.LIVE_VERIFIED, True, "Ji Boss, video like kar diya." if target_lk else "Ji Boss, like hata diya."
             return ActionStatus.DEGRADED, False, "Like state toggle verify nahi ho paya."
 
