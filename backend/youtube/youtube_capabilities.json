@@ -1,0 +1,182 @@
+{
+  "version": "3.0.0",
+  "runtime": "JARVIS_YOUTUBE_RUNTIME_V3",
+  "principles": {
+    "single_runtime": "backend.youtube.controller.youtube_controller",
+    "zero_physical_input": true,
+    "physical_input_allowed_config": "JARVIS_ALLOW_PHYSICAL_INPUT=0",
+    "zero_synthetic_candidates": true,
+    "forbidden_status_success": true,
+    "closed_loop_verification_mandatory": true
+  },
+  "capabilities": {
+    "youtube.open": {
+      "execution_mode": "CDP_PAGE_NAVIGATE",
+      "verification_mode": "EXACT_PAGE_TYPE_AND_IS_YOUTUBE",
+      "status": "INTEGRATION_TESTED",
+      "physical_fallback_permitted": false,
+      "synthetic_fallback_permitted": false
+    },
+    "youtube.search": {
+      "execution_mode": "CDP_SAME_TAB_URL_NAVIGATE",
+      "verification_mode": "EXACT_QUERY_MATCH",
+      "status": "INTEGRATION_TESTED",
+      "physical_fallback_permitted": false,
+      "synthetic_fallback_permitted": false
+    },
+    "youtube.play_video": {
+      "execution_mode": "CDP_DOM_CARD_CLICK",
+      "verification_mode": "EXACT_VIDEO_ID_MATCH",
+      "status": "INTEGRATION_TESTED",
+      "physical_fallback_permitted": false,
+      "synthetic_fallback_permitted": false
+    },
+    "youtube.play_short": {
+      "execution_mode": "CDP_DOM_CARD_CLICK",
+      "verification_mode": "EXACT_SHORT_ID_MATCH",
+      "status": "INTEGRATION_TESTED",
+      "physical_fallback_permitted": false,
+      "synthetic_fallback_permitted": false
+    },
+    "youtube.pause": {
+      "execution_mode": "DOM_HTMLMediaElement_PAUSE",
+      "verification_mode": "EXACT_PLAYER_PAUSED_STATE",
+      "status": "INTEGRATION_TESTED",
+      "physical_fallback_permitted": false,
+      "synthetic_fallback_permitted": false
+    },
+    "youtube.resume": {
+      "execution_mode": "DOM_HTMLMediaElement_PLAY",
+      "verification_mode": "EXACT_PLAYER_PLAYING_STATE",
+      "status": "INTEGRATION_TESTED",
+      "physical_fallback_permitted": false,
+      "synthetic_fallback_permitted": false
+    },
+    "youtube.toggle_play_pause": {
+      "execution_mode": "DOM_HTMLMediaElement_TOGGLE",
+      "verification_mode": "EXACT_STATE_INVERSION",
+      "status": "INTEGRATION_TESTED",
+      "physical_fallback_permitted": false,
+      "synthetic_fallback_permitted": false
+    },
+    "youtube.seek_forward": {
+      "execution_mode": "DOM_HTMLMediaElement_CURRENT_TIME",
+      "verification_mode": "EXACT_CURRENT_TIME_DELTA",
+      "status": "INTEGRATION_TESTED",
+      "physical_fallback_permitted": false,
+      "synthetic_fallback_permitted": false
+    },
+    "youtube.seek_backward": {
+      "execution_mode": "DOM_HTMLMediaElement_CURRENT_TIME",
+      "verification_mode": "EXACT_CURRENT_TIME_DELTA",
+      "status": "INTEGRATION_TESTED",
+      "physical_fallback_permitted": false,
+      "synthetic_fallback_permitted": false
+    },
+    "youtube.seek_to": {
+      "execution_mode": "DOM_HTMLMediaElement_CURRENT_TIME",
+      "verification_mode": "EXACT_TARGET_TIME",
+      "status": "INTEGRATION_TESTED",
+      "physical_fallback_permitted": false,
+      "synthetic_fallback_permitted": false
+    },
+    "youtube.set_volume": {
+      "execution_mode": "DOM_HTMLMediaElement_VOLUME",
+      "verification_mode": "EXACT_VOLUME_LEVEL",
+      "status": "INTEGRATION_TESTED",
+      "physical_fallback_permitted": false,
+      "synthetic_fallback_permitted": false
+    },
+    "youtube.mute": {
+      "execution_mode": "DOM_HTMLMediaElement_MUTED",
+      "verification_mode": "EXACT_MUTED_TRUE",
+      "status": "INTEGRATION_TESTED",
+      "physical_fallback_permitted": false,
+      "synthetic_fallback_permitted": false
+    },
+    "youtube.unmute": {
+      "execution_mode": "DOM_HTMLMediaElement_MUTED",
+      "verification_mode": "EXACT_MUTED_FALSE",
+      "status": "INTEGRATION_TESTED",
+      "physical_fallback_permitted": false,
+      "synthetic_fallback_permitted": false
+    },
+    "youtube.toggle_mute": {
+      "execution_mode": "DOM_HTMLMediaElement_MUTED",
+      "verification_mode": "EXACT_MUTE_STATE_INVERSION",
+      "status": "INTEGRATION_TESTED",
+      "physical_fallback_permitted": false,
+      "synthetic_fallback_permitted": false
+    },
+    "youtube.set_speed": {
+      "execution_mode": "DOM_HTMLMediaElement_PLAYBACK_RATE",
+      "verification_mode": "EXACT_PLAYBACK_RATE",
+      "status": "INTEGRATION_TESTED",
+      "physical_fallback_permitted": false,
+      "synthetic_fallback_permitted": false
+    },
+    "youtube.replay": {
+      "execution_mode": "DOM_HTMLMediaElement_CURRENT_TIME_ZERO",
+      "verification_mode": "EXACT_TIME_NEAR_ZERO_AND_PLAYING",
+      "status": "INTEGRATION_TESTED",
+      "physical_fallback_permitted": false,
+      "synthetic_fallback_permitted": false
+    },
+    "youtube.toggle_fullscreen": {
+      "execution_mode": "DOM_FULLSCREEN_BUTTON_CLICK",
+      "verification_mode": "EXACT_FULLSCREEN_STATE_CHANGE",
+      "status": "INTEGRATION_TESTED",
+      "physical_fallback_permitted": false,
+      "synthetic_fallback_permitted": false
+    },
+    "youtube.toggle_theater": {
+      "execution_mode": "DOM_THEATER_BUTTON_CLICK",
+      "verification_mode": "EXACT_THEATER_STATE_CHANGE",
+      "status": "INTEGRATION_TESTED",
+      "physical_fallback_permitted": false,
+      "synthetic_fallback_permitted": false
+    },
+    "youtube.toggle_miniplayer": {
+      "execution_mode": "DOM_MINIPLAYER_BUTTON_CLICK",
+      "verification_mode": "EXACT_MINIPLAYER_STATE_CHANGE",
+      "status": "INTEGRATION_TESTED",
+      "physical_fallback_permitted": false,
+      "synthetic_fallback_permitted": false
+    },
+    "youtube.toggle_captions": {
+      "execution_mode": "DOM_SUBTITLES_BUTTON_CLICK",
+      "verification_mode": "EXACT_CAPTIONS_STATE_CHANGE",
+      "status": "INTEGRATION_TESTED",
+      "physical_fallback_permitted": false,
+      "synthetic_fallback_permitted": false
+    },
+    "youtube.like": {
+      "execution_mode": "DOM_LIKE_BUTTON_CLICK",
+      "verification_mode": "EXACT_ARIA_PRESSED_STATE",
+      "status": "INTEGRATION_TESTED",
+      "physical_fallback_permitted": false,
+      "synthetic_fallback_permitted": false
+    },
+    "youtube.next_video": {
+      "execution_mode": "DOM_NEXT_BUTTON_CLICK",
+      "verification_mode": "EXACT_VIDEO_ID_OR_URL_CHANGE",
+      "status": "INTEGRATION_TESTED",
+      "physical_fallback_permitted": false,
+      "synthetic_fallback_permitted": false
+    },
+    "youtube.previous_video": {
+      "execution_mode": "CDP_PAGE_GO_BACK",
+      "verification_mode": "EXACT_VIDEO_ID_OR_URL_CHANGE",
+      "status": "INTEGRATION_TESTED",
+      "physical_fallback_permitted": false,
+      "synthetic_fallback_permitted": false
+    },
+    "youtube.observe": {
+      "execution_mode": "DOM_READ_ONLY_PERCEPTION",
+      "verification_mode": "EXACT_FRESH_DOM_PARSED",
+      "status": "INTEGRATION_TESTED",
+      "physical_fallback_permitted": false,
+      "synthetic_fallback_permitted": false
+    }
+  }
+}
