@@ -1,0 +1,44 @@
+name: YouTube Runtime V3 & Safety Verification CI
+
+on:
+  push:
+    branches: [ main, master, youtube-runtime-v3 ]
+  pull_request:
+    branches: [ main, master, youtube-runtime-v3 ]
+
+jobs:
+  test:
+    name: Regression, Safety & Architecture Guards
+    runs-on: windows-latest
+    env:
+      JARVIS_ALLOW_PHYSICAL_INPUT: "0"
+      JARVIS_DEV_SAFE_MODE: "1"
+      PYTHONPATH: .
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if (Test-Path requirements.txt) { pip install -r requirements.txt }
+          pip install pytest pytest-asyncio anyio
+
+      - name: Run Architecture Invariant Guards
+        run: |
+          python -m pytest tests/test_youtube_architecture_guards.py -v
+
+      - name: Run YouTube Strict Verification & Identity Suites
+        run: |
+          python -m pytest tests/test_youtube_strict_verification.py tests/test_youtube_v2_contract.py tests/test_youtube_eyes_v1.py tests/test_youtube_open_verification.py tests/test_youtube_ordinal_identity.py tests/test_youtube_hindi_semantic_engine.py -v
+
+      - name: Run System & Adapter Safety Tests
+        run: |
+          python -m pytest tests/test_development_safety.py tests/test_adapters.py -v
